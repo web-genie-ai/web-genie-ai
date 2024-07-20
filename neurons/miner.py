@@ -1,7 +1,7 @@
 # The MIT License (MIT)
-# Copyright © 2023 Yuma Rao
-# TODO(developer): Set your name
-# Copyright © 2023 <your name>
+# Copyright © 2023 Brendon R
+# Created by Brendon R.
+# Copyright © 2023
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the “Software”), to deal in the Software without restriction, including without limitation
@@ -19,6 +19,7 @@
 
 import time
 import typing
+import argparse
 import bittensor as bt
 
 # Bittensor Miner Template:
@@ -26,6 +27,7 @@ import template
 
 # import base miner class which takes care of most of the boilerplate
 from template.base.miner import BaseMinerNeuron
+from btcopilot import forward_codegen, forward_codegen_blacklist, forward_codegen_priority
 
 
 class Miner(BaseMinerNeuron):
@@ -38,9 +40,26 @@ class Miner(BaseMinerNeuron):
     """
 
     def __init__(self, config=None):
+        parser = argparse.ArgumentParser()
+       
+        parser.add_argument("--netuid", type=int, default=15, help="The chain subnet uid.")
+        parser.add_argument("--dev", action=argparse.BooleanOptionalAction)
+        
+        bt.subtensor.add_args(parser)
+        bt.logging.add_args(parser)
+        bt.wallet.add_args(parser)
+        bt.axon.add_args(parser)
+
         super(Miner, self).__init__(config=config)
 
-        # TODO(developer): Anything specific to your use case you can do here
+        self.axon = bt.axon(wallet=self.wallet, port=self.config.axon.port)        
+        # Attach determiners which functions are called when servicing a request.
+        bt.logging.info(f"Attaching forwards functions to miner axon.")
+        self.axon.attach(
+            forward_fn = forward_codegen,
+            blacklist_fn = forward_codegen_blacklist,
+            priority_fn = forward_codegen_priority,
+        )
 
     async def forward(
         self, synapse: template.protocol.Dummy

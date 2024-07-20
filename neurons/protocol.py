@@ -74,3 +74,32 @@ class Dummy(bt.Synapse):
         5
         """
         return self.dummy_output
+    
+class CodeGenObj(bt.Synapse):
+    """
+    A simple codegenobj protocol representation which uses bt.Synapse as its base.
+    This protocol helps in handling codegenobj request and response communication between
+    the miner and the validator.
+
+    Attributes:
+    - codegenobj_input: A string value representing the input request sent by the validator.
+    - codegenobj_output: An optional string value which, when filled, represents the response from the miner.
+    """
+
+    # Required request input, filled by sending dendrite caller.
+    codegenobj_input: str
+
+    # Optional request output, filled by receiving axon.
+    codegenobj_output: typing.Optional[str] = None
+
+    def deserialize(self) -> str:
+        """
+        Deserialize the codegenobj output. This method retrieves the response from
+        the miner in the form of codegenobj_output, deserializes it and returns it
+        as the output of the dendrite.query() call.
+
+        Returns:
+        - str: The deserialized response, which in this case is the value of codegenobj_output.
+        
+        """
+        return self.codegenobj_output
