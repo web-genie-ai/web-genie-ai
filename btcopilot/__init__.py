@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # Copyright © 2023 Yuma Rao
-# TODO(developer): Set your name
+# Sangar
 # Copyright © 2023 <your name>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -17,9 +17,9 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-# TODO(developer): Change this value when updating your code base.
-# Define the version of the template module.
-__version__ = "0.0.0"
+# Change this value when updating your code base.
+# Define the version of the btcopilot.
+__version__ = "0.0.1"
 version_split = __version__.split(".")
 __spec_version__ = (
     (1000 * int(version_split[0]))
