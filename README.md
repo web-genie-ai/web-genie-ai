@@ -1,213 +1,100 @@
-<div align="center">
+# BTCopilot Subnet
 
-# **Bittensor Subnet Template** <!-- omit in toc -->
-[![Discord Chat](https://img.shields.io/discord/308323056592486420.svg)](https://discord.gg/bittensor)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+Welcome to BTCopilot Subnet, a pioneering Bittensor-based subnet designed to revolutionize project generation through advanced AI models. BTCopilot aims to transform diverse prompts—ranging from text and voice to images and Figma designs—into fully functional, ready-to-deploy projects. This subnet is tailored for developers, designers, and innovators who seek to accelerate their project development process with high-quality, AI-generated outputs.
 
----
+## Table of Contents
 
-## The Incentivized Internet <!-- omit in toc -->
+- [Overview](#overview)
+- [Features](#features)
+- [Incentive Mechanism](#incentive-mechanism)
+- [Roadmap](#roadmap)
 
-[Discord](https://discord.gg/bittensor) • [Network](https://taostats.io/) • [Research](https://bittensor.com/whitepaper)
-</div>
+## Overview
 
----
-- [Quickstarter template](#quickstarter-template)
-- [Introduction](#introduction)
-  - [Example](#example)
-- [Installation](#installation)
-  - [Before you proceed](#before-you-proceed)
-  - [Install](#install)
-- [Writing your own incentive mechanism](#writing-your-own-incentive-mechanism)
-- [Writing your own subnet API](#writing-your-own-subnet-api)
-- [Subnet Links](#subnet-links)
-- [License](#license)
+BTCopilot Subnet leverages state-of-the-art AI models to interpret and convert various types of prompts into complete, deployable projects. Whether you're starting with a simple HTML/CSS framework or aiming to develop a complex React application, BTCopilot can generate the entire codebase, ensuring it meets your specified requirements and is ready for immediate deployment.
 
----
-## Quickstarter template
+### Vision
 
-This template contains all the required installation instructions, scripts, and files and functions for:
-- Building Bittensor subnets.
-- Creating custom incentive mechanisms and running these mechanisms on the subnets. 
+BTCopilot envisions a future where project creation is seamless, automated, and efficient, empowering developers to focus more on innovation and less on repetitive coding tasks. By harnessing the capabilities of the Bittensor network, BTCopilot fosters a competitive environment that drives continuous improvement in AI-generated outputs.
 
-In order to simplify the building of subnets, this template abstracts away the complexity of the underlying blockchain and other boilerplate code. While the default behavior of the template is sufficient for a simple subnet, you should customize the template in order to meet your specific requirements.
----
+### Purpose
 
-## Introduction
+The primary purpose of BTCopilot is to:
 
-**IMPORTANT**: If you are new to Bittensor subnets, read this section before proceeding to [Installation](#installation) section. 
+- Automate Project Generation: Provide a platform that can autonomously generate high-quality projects from diverse input prompts.
+- Enhance Productivity: Reduce the time and effort required for project development, enabling developers to quickly bring their ideas to life.
+- Promote Innovation: Encourage innovative solutions and optimizations in project generation through competitive incentivization.
 
-The Bittensor blockchain hosts multiple self-contained incentive mechanisms called **subnets**. Subnets are playing fields in which:
-- Subnet miners who produce value, and
-- Subnet validators who produce consensus
+## Features
 
-determine together the proper distribution of TAO for the purpose of incentivizing the creation of value, i.e., generating digital commodities, such as intelligence or data. 
+- **Text Prompt**: Generate projects by describing them in text.
+- **Voice Prompt**: Create projects by giving voice commands.
+- **Image Prompt**: Upload an image of a website or app, and BTCopilot will generate a pixel-perfect project.
+- **Figma Prompt**: Convert Figma designs into functional projects.
+- **Automated Downloads**: Directly download the generated projects as complete folders.
 
-Each subnet consists of:
-- Subnet miners and subnet validators.
-- A protocol using which the subnet miners and subnet validators interact with one another. This protocol is part of the incentive mechanism.
-- The Bittensor API using which the subnet miners and subnet validators interact with Bittensor's onchain consensus engine [Yuma Consensus](https://bittensor.com/documentation/validating/yuma-consensus). The Yuma Consensus is designed to drive these actors: subnet validators and subnet miners, into agreement on who is creating value and what that value is worth. 
+## Incentive Mechanism
 
-This starter template is split into three primary files. To write your own incentive mechanism, you should edit these files. These files are:
-1. `template/protocol.py`: Contains the definition of the protocol used by subnet miners and subnet validators.
-2. `neurons/miner.py`: Script that defines the subnet miner's behavior, i.e., how the subnet miner responds to requests from subnet validators.
-3. `neurons/validator.py`: This script defines the subnet validator's behavior, i.e., how the subnet validator requests information from the subnet miners and determines the scores.
+The BTCopilot subnet incentivizes miners and validators to ensure high-quality outputs. Here’s how it works specifically for this subnet:
 
-### Example
+- Task Assignment: Subnet miners are assigned tasks related to generating and improving machine learning models based on various prompts (text, voice, image, Figma).
+- Performance Evaluation: Validators evaluate the outputs produced by miners. The evaluation criteria include accuracy, efficiency, and innovation.
+- Ranking and Rewarding: Validators rank the miners according to their performance. The Bittensor blockchain’s Yuma Consensus mechanism determines the TAO rewards distribution based on these rankings.
 
-The Bittensor Subnet 1 for Text Prompting is built using this template. See [prompting](https://github.com/macrocosm-os/prompting) for how to configure the files and how to add monitoring and telemetry and support multiple miner types. Also see this Subnet 1 in action on [Taostats](https://taostats.io/subnets/netuid-1/) explorer.
+## Evaluation Process
 
----
+- For Miners:
 
-## Installation
+  Miners in the BTCopilot subnet are tasked with generating project outputs based on various types of prompts. Their outputs are evaluated based on the following criteria:
 
-### Before you proceed
-Before you proceed with the installation of the subnet, note the following: 
+  1. Accuracy:
 
-- Use these instructions to run your subnet locally for your development and testing, or on Bittensor testnet or on Bittensor mainnet. 
-- **IMPORTANT**: We **strongly recommend** that you first run your subnet locally and complete your development and testing before running the subnet on Bittensor testnet. Furthermore, make sure that you next run your subnet on Bittensor testnet before running it on the Bittensor mainnet.
-- You can run your subnet either as a subnet owner, or as a subnet validator or as a subnet miner. 
-- **IMPORTANT:** Make sure you are aware of the minimum compute requirements for your subnet. See the [Minimum compute YAML configuration](./min_compute.yml).
-- Note that installation instructions differ based on your situation: For example, installing for local development and testing will require a few additional steps compared to installing for testnet. Similarly, installation instructions differ for a subnet owner vs a validator or a miner. 
+     Correctness: The generated code must accurately reflect the requirements stated in the prompt.
 
-### Install
+     Functionality: The output should be fully functional with minimal to no errors.
 
-- **Running locally**: Follow the step-by-step instructions described in this section: [Running Subnet Locally](./docs/running_on_staging.md).
-- **Running on Bittensor testnet**: Follow the step-by-step instructions described in this section: [Running on the Test Network](./docs/running_on_testnet.md).
-- **Running on Bittensor mainnet**: Follow the step-by-step instructions described in this section: [Running on the Main Network](./docs/running_on_mainnet.md).
+  2. Efficiency:
 
----
+     Resource Utilization: The output should be produced using the least amount of computational resources without compromising on quality.
 
-## Writing your own incentive mechanism
+     Speed: Faster generation times are favored, provided the output meets all other criteria.
 
-As described in [Quickstarter template](#quickstarter-template) section above, when you are ready to write your own incentive mechanism, update this template repository by editing the following files. The code in these files contains detailed documentation on how to update the template. Read the documentation in each of the files to understand how to update the template. There are multiple **TODO**s in each of the files identifying sections you should update. These files are:
-- `template/protocol.py`: Contains the definition of the wire-protocol used by miners and validators.
-- `neurons/miner.py`: Script that defines the miner's behavior, i.e., how the miner responds to requests from validators.
-- `neurons/validator.py`: This script defines the validator's behavior, i.e., how the validator requests information from the miners and determines the scores.
-- `template/forward.py`: Contains the definition of the validator's forward pass.
-- `template/reward.py`: Contains the definition of how validators reward miner responses.
+  3. Innovation:
 
-In addition to the above files, you should also update the following files:
-- `README.md`: This file contains the documentation for your project. Update this file to reflect your project's documentation.
-- `CONTRIBUTING.md`: This file contains the instructions for contributing to your project. Update this file to reflect your project's contribution guidelines.
-- `template/__init__.py`: This file contains the version of your project.
-- `setup.py`: This file contains the metadata about your project. Update this file to reflect your project's metadata.
-- `docs/`: This directory contains the documentation for your project. Update this directory to reflect your project's documentation.
+     Novelty: Unique and creative approaches to solving the prompt are rewarded.
 
-__Note__
-The `template` directory should also be renamed to your project name.
----
+     Optimization: Innovative optimizations that improve the performance or usability of the generated project are highly valued.
 
-# Writing your own subnet API
-To leverage the abstract `SubnetsAPI` in Bittensor, you can implement a standardized interface. This interface is used to interact with the Bittensor network and can be used by a client to interact with the subnet through its exposed axons.
+- For Validators:
 
-What does Bittensor communication entail? Typically two processes, (1) preparing data for transit (creating and filling `synapse`s) and (2), processing the responses received from the `axon`(s).
+  Validators play a crucial role in ensuring the quality of outputs. They are responsible for evaluating and ranking the miners’ contributions. The evaluation process involves:
 
-This protocol uses a handler registry system to associate bespoke interfaces for subnets by implementing two simple abstract functions:
-- `prepare_synapse`
-- `process_responses`
+  1. Initial Review: Validators perform an initial check to ensure that the submitted outputs meet basic functional requirements.
+  2. Detailed Assessment: Each output is thoroughly reviewed against the criteria of accuracy, efficiency, and innovation.
+  3. Feedback Provision: Validators provide detailed feedback to miners, highlighting strengths and areas for improvement.
+  4. Ranking Submission: Validators rank the outputs from different miners. These rankings are submitted to the Bittensor blockchain.
 
-These can be implemented as extensions of the generic `SubnetsAPI` interface.  E.g.:
+### Example Scenario
 
+- Prompt: A miner receives a text prompt to create a React-based TodoList application.
+- Generation: The miner generates the code for the application and submits it.
+- Evaluation: Validators review the submission:
+  - Accuracy: Does the application have all the features mentioned in the prompt?
+  - Efficiency: Is the code optimized for performance?
+  - Innovation: Does the application include any additional features or optimizations not explicitly requested but beneficial?
+- Ranking: Validators rank this submission against others.
+- Rewarding: Based on the ranking, the miner receives TAO rewards.
 
-This is abstract, generic, and takes(`*args`, `**kwargs`) for flexibility. See the extremely simple base class:
-```python
-class SubnetsAPI(ABC):
-    def __init__(self, wallet: "bt.wallet"):
-        self.wallet = wallet
-        self.dendrite = bt.dendrite(wallet=wallet)
+## Roadmap
 
-    async def __call__(self, *args, **kwargs):
-        return await self.query_api(*args, **kwargs)
+Phase 1: Generate HTML/CSS projects from text prompts.
 
-    @abstractmethod
-    def prepare_synapse(self, *args, **kwargs) -> Any:
-        """
-        Prepare the synapse-specific payload.
-        """
-        ...
+Phase 2: Enable voice prompts for project generation.
 
-    @abstractmethod
-    def process_responses(self, responses: List[Union["bt.Synapse", Any]]) -> Any:
-        """
-        Process the responses from the network.
-        """
-        ...
+Phase 3: Support image prompts to generate pixel-perfect projects.
 
-```
+Phase 4: Integrate Figma designs as input for project generation.
 
+Phase 5: Automate the downloading of fully functional project folders.
 
-Here is a toy example:
-
-```python
-from bittensor.subnets import SubnetsAPI
-from MySubnet import MySynapse
-
-class MySynapseAPI(SubnetsAPI):
-    def __init__(self, wallet: "bt.wallet"):
-        super().__init__(wallet)
-        self.netuid = 99
-
-    def prepare_synapse(self, prompt: str) -> MySynapse:
-        # Do any preparatory work to fill the synapse
-        data = do_prompt_injection(prompt)
-
-        # Fill the synapse for transit
-        synapse = StoreUser(
-            messages=[data],
-        )
-        # Send it along
-        return synapse
-
-    def process_responses(self, responses: List[Union["bt.Synapse", Any]]) -> str:
-        # Look through the responses for information required by your application
-        for response in responses:
-            if response.dendrite.status_code != 200:
-                continue
-            # potentially apply post processing
-            result_data = postprocess_data_from_response(response)
-        # return data to the client
-        return result_data
-```
-
-You can use a subnet API to the registry by doing the following:
-1. Download and install the specific repo you want
-1. Import the appropriate API handler from bespoke subnets
-1. Make the query given the subnet specific API
-
-
-
-# Subnet Links
-In order to see real-world examples of subnets in-action, see the `subnet_links.py` document or access them from inside the `template` package by:
-```python
-import template
-template.SUBNET_LINKS
-[{'name': 'sn0', 'url': ''},
- {'name': 'sn1', 'url': 'https://github.com/opentensor/prompting/'},
- {'name': 'sn2', 'url': 'https://github.com/bittranslateio/bittranslate/'},
- {'name': 'sn3', 'url': 'https://github.com/gitphantomman/scraping_subnet/'},
- {'name': 'sn4', 'url': 'https://github.com/manifold-inc/targon/'},
-...
-]
-```
-
-## License
-This repository is licensed under the MIT License.
-```text
-# The MIT License (MIT)
-# Copyright © 2024 Opentensor Foundation
-
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the “Software”), to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
-# and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of
-# the Software.
-
-# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-# THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-```
+Phase 6: Expand to generate full framework-based projects like React, Angular, etc.
