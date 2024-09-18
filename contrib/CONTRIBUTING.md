@@ -1,6 +1,6 @@
-# Contributing to Bittensor Subnet Development
+# Contributing to BTCopilot
 
-The following is a set of guidelines for contributing to the Bittensor ecosystem. These are **HIGHLY RECOMMENDED** guidelines, but not hard-and-fast rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
+The following is a set of guidelines for contributing to the BTCopilot Subnet. These are **HIGHLY RECOMMENDED** guidelines, but not hard-and-fast rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
 ## Table Of Contents
 1. [How Can I Contribute?](#how-can-i-contribute)
@@ -16,10 +16,10 @@ The following is a set of guidelines for contributing to the Bittensor ecosystem
 
 
 ## How Can I Contribute?
-TODO(developer): Define your desired contribution procedure.
+You can fork this repository and create a PR with your codes and request review from our development team. You can reference [Pull Request Philosophy](#pull-request-philosophy).
 
 ## Communication Channels
-TODO(developer): Place your communication channels here
+Contact us on [Our discord server](https://discord.gg/P2XRwVEJ)
 
 > Please follow the Bittensor Subnet [style guide](./STYLE.md) regardless of your contribution type. 
 
@@ -99,7 +99,7 @@ After you submit a pull request, it will be reviewed by the maintainers. They ma
 > Note: Be sure to merge the latest from "upstream" before making a pull request:
 
 ```bash
-git remote add upstream https://github.com/opentensor/bittensor.git # TODO(developer): replace with your repo URL
+git remote add upstream https://github.com/BTCopilot/btcopilot.git
 git fetch upstream
 git merge upstream/<your-branch-name>
 git push origin <your-branch-name>
