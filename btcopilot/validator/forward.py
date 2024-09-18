@@ -20,9 +20,9 @@
 import time
 import bittensor as bt
 
-from template.protocol import Dummy
-from template.validator.reward import get_rewards
-from template.utils.uids import get_random_uids
+from btcopilot.protocol import Dummy
+from btcopilot.validator.reward import get_rewards
+from btcopilot.utils.uids import get_random_uids
 
 
 async def forward(self):
