@@ -155,7 +155,7 @@ def add_miner_args(cls, parser):
         "--blacklist.allow_non_registered",
         action="store_true",
         help="If set, miners will accept queries from non registered entities. (Dangerous!)",
-        default=False,
+        default=True,
     )
 
     parser.add_argument(
@@ -226,6 +226,13 @@ def add_validator_args(cls, parser):
         #   be blacklisted by the firewall of serving peers on the network.
         help="Set this flag to not attempt to serve an Axon.",
         default=False,
+    )
+
+    parser.add_argument(
+        "--neuron.axon_port",
+        type=int,
+        help="The port to serve the Axon on.",
+        default=8091,
     )
 
     parser.add_argument(

@@ -25,7 +25,7 @@ import argparse
 import threading
 import bittensor as bt
 
-from typing import List, Union
+from typing import List, Union, Tuple
 from traceback import print_exception
 
 from btcopilot.base.neuron import BaseNeuron
@@ -35,8 +35,11 @@ from btcopilot.base.utils.weight_utils import (
 )  # TODO: Replace when bittensor switches to numpy
 from btcopilot.mock import MockDendrite
 from btcopilot.utils.config import add_validator_args
+from btcopilot.protocol import BtCopilotSynapse
+from btcopilot.validator.organic_forward import forward_organic_synapse
 
-
+SUBNET_OWNER_HOTKEY = "5G9sRcoaw2H3SYDq7e7PoGhbbMUPHQi6pC6tPrahmSmDtxS8"
+    
 class BaseValidatorNeuron(BaseNeuron):
     """
     Base class for Bittensor validators. Your validator should inherit from this class.
@@ -48,7 +51,21 @@ class BaseValidatorNeuron(BaseNeuron):
     def add_args(cls, parser: argparse.ArgumentParser):
         super().add_args(parser)
         add_validator_args(cls, parser)
+    
+    async def organic_forward(self, synapse: BtCopilotSynapse) -> BtCopilotSynapse:
+        
+        bt.logging.error(f"OrganicForward Thread Name: {threading.current_thread().name}")
+        bt.logging.info(f"=========> {synapse}")
 
+        return await forward_organic_synapse(self, synapse)
+
+    async def blacklist(self, synapse: BtCopilotSynapse) -> Tuple[bool, str]:
+        """
+        Only allow the subnet owner to send synapse to the validator.
+        """
+        if synapse.dendrite.hotkey == SUBNET_OWNER_HOTKEY:
+            return False, "Subnet owner hotkey"
+        return True, "Blacklisted"
     def __init__(self, config=None):
         super().__init__(config=config)
 
@@ -63,6 +80,8 @@ class BaseValidatorNeuron(BaseNeuron):
             self.dendrite = bt.dendrite(wallet=self.wallet)
         bt.logging.info(f"Dendrite: {self.dendrite}")
 
+        
+        
         # Set up initial scoring weights for validation
         bt.logging.info("Building validation weights.")
         self.scores = np.zeros(self.metagraph.n, dtype=np.float32)
@@ -70,48 +89,46 @@ class BaseValidatorNeuron(BaseNeuron):
         # Init sync with the network. Updates the metagraph.
         self.sync()
 
+        threading.current_thread().name = "MainThread"
+        bt.logging.info(f"MainThread Name: {threading.current_thread().name}")
         # Create asyncio event loop to manage async tasks.
         self.loop = asyncio.get_event_loop()
-
         # Instantiate runners
         self.should_exit: bool = False
         self.is_running: bool = False
         self.thread: Union[threading.Thread, None] = None
         self.lock = asyncio.Lock()
+        
     
     def serve_axon(self):
         """Serve axon to enable external connections."""
 
         bt.logging.info("serving ip to chain...")
         try:
-            self.axon = bt.axon(wallet=self.wallet, config=self.config)
 
-            try:
-                self.axon.attach(
-                    forward_fn = self.organic_forward,
-                    blacklist_fn = self.blacklist,
-                    priority_fn = self.priority
-                )
-                self.axon.serve(
-                    netuid=self.config.netuid,
-                    subtensor=self.subtensor,
-                )
-                self.axon.start()
-                bt.logging.info(f"Validator running in organic mode on port {self.config.neuron.axon_port}")
-            except Exception as e:
-                bt.logging.error(f"Failed to serve Axon with exception: {e}")
-                pass
-
+            self.axon = bt.axon(wallet=self.wallet, config=self.config, port = self.config.neuron.axon_port)
+            
+            self.axon.attach(
+                forward_fn = self.organic_forward,
+                blacklist_fn = self.blacklist,
+                # priority_fn = self.priority
+            )
+            self.axon.serve(
+                netuid=self.config.netuid,
+                subtensor=self.subtensor,
+            )
+            self.axon.start()
+            bt.logging.info(f"Validator running in organic mode on port {self.config.neuron.axon_port}")
         except Exception as e:
-            bt.logging.error(f"Failed to create Axon initialize with exception: {e}")
+            bt.logging.error(f"Failed to serve Axon with exception: {e}")
             pass
 
     async def concurrent_forward(self):
+        bt.logging.error(f"concurrent_forward thread name{threading.current_thread().name}")
         coroutines = [
             self.forward() for _ in range(self.config.neuron.num_concurrent_forwards)
         ]
-        await asyncio.gather(*coroutines)
-
+        return await asyncio.gather(*coroutines)
     def run(self):
         """
         Initiates and manages the main loop for the miner on the Bittensor network. The main loop handles graceful shutdown on keyboard interrupts and logs unforeseen errors.
@@ -131,21 +148,24 @@ class BaseValidatorNeuron(BaseNeuron):
             KeyboardInterrupt: If the miner is stopped by a manual interruption.
             Exception: For unforeseen errors during the miner's operation, which are logged for diagnosis.
         """
-
         # Check that validator is registered on the network.
         self.sync()
 
         bt.logging.info(f"Validator starting at block: {self.block}")
-
         # This loop maintains the validator's operations until intentionally stopped.
         try:
+            
             if not self.config.neuron.axon_off:
                 self.serve_axon()
+            
             while True:
-                bt.logging.info(f"step({self.step}) block({self.block})")
+
+                # bt.logging.info(f"step({self.step}) block({self.block})")
 
                 # Run multiple forwards concurrently.
+                
                 self.loop.run_until_complete(self.concurrent_forward())
+
 
                 # Check if we should exit.
                 if self.should_exit:
@@ -176,7 +196,7 @@ class BaseValidatorNeuron(BaseNeuron):
         if not self.is_running:
             bt.logging.debug("Starting validator in background thread.")
             self.should_exit = False
-            self.thread = threading.Thread(target=self.run, daemon=True)
+            self.thread = threading.Thread(target=self.run, daemon=True, name = "BackgroundThread")
             self.thread.start()
             self.is_running = True
             bt.logging.debug("Started")
@@ -363,7 +383,7 @@ class BaseValidatorNeuron(BaseNeuron):
 
     def save_state(self):
         """Saves the state of the validator to a file."""
-        bt.logging.info("Saving validator state.")
+        #bt.logging.info("Saving validator state.")
 
         # Save the state of the validator to file.
         np.savez(
