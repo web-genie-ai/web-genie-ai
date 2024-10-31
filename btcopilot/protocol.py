@@ -1,7 +1,6 @@
 # The MIT License (MIT)
 # Copyright © 2023 Yuma Rao
-# TODO(developer): Set your name
-# Copyright © 2023 <your name>
+# Copyright © 2023 Dominique Hayes
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the “Software”), to deal in the Software without restriction, including without limitation
@@ -17,60 +16,94 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import typing
+import pydantic
+import json
+from typing import AsyncIterator, Union, Any
+from starlette.responses import StreamingResponse
+
 import bittensor as bt
 
-# TODO(developer): Rewrite with your protocol definition.
+from btcopilot.tasks import Task
+from btcopilot.solution import Solution
 
-# This is the protocol for the dummy miner and validator.
-# It is a simple request-response protocol where the validator sends a request
-# to the miner, and the miner responds with a dummy response.
-
-# ---- miner ----
-# Example usage:
-#   def dummy( synapse: Dummy ) -> Dummy:
-#       synapse.dummy_output = synapse.dummy_input + 1
-#       return synapse
-#   axon = bt.axon().attach( dummy ).serve(netuid=...).start()
-
-# ---- validator ---
-# Example usage:
-#   dendrite = bt.dendrite()
-#   dummy_output = dendrite.query( Dummy( dummy_input = 1 ) )
-#   assert dummy_output == 2
-
-
-class Dummy(bt.Synapse):
+class BtCopilotSynapse(bt.StreamingSynapse):
     """
-    A simple dummy protocol representation which uses bt.Synapse as its base.
-    This protocol helps in handling dummy request and response communication between
-    the miner and the validator.
-
-    Attributes:
-    - dummy_input: An integer value representing the input request sent by the validator.
-    - dummy_output: An optional integer value which, when filled, represents the response from the miner.
+    A protocol for the BtCopilot.
     """
 
-    # Required request input, filled by sending dendrite caller.
-    dummy_input: int
+    task: Union[Task, None] = pydantic.Field(
+        None,
+        title="Task",
+        description="A task to be sent to miners."
+    )
 
-    # Optional request output, filled by receiving axon.
-    dummy_output: typing.Optional[int] = None
+    solution: Union[Solution, None] = pydantic.Field(
+        None,
+        title="Solution",
+        description="A solution received from miners."
+    )
 
-    def deserialize(self) -> int:
+    completion: str = pydantic.Field(
+        "",
+        title="Completion",
+        description="The completion response from miners."
+    )
+
+    async def process_streaming_response(self, response: StreamingResponse) -> AsyncIterator[str]:
         """
-        Deserialize the dummy output. This method retrieves the response from
-        the miner in the form of dummy_output, deserializes it and returns it
-        as the output of the dendrite.query() call.
-
-        Returns:
-        - int: The deserialized response, which in this case is the value of dummy_output.
-
-        Example:
-        Assuming a Dummy instance has a dummy_output value of 5:
-        >>> dummy_instance = Dummy(dummy_input=4)
-        >>> dummy_instance.dummy_output = 5
-        >>> dummy_instance.deserialize()
-        5
+        Processes a streaming response from a miner.
         """
-        return self.dummy_output
+        if self.completion is None:
+            self.completion = ""
+        async for chunk in response.content.iter_any():
+            tokens = chunk.decode("utf-8") 
+            
+            for token in tokens:
+                if token:
+                    self.completion += token
+            yield tokens
+
+    def deserialize(self) -> Union[Any, None]:
+        """
+        Deserializes the response.
+        """
+        try:
+            bt.logging.debug(f"completion: {self.completion}")
+            json_response = json.loads(self.completion)
+            css = json_response.get("css", None)
+            html = json_response.get("html", None)
+            if css is None and html is None:
+                bt.logging.error(f"Invalid response: {json_response}")
+                return None
+            
+            css = str(css)
+            html = str(html)
+
+            process_time = self.dendrite.process_time
+            bt.logging.debug(f"css: {css}, html: {html}, process_time: {process_time}")
+            self.solution = Solution(css=css, html=html, process_time=process_time, miner_uid=0)
+            return self 
+        except Exception as e:
+            bt.logging.error(f"Failed to parse completion: {e}")
+            return None
+        
+    
+    def extract_response_json(self, response: StreamingResponse) -> dict:
+        """
+        Extracts the response JSON.
+        """
+        headers = {
+            k.decode("utf-8"): v.decode("utf-8")
+            for k, v in response.__dict__["_raw_headers"]
+        }
+
+        def extract_info(prefix:str) -> dict:
+            return {
+                key.split("_")[-1]: value
+                for key, value in headers.items()
+                if key.startswith(prefix)
+            }
+        return {
+            "completion": self.completion
+        }
+    

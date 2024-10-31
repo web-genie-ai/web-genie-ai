@@ -138,6 +138,13 @@ def add_miner_args(cls, parser):
     )
 
     parser.add_argument(
+        "--neuron.streaming_batch_size",
+        type=int,
+        default=12,
+        help="Batch size in tokens for streaming forward calls.",
+    )
+
+    parser.add_argument(
         "--blacklist.force_validator_permit",
         action="store_true",
         help="If set, we will force incoming requests to have a permit.",

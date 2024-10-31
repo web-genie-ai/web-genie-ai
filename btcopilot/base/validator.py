@@ -54,6 +54,7 @@ class BaseValidatorNeuron(BaseNeuron):
 
         # Save a copy of the hotkeys to local memory.
         self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
+        print("=== self.hotkeys ===>", self.hotkeys)
 
         # Dendrite lets us send messages to other nodes (axons) in the network.
         if self.config.mock:
@@ -280,7 +281,9 @@ class BaseValidatorNeuron(BaseNeuron):
 
     def resync_metagraph(self):
         """Resyncs the metagraph and updates the hotkeys and moving averages based on the new metagraph."""
-        bt.logging.info("resync_metagraph()")
+        #TODO: Implement this
+
+        #bt.logging.info("resync_metagraph()")
 
         # Copies state of metagraph before syncing.
         previous_metagraph = copy.deepcopy(self.metagraph)

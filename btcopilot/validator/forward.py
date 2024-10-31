@@ -18,12 +18,43 @@
 # DEALINGS IN THE SOFTWARE.
 
 import time
+import asyncio
 import bittensor as bt
 
-from btcopilot.protocol import Dummy
+from typing import Awaitable, List
+from dataclasses import dataclass
+from btcopilot.protocol import BtCopilotSynapse
 from btcopilot.validator.reward import get_rewards
 from btcopilot.utils.uids import get_random_uids
+from btcopilot.solution import Solution
 
+async def process_response(uid: int, async_generator: Awaitable):
+    try:
+        buffer = ""
+        chunk = None
+        async for chunk in async_generator:
+            if isinstance(chunk, str):
+                buffer += chunk
+        if chunk is not None:
+            synapse = chunk
+            if isinstance(synapse, BtCopilotSynapse):
+                if synapse.dendrite.status_code == 200:
+                    synapse.solution.miner_uid = uid
+                    return synapse.solution
+            else:
+                bt.logging.error(f"Received non-200 status code: {chunk.dendrite.status_code} for uid: {uid}")
+                return None
+        else:
+            bt.logging.error(f"Synapse is None for uid: {uid}")
+            return None
+    except Exception as e:
+        bt.logging.error(f"Error processing response for uid: {uid}: {e}")
+        return None
+
+async def handle_responses(miner_uids_list: List[int], responses: List[Awaitable]):
+    tasks = [process_response(uid, response) for uid, response in zip(miner_uids_list, responses)]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    return [result for result in results if result is not None]
 
 async def forward(self):
     """
@@ -38,26 +69,38 @@ async def forward(self):
     # TODO(developer): Define how the validator selects a miner to query, how often, etc.
     # get_random_uids is an example method, but you can replace it with your own.
     miner_uids = get_random_uids(self, k=self.config.neuron.sample_size)
+    miner_uids_list = miner_uids.tolist()
+
+    bt.logging.info(f"Selected miners: {miner_uids}")
+
+    # TODO(developer): Define how the validator selects a miner to query, how often, etc.
+    axons = [self.metagraph.axons[uid] for uid in miner_uids]
+    
+    task = self.task_generator.next_task()
+
+    synapse = BtCopilotSynapse(
+        task=task
+    )
 
     # The dendrite client queries the network.
     responses = await self.dendrite(
-        # Send the query to selected miner axons in the network.
-        axons=[self.metagraph.axons[uid] for uid in miner_uids],
-        # Construct a dummy query. This simply contains a single integer.
-        synapse=Dummy(dummy_input=self.step),
-        # All responses have the deserialize function called on them before returning.
-        # You are encouraged to define your own deserialization function.
+        axons=axons,
+        synapse=synapse,
+        timeout=task.timeout,
         deserialize=True,
+        streaming=True,
     )
 
-    # Log the results for monitoring purposes.
-    bt.logging.info(f"Received responses: {responses}")
+    handle_responses_task = asyncio.create_task(handle_responses(miner_uids_list, responses))
+    
+    results = await handle_responses_task
+    if len(results) == 0:
+        bt.logging.info("No responses received")
+        return
+    bt.logging.info(f"Received {results} results")
 
-    # TODO(developer): Define how the validator scores responses.
-    # Adjust the scores based on responses from miners.
-    rewards = get_rewards(self, query=self.step, responses=responses)
-
-    bt.logging.info(f"Scored responses: {rewards}")
+    scores, miner_uids = self.reward_manager.score(task, results)
     # Update the scores based on the rewards. You may want to define your own update_scores function for custom behavior.
-    self.update_scores(rewards, miner_uids)
+    bt.logging.info(f"Updating scores: {scores}")
+    self.update_scores(scores, miner_uids)
     time.sleep(5)

@@ -27,8 +27,8 @@ import bittensor as bt
 from btcopilot.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
 from btcopilot.validator import forward
-
-
+from btcopilot.task_generator import TaskGenerator
+from btcopilot.rewards import RewardManager
 class Validator(BaseValidatorNeuron):
     """
     Your validator neuron class. You should use this class to define your validator's behavior. In particular, you should replace the forward function with your own logic.
@@ -40,11 +40,11 @@ class Validator(BaseValidatorNeuron):
 
     def __init__(self, config=None):
         super(Validator, self).__init__(config=config)
-
         bt.logging.info("load_state()")
         self.load_state()
+        self.reward_manager = RewardManager()
+        self.task_generator = TaskGenerator()
 
-        # TODO(developer): Anything specific to your use case you can do here
 
     async def forward(self):
         """

@@ -7,7 +7,7 @@ from protocol import StreamPrompting
 """
 This has assumed you have:
 1. Registered your miner on the chain (finney/test)
-2. Are serving your miner on an open port (e.g. 12345)
+2. Are serving your miner on an open(e.g. 12345)
 
 Steps:
 - Instantiate your synapse subclass with the relevant information. E.g. messages, roles, etc.
