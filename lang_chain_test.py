@@ -78,7 +78,8 @@ def miner_forward(self, synapse: DummySynapse) -> str:
     #     "You are an expert programmer. Generate code based on the following request:\n\n{query}\n\nProvide only the code, without any explanations."
     # )
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are an expert programmer. Generate code based on the following request.:\n\n{query}\n\n Return only the code, without any explanations."),
+        ("system", """You are an expert programmer. Generate code based on the following request without explanations:\n\n{query}\n\n Provide the code that satisfies the following requirements without any explanation. You must give me both the CSS file and the frontend HTML file for a 'Login Page.' The response should be in JSON format as shown below, and it should be plaintext (without triple quotes):
+        {{ 'CSS': 'css_code_here', 'HTML': 'html_code_here' }}"""),
         ("user", "{query}"),
     ])
     chain = prompt | self.model | StrOutputParser()

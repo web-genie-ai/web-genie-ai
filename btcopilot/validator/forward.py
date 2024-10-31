@@ -56,6 +56,7 @@ async def handle_responses(miner_uids_list: List[int], responses: List[Awaitable
     results = await asyncio.gather(*tasks, return_exceptions=True)
     return [result for result in results if result is not None]
 
+
 async def forward(self):
     """
     The forward function is called by the validator every time step.

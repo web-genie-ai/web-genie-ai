@@ -68,10 +68,15 @@ class BtCopilotSynapse(bt.StreamingSynapse):
         Deserializes the response.
         """
         try:
-            bt.logging.debug(f"completion: {self.completion}")
             json_response = json.loads(self.completion)
-            css = json_response.get("css", None)
-            html = json_response.get("html", None)
+            css = None
+            html = None
+            for key, value in json_response.items():
+                if key.lower() == "css":    
+                    css = value
+                elif key.lower() == "html":
+                    html = value
+
             if css is None and html is None:
                 bt.logging.error(f"Invalid response: {json_response}")
                 return None

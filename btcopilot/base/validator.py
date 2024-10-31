@@ -70,12 +70,6 @@ class BaseValidatorNeuron(BaseNeuron):
         # Init sync with the network. Updates the metagraph.
         self.sync()
 
-        # Serve axon to enable external connections.
-        if not self.config.neuron.axon_off:
-            self.serve_axon()
-        else:
-            bt.logging.warning("axon off, not serving ip to chain.")
-
         # Create asyncio event loop to manage async tasks.
         self.loop = asyncio.get_event_loop()
 
@@ -84,7 +78,7 @@ class BaseValidatorNeuron(BaseNeuron):
         self.is_running: bool = False
         self.thread: Union[threading.Thread, None] = None
         self.lock = asyncio.Lock()
-
+    
     def serve_axon(self):
         """Serve axon to enable external connections."""
 
@@ -93,13 +87,17 @@ class BaseValidatorNeuron(BaseNeuron):
             self.axon = bt.axon(wallet=self.wallet, config=self.config)
 
             try:
-                self.subtensor.serve_axon(
+                self.axon.attach(
+                    forward_fn = self.organic_forward,
+                    blacklist_fn = self.blacklist,
+                    priority_fn = self.priority
+                )
+                self.axon.serve(
                     netuid=self.config.netuid,
-                    axon=self.axon,
+                    subtensor=self.subtensor,
                 )
-                bt.logging.info(
-                    f"Running validator {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {self.config.netuid}"
-                )
+                self.axon.start()
+                bt.logging.info(f"Validator running in organic mode on port {self.config.neuron.axon_port}")
             except Exception as e:
                 bt.logging.error(f"Failed to serve Axon with exception: {e}")
                 pass
@@ -141,6 +139,8 @@ class BaseValidatorNeuron(BaseNeuron):
 
         # This loop maintains the validator's operations until intentionally stopped.
         try:
+            if not self.config.neuron.axon_off:
+                self.serve_axon()
             while True:
                 bt.logging.info(f"step({self.step}) block({self.block})")
 
@@ -158,7 +158,8 @@ class BaseValidatorNeuron(BaseNeuron):
 
         # If someone intentionally stops the validator, it'll safely terminate operations.
         except KeyboardInterrupt:
-            self.axon.stop()
+            if not self.config.neuron.axon_off:
+                self.axon.stop()
             bt.logging.success("Validator killed by keyboard interrupt.")
             exit()
 
