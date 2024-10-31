@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple
 from btcopilot.rewards import Reward
 from btcopilot.rewards import GPTReward
 from btcopilot.rewards import SpeedReward
-from btcopilot.rewards import PenaltyReward
+from btcopilot.rewards import IsValidReward
 from btcopilot.tasks import Task
 from btcopilot.solution import Solution
 
@@ -17,7 +17,7 @@ class RewardManager:
         self.reward_models = {
             "gpt": GPTReward(),
             "speed": SpeedReward(),
-            "penalty": PenaltyReward(),
+            "is_valid": IsValidReward(),
         }
         
     def _penalty(self, task: Task, solution: Solution) -> float:

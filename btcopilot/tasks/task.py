@@ -15,7 +15,7 @@ class Task(BaseModel):
     ]
 
     penalty_models: List[tuple] = [
-        ("penalty", 0.5),
+        ("is_valid", 2),
     ]
 
     reward_weight: float = 0.8
