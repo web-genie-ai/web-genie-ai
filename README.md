@@ -1,6 +1,6 @@
-# BTCopilot Subnet
+# WebGenieAI Subnet
 
-Welcome to BTCopilot Subnet, a pioneering Bittensor-based subnet designed to revolutionize project generation through advanced AI models. BTCopilot aims to transform diverse prompts—ranging from text and voice to images and Figma designs—into fully functional, ready-to-deploy projects. This subnet is tailored for developers, designers, and innovators who seek to accelerate their project development process with high-quality, AI-generated outputs.
+Welcome to WebGenieAI Subnet, a pioneering Bittensor-based subnet designed to revolutionize project generation through advanced AI models. WebGenieAI aims to transform diverse prompts—ranging from text and voice to images and Figma designs—into fully functional, ready-to-deploy projects. This subnet is tailored for developers, designers, and innovators who seek to accelerate their project development process with high-quality, AI-generated outputs.
 
 ## Table of Contents
 
@@ -11,15 +11,15 @@ Welcome to BTCopilot Subnet, a pioneering Bittensor-based subnet designed to rev
 
 ## Overview
 
-BTCopilot Subnet leverages state-of-the-art AI models to interpret and convert various types of prompts into complete, deployable projects. Whether you're starting with a simple HTML/CSS framework or aiming to develop a complex React application, BTCopilot can generate the entire codebase, ensuring it meets your specified requirements and is ready for immediate deployment.
+WebGenieAI Subnet leverages state-of-the-art AI models to interpret and convert various types of prompts into complete, deployable projects. Whether you're starting with a simple HTML/CSS framework or aiming to develop a complex React application, WebGenieAI can generate the entire codebase, ensuring it meets your specified requirements and is ready for immediate deployment.
 
 ### Vision
 
-BTCopilot envisions a future where project creation is seamless, automated, and efficient, empowering developers to focus more on innovation and less on repetitive coding tasks. By harnessing the capabilities of the Bittensor network, BTCopilot fosters a competitive environment that drives continuous improvement in AI-generated outputs.
+WebGenieAI envisions a future where project creation is seamless, automated, and efficient, empowering developers to focus more on innovation and less on repetitive coding tasks. By harnessing the capabilities of the Bittensor network, WebGenieAI fosters a competitive environment that drives continuous improvement in AI-generated outputs.
 
 ### Purpose
 
-The primary purpose of BTCopilot is to:
+The primary purpose of WebGenieAI is to:
 
 - Automate Project Generation: Provide a platform that can autonomously generate high-quality projects from diverse input prompts.
 - Enhance Productivity: Reduce the time and effort required for project development, enabling developers to quickly bring their ideas to life.
@@ -29,13 +29,13 @@ The primary purpose of BTCopilot is to:
 
 - **Text Prompt**: Generate projects by describing them in text.
 - **Voice Prompt**: Create projects by giving voice commands.
-- **Image Prompt**: Upload an image of a website or app, and BTCopilot will generate a pixel-perfect project.
+- **Image Prompt**: Upload an image of a website or app, and WebGenieAI will generate a pixel-perfect project.
 - **Figma Prompt**: Convert Figma designs into functional projects.
 - **Automated Downloads**: Directly download the generated projects as complete folders.
 
 ## Incentive Mechanism
 
-The BTCopilot subnet incentivizes miners and validators to ensure high-quality outputs. Here’s how it works specifically for this subnet:
+The WebGenieAI subnet incentivizes miners and validators to ensure high-quality outputs. Here’s how it works specifically for this subnet:
 
 - Task Assignment: Subnet miners are assigned tasks related to generating and improving machine learning models based on various prompts (text, voice, image, Figma).
 - Performance Evaluation: Validators evaluate the outputs produced by miners. The evaluation criteria include accuracy, efficiency, and innovation.
@@ -45,7 +45,7 @@ The BTCopilot subnet incentivizes miners and validators to ensure high-quality o
 
 - For Miners:
 
-  Miners in the BTCopilot subnet are tasked with generating project outputs based on various types of prompts. Their outputs are evaluated based on the following criteria:
+  Miners in the WebGenieAI subnet are tasked with generating project outputs based on various types of prompts. Their outputs are evaluated based on the following criteria:
 
   1. Accuracy:
 
@@ -76,7 +76,7 @@ The BTCopilot subnet incentivizes miners and validators to ensure high-quality o
 
 ### Example Scenario
 
-- Prompt: A miner receives a text prompt to create a React-based TodoList application.
+- Prompt: A miner receives a prompt to create a front-end focus application.
 - Generation: The miner generates the code for the application and submits it.
 - Evaluation: Validators review the submission:
   - Accuracy: Does the application have all the features mentioned in the prompt?
@@ -89,9 +89,9 @@ The BTCopilot subnet incentivizes miners and validators to ensure high-quality o
 
 Phase 1: Generate HTML/CSS projects from text prompts.
 
-Phase 2: Enable voice prompts for project generation.
+Phase 2: Generate HTML/CSS projects from image based prompts.
 
-Phase 3: Support image prompts to generate pixel-perfect projects.
+Phase 3: Enable voice prompts for project generation.
 
 Phase 4: Integrate Figma designs as input for project generation.
 
