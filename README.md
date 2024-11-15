@@ -49,7 +49,7 @@ We break down the evaluation into both high-level visual similarity and low-leve
 
 #### High-level Visual Similarity
 
-To evaluate the visual similarity of IR and IG, we use the similarity of their CLIP embedding, denoted as CLIP(IR, IG). Specifically, we extract features by CLIP-ViT-B/32 after resizing screenshots to squares. 
+To evaluate the visual similarity of IR and IG, we use the similarity of their CLIP embedding, denoted as CLIP(I<sub>R</sub>, I<sub>G</sub>). Specifically, we extract features by CLIP-ViT-B/32 after resizing screenshots to squares. 
 To rule out the texts in the screenshots, we use the inpainting algorithm from [Telea](https://docs.opencv.org/4.3.0/df/d3d/tutorial_py_inpainting.html) to mask all detected text boxes using their bounding box coordinates.
 
 #### Low-level Element Matching
@@ -58,7 +58,7 @@ Metrics like CLIP similarity only capture the similarity of the overall images r
 
 To complement that, we introduce a suite of element-matching metrics. Specifically, we consider whether the generated webpages manage to recall all visual elements, and whether the corresponding visual elements in the input image and generated webpages have aligned text content, position, and color.
 
-Given a reference webpage screenshot $I_R$ and a generated webpage screenshot $I_G$, we use a text detection module to output a set of detected visual element blocks for each: R = {$r_1$, $r_2$, ..., $r_m$} and G = {$g_1$, $g_2$, ..., $g_n$}, where each block contains its textual content and bounding box coordinates.
+Given a reference webpage screenshot $I_R$ and a generated webpage screenshot $I_G$, we use a text detection module to output a set of detected visual element blocks for each: R = { $r_1$, $r_2$, ..., $r_m$ } and G = { $g_1$, $g_2$, ..., $g_n$ }, where each block contains its textual content and bounding box coordinates.
 
 Based on the two sets of detected blocks, we use the Jonker-Volgenant algorithm to get the optimal matching M between R and G based on text similarity, where (p, q) ∈ M indicates $r_p$ is matched with $g_q$.
 
