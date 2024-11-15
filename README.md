@@ -100,23 +100,23 @@ blocks are, the lower this score is.
 
 ### Phase 1: Foundation (Q4 2024)
 - [x] Launch on testnet (214)
-- [] Launch front-end application v1 (webgenieai.co)
+- [ ] Launch front-end application v1 (webgenieai.co)
     - Enable Text & image inputs
-- [] Incentive mechanism v1
+- [ ] Incentive mechanism v1
     - Generate pure HTML/CSS web pages from text & image based prompts
-- [] Begin marketing for brand awareness and interest
-- [] Launch on mainnet
+- [ ] Begin marketing for brand awareness and interest
+- [ ] Launch on mainnet
 
 ### Phase 2: Upgrade (Q1 2025)
-- [] Build dashboard to track miner performance and progress
-- [] Upgrade front-end application to v2
+- [ ] Build dashboard to track miner performance and progress
+- [ ] Upgrade front-end application to v2
     - Enable figma design inputs
-- [] Upgrade incentive mechanism to v2
+- [ ] Upgrade incentive mechanism to v2
     - Generate full framework based on React, Vue, and Next.js projects from text, image, and figma prompts
 
 ### Phase 3: Expand (Q2 2025)
-- [] Add features to monetize the application
+- [ ] Add features to monetize the application
    - Add payment gateways
    - Automate the downloading of fully functional projects
-- [] Market and B2B sales expansion
-- [] Grow the team
+- [ ] Market and B2B sales expansion
+- [ ] Grow the team
