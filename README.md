@@ -49,7 +49,7 @@ We break down the evaluation into both high-level visual similarity and low-leve
 
 #### High-level Visual Similarity
 
-To evaluate the visual similarity of IR and IG, we use the similarity of their CLIP embedding, denoted as CLIP(I<sub>R</sub>, I<sub>G</sub>). Specifically, we extract features by CLIP-ViT-B/32 after resizing screenshots to squares. 
+To evaluate the visual similarity of $I_R$ and $I_G$, we use the similarity of their CLIP embedding, denoted as CLIP($I_R$, $I_G$). Specifically, we extract features by CLIP-ViT-B/32 after resizing screenshots to squares. 
 To rule out the texts in the screenshots, we use the inpainting algorithm from [Telea](https://docs.opencv.org/4.3.0/df/d3d/tutorial_py_inpainting.html) to mask all detected text boxes using their bounding box coordinates.
 
 #### Low-level Element Matching
