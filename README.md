@@ -65,13 +65,14 @@ Based on the two sets of detected blocks, we use the Jonker-Volgenant algorithm 
 Given R, G, and matched pairs in M, we evaluate similarity along the following aspects:
 - **Block-Match**: The first desideratum of the task is that all visual elements from the image should be reproduced in the generated webpage, and the generated webpage should not hallucinate non-existent new elements. We measure this by computing the total sizes of all matched blocks divided by the total sizes of all blocks, including unmatched ones (either because the generated webpages missed them or because the generated webpages contain hallucinated blocks):
 
-$$
+![Incentive Mechanism Fomula](docs/incentive-fomula.png)
+<!-- $$
 \mathbf{match}_{\text{block}}(r_p, g_q) = \frac{S(r_p) + S(g_q)}{\sum_{(i,j) \in M} (S(r_i) + S(g_j)) + \left(\sum_{i \in U_R} S(r_i) + \sum_{j \in U_G} S(g_j)\right)}
 $$
 
 $$
 \mathbf{match}_{\text{block}}(R, G) = \sum_{(p,q) \in M} \mathbf{match}_{\text{block}}(r_p, g_q)
-$$
+$$ -->
 
 where S(·) returns the size of the blocks, $U_R$ and $U_G$ denotes the unmatched blocks in R
 and G. The intuition here is that unmatched blocks will lower the score as they indicate
