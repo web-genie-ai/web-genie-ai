@@ -18,7 +18,7 @@
 
 
 import time
-
+from typing import Tuple
 # Bittensor
 import bittensor as bt
 
@@ -26,7 +26,11 @@ import bittensor as bt
 from btcopilot.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
 from btcopilot.validator import forward
+from btcopilot.validator import forward_organic_synapse
 
+from btcopilot.task_generator import TaskGenerator
+from btcopilot.rewards import RewardManager
+from btcopilot.protocol import BtCopilotSynapse
 
 class Validator(BaseValidatorNeuron):
     """
@@ -39,11 +43,11 @@ class Validator(BaseValidatorNeuron):
 
     def __init__(self, config=None):
         super(Validator, self).__init__(config=config)
-
         bt.logging.info("load_state()")
         self.load_state()
+        self.reward_manager = RewardManager()
+        self.task_generator = TaskGenerator()
 
-        # TODO(developer): Anything specific to your use case you can do here
 
     async def forward(self):
         """
@@ -56,11 +60,12 @@ class Validator(BaseValidatorNeuron):
         """
         # TODO(developer): Rewrite this function based on your protocol definition.
         return await forward(self)
+    
 
 
 # The main function parses the configuration and runs the validator.
 if __name__ == "__main__":
     with Validator() as validator:
         while True:
-            bt.logging.info(f"Validator running... {time.time()}")
+            #bt.logging.info(f"Validator running... {time.time()}")
             time.sleep(5)
