@@ -1,6 +1,6 @@
 # Running Subnet Locally
 
-This tutorial will guide you through:
+This document will guide you through:
 
 - Setting up a local blockchain that is not connected to either Bittensor testchain or mainchain
 - Creating a subnet
@@ -92,21 +92,21 @@ BUILD_BINARY=0 ./scripts/localnet.sh
 
 **NOTE**: Watch for any build or initialization outputs in this step. If you are building the project for the first time, this step will take a while to finish building, depending on your hardware.
 
-## 6. Install subnet template
+## 6. Install web-genie-ai subnet
 
-`cd` to your project directory and clone the bittensor subnet template repository:
+`cd` to your project directory and clone the web-genie-ai repository:
 
 ```bash
-git clone https://github.com/opentensor/bittensor-subnet-template.git
+git clone https://github.com/web-genie-ai/web-genie-ai.git
 ```
 
 Navigate to the cloned repository:
 
 ```bash
-cd bittensor-subnet-template
+cd web-genie-ai
 ```
 
-Install the bittensor-subnet-template Python package:
+Install the web-genie-ai Python package:
 
 ```bash
 python -m pip install -e .

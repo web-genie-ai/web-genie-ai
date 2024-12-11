@@ -96,13 +96,25 @@ blocks are, the lower this score is.
 - Ranking: Validators rank this submission against others.
 - Rewarding: Based on the ranking, the miner receives TAO rewards.
 
+## Installation
+
+- See [Running on Staging](docs/running_on_staging.md) for instructions on how to run the subnet on staging.
+- See [Running on Testnet](docs/running_on_testnet.md) for instructions on how to run the subnet on testnet.
+- See [Running on Mainnet](docs/running_on_mainnet.md) for instructions on how to run the subnet on mainnet.
+
+## Requirements
+
+- Miners can use any port.
+- Miners can use OpenAI API key or can use their own model.
+- Validators need to use OpenAI API key to generate a task for miners.
+
 ## Roadmap
 
 ### Phase 1: Foundation (Q4 2024)
 - [x] Launch on testnet (214)
-- [ ] Launch front-end application v1 (webgenieai.co)
+- [x] Launch front-end application v1 (webgenieai.co)
     - Enable Text & image inputs
-- [ ] Incentive mechanism v1
+- [x] Incentive mechanism v1
     - Generate pure HTML/CSS web pages from text & image based prompts
 - [ ] Begin marketing for brand awareness and interest
 - [ ] Launch on mainnet
