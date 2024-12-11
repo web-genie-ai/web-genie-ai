@@ -1,11 +1,11 @@
 from typing import Dict, List, Tuple
 
-from btcopilot.rewards import Reward
-from btcopilot.rewards import GPTReward
-from btcopilot.rewards import SpeedReward
-from btcopilot.rewards import IsValidReward
-from btcopilot.tasks import Task
-from btcopilot.solution import Solution
+from webgenie.rewards import Reward
+from webgenie.rewards import GPTReward
+from webgenie.rewards import SpeedReward
+from webgenie.rewards import IsValidReward
+from webgenie.tasks import Task
+from webgenie.solution import Solution
 
 class RewardManager:
     """

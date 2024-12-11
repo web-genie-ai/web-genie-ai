@@ -23,10 +23,10 @@ import importlib
 import bittensor as bt
 
 # Bittensor Miner Template:
-import btcopilot
+import webgenie
 
 # import base miner class which takes care of most of the boilerplate
-from btcopilot.base.miner import BaseMinerNeuron
+from webgenie.base.miner import BaseMinerNeuron
 
 
 class Miner(BaseMinerNeuron):
@@ -42,7 +42,7 @@ class Miner(BaseMinerNeuron):
         super(Miner, self).__init__(config=config)
 
         miner_name = "dummy_miner"
-        miner_module = importlib.import_module(f"btcopilot.miners.{miner_name}")
+        miner_module = importlib.import_module(f"webgenie.miners.{miner_name}")
 
         self.miner_init = miner_module.miner_init
         self.miner_forward = miner_module.miner_forward
@@ -50,14 +50,14 @@ class Miner(BaseMinerNeuron):
         self.miner_init(self)
 
     async def forward(
-        self, synapse: btcopilot.protocol.BtCopilotSynapse
-    ) -> btcopilot.protocol.BtCopilotSynapse:
+        self, synapse: webgenie.protocol.webgenieSynapse
+    ) -> webgenie.protocol.webgenieSynapse:
         
         bt.logging.debug(f"Miner forward called with synapse: {synapse}")
         return self.miner_forward(self, synapse)
 
     async def blacklist(
-        self, synapse: btcopilot.protocol.BtCopilotSynapse
+        self, synapse: webgenie.protocol.webgenieSynapse
     ) -> typing.Tuple[bool, str]:
         """
         Determines whether an incoming request should be blacklisted and thus ignored. Your implementation should
@@ -68,7 +68,7 @@ class Miner(BaseMinerNeuron):
         requests before they are deserialized to avoid wasting resources on requests that will be ignored.
 
         Args:
-            synapse (template.protocol.BtCopilotSynapse): A synapse object constructed from the headers of the incoming request.
+            synapse (template.protocol.webgenieSynapse): A synapse object constructed from the headers of the incoming request.
 
         Returns:
             Tuple[bool, str]: A tuple containing a boolean indicating whether the synapse's hotkey is blacklisted,
@@ -118,7 +118,7 @@ class Miner(BaseMinerNeuron):
         )
         return False, "Hotkey recognized!"
 
-    async def priority(self, synapse: btcopilot.protocol.BtCopilotSynapse) -> float:
+    async def priority(self, synapse: webgenie.protocol.webgenieSynapse) -> float:
         """
         The priority function determines the order in which requests are handled. More valuable or higher-priority
         requests are processed before others. You should design your own priority mechanism with care.
@@ -126,7 +126,7 @@ class Miner(BaseMinerNeuron):
         This implementation assigns priority to incoming requests based on the calling entity's stake in the metagraph.
 
         Args:
-            synapse (template.protocol.BtCopilotSynapse): The synapse object that contains metadata about the incoming request.
+            synapse (template.protocol.webgenieSynapse): The synapse object that contains metadata about the incoming request.
 
         Returns:
             float: A priority score derived from the stake of the calling entity.

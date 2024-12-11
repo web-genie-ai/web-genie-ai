@@ -12,7 +12,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables.base import RunnableSequence
 
 import bittensor as bt
-import btcopilot
+import webgenie
 import os
 
 def miner_init(self):
@@ -25,7 +25,7 @@ def miner_init(self):
         model_name="gpt-4",
     )
 
-def miner_forward(self, synapse: btcopilot.protocol.BtCopilotSynapse)->Awaitable:
+def miner_forward(self, synapse: webgenie.protocol.webgenieSynapse)->Awaitable:
     
     async def _forward(self, chain: RunnableSequence, chain_formatter: Dict[str, str], timeout_threshold: float, init_time: float, send: Send):
         try:

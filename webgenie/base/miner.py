@@ -23,8 +23,8 @@ import traceback
 
 import bittensor as bt
 
-from btcopilot.base.neuron import BaseNeuron
-from btcopilot.utils.config import add_miner_args
+from webgenie.base.neuron import BaseNeuron
+from webgenie.utils.config import add_miner_args
 
 from typing import Union
 

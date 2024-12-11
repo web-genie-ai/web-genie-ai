@@ -3,9 +3,9 @@ from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
 import bittensor as bt
-from btcopilot.rewards import Reward
-from btcopilot.tasks import Task
-from btcopilot.solution import Solution
+from webgenie.rewards import Reward
+from webgenie.tasks import Task
+from webgenie.solution import Solution
 
 class GPTReward(Reward):
     def __init__(self):

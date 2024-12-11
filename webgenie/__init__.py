@@ -18,7 +18,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 # Change this value when updating your code base.
-# Define the version of the btcopilot.
+# Define the version of the webgenie.
 __version__ = "0.0.1"
 version_split = __version__.split(".")
 __spec_version__ = (

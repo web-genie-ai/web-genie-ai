@@ -23,14 +23,14 @@ from typing import Tuple
 import bittensor as bt
 
 # import base validator class which takes care of most of the boilerplate
-from btcopilot.base.validator import BaseValidatorNeuron
+from webgenie.base.validator import BaseValidatorNeuron
 # Bittensor Validator Template:
-from btcopilot.validator import forward
-from btcopilot.validator import forward_organic_synapse
+from webgenie.validator import forward
+from webgenie.validator import forward_organic_synapse
 
-from btcopilot.task_generator import TaskGenerator
-from btcopilot.rewards import RewardManager
-from btcopilot.protocol import BtCopilotSynapse
+from webgenie.task_generator import TaskGenerator
+from webgenie.rewards import RewardManager
+from webgenie.protocol import webgenieSynapse
 
 class Validator(BaseValidatorNeuron):
     """

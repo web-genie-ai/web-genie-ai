@@ -22,12 +22,12 @@ from starlette.responses import StreamingResponse
 
 import bittensor as bt
 
-from btcopilot.tasks import Task
-from btcopilot.solution import Solution
+from webgenie.tasks import Task
+from webgenie.solution import Solution
 
-class BtCopilotSynapse(bt.StreamingSynapse):
+class webgenieSynapse(bt.StreamingSynapse):
     """
-    A protocol for the BtCopilot.
+    A protocol for the webgenie.
     """
 
     task: Union[Task, None] = pydantic.Field(

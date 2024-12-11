@@ -27,15 +27,15 @@ import bittensor as bt
 from typing import List, Union, Tuple
 from traceback import print_exception
 
-from btcopilot.base.neuron import BaseNeuron
-from btcopilot.base.utils.weight_utils import (
+from webgenie.base.neuron import BaseNeuron
+from webgenie.base.utils.weight_utils import (
     process_weights_for_netuid,
     convert_weights_and_uids_for_emit,
 )  # TODO: Replace when bittensor switches to numpy
-from btcopilot.mock import MockDendrite
-from btcopilot.utils.config import add_validator_args
-from btcopilot.protocol import BtCopilotSynapse
-from btcopilot.validator.organic_forward import forward_organic_synapse
+from webgenie.mock import MockDendrite
+from webgenie.utils.config import add_validator_args
+from webgenie.protocol import webgenieSynapse
+from webgenie.validator.organic_forward import forward_organic_synapse
 
 SUBNET_OWNER_HOTKEY = "5G9sRcoaw2H3SYDq7e7PoGhbbMUPHQi6pC6tPrahmSmDtxS8"
     
@@ -51,14 +51,14 @@ class BaseValidatorNeuron(BaseNeuron):
         super().add_args(parser)
         add_validator_args(cls, parser)
     
-    async def organic_forward(self, synapse: BtCopilotSynapse) -> BtCopilotSynapse:
+    async def organic_forward(self, synapse: webgenieSynapse) -> webgenieSynapse:
         
         bt.logging.error(f"OrganicForward Thread Name: {threading.current_thread().name}")
         bt.logging.info(f"=========> {synapse}")
 
         return await forward_organic_synapse(self, synapse)
 
-    async def blacklist(self, synapse: BtCopilotSynapse) -> Tuple[bool, str]:
+    async def blacklist(self, synapse: webgenieSynapse) -> Tuple[bool, str]:
         """
         Only allow the subnet owner to send synapse to the validator.
         """

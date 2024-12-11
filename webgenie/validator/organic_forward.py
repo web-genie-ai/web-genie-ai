@@ -4,10 +4,10 @@ from typing import Any, AsyncGenerator
 from starlette.types import Send
 
 import bittensor as bt
-from btcopilot.protocol import BtCopilotSynapse
+from webgenie.protocol import webgenieSynapse
 
-async def forward_organic_synapse(self, synapse: BtCopilotSynapse)->BtCopilotSynapse:
-    async def forward_miner(synapse: BtCopilotSynapse, send: Send):
+async def forward_organic_synapse(self, synapse: webgenieSynapse)->webgenieSynapse:
+    async def forward_miner(synapse: webgenieSynapse, send: Send):
         bt.logging.info(f"Send Synapse to miner: {synapse}")  
         async def handle_miner_response(responses):
             for resp in responses:

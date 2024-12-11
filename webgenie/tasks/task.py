@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
 from pydantic import BaseModel
-from btcopilot.solution import Solution
+from webgenie.solution import Solution
 
 class Task(BaseModel):
     query: str

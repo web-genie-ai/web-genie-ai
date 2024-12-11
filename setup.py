@@ -1,7 +1,7 @@
 # The MIT License (MIT)
-# Copyright © 2023 BTCopilot
+# Copyright © 2023 webgenie
 # Sangar
-# Copyright © 2023 <BTCopilot>
+# Copyright © 2023 <webgenie>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the “Software”), to deal in the Software without restriction, including without limitation
@@ -63,12 +63,12 @@ with codecs.open(
     version_string = version_match.group(1)
 
 setup(
-    name="btcopilot", 
+    name="webgenie", 
     version=version_string,
-    description="BTCopilot aims to transform diverse prompts—ranging from text and voice to images and Figma designs—into fully functional, ready-to-deploy projects.",  
+    description="webgenie aims to transform diverse prompts—ranging from text and voice to images and Figma designs—into fully functional, ready-to-deploy projects.",  
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/BTCopilot/btcopilot",  
+    url="https://github.com/webgenie/webgenie",  
     author="Sangar", 
     packages=find_packages(),
     include_package_data=True,

@@ -23,10 +23,10 @@ import bittensor as bt
 from abc import ABC, abstractmethod
 
 # Sync calls set weights and also resyncs the metagraph.
-from btcopilot.utils.config import check_config, add_args, config
-from btcopilot.utils.misc import ttl_get_block
-from btcopilot import __spec_version__ as spec_version
-from btcopilot.mock import MockSubtensor, MockMetagraph
+from webgenie.utils.config import check_config, add_args, config
+from webgenie.utils.misc import ttl_get_block
+from webgenie import __spec_version__ as spec_version
+from webgenie.mock import MockSubtensor, MockMetagraph
 
 
 class BaseNeuron(ABC):

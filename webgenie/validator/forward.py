@@ -22,10 +22,10 @@ import bittensor as bt
 
 from typing import Awaitable, List
 from dataclasses import dataclass
-from btcopilot.protocol import BtCopilotSynapse
-from btcopilot.validator.reward import get_rewards
-from btcopilot.utils.uids import get_random_uids
-from btcopilot.solution import Solution
+from webgenie.protocol import webgenieSynapse
+from webgenie.validator.reward import get_rewards
+from webgenie.utils.uids import get_random_uids
+from webgenie.solution import Solution
 from .organic_forward import forward_organic_synapse
 
 async def process_response(uid: int, async_generator: Awaitable):
@@ -41,7 +41,7 @@ async def process_response(uid: int, async_generator: Awaitable):
         bt.logging.info(f"==============8")
         if chunk is not None:
             synapse = chunk
-            if isinstance(synapse, BtCopilotSynapse):
+            if isinstance(synapse, webgenieSynapse):
                 if synapse.dendrite.status_code == 200:
                     synapse.solution.miner_uid = uid
                     return synapse.solution
@@ -84,7 +84,7 @@ async def forward(self):
     
     task = self.task_generator.next_task()
 
-    synapse = BtCopilotSynapse(
+    synapse = webgenieSynapse(
         task=task
     )
 

@@ -1,5 +1,5 @@
 
-from btcopilot.tasks import Task
+from webgenie.tasks import Task
 class TaskGenerator:
     """
     A singleton generator for tasks.

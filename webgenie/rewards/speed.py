@@ -1,7 +1,7 @@
 
-from btcopilot.rewards import Reward
-from btcopilot.tasks import Task
-from btcopilot.solution import Solution
+from webgenie.rewards import Reward
+from webgenie.tasks import Task
+from webgenie.solution import Solution
 
 class SpeedReward(Reward):
 
