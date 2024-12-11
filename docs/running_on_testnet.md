@@ -18,23 +18,23 @@ Before proceeding further, make sure that you have installed Bittensor. See the 
 
 After installing `bittensor`, proceed as below:
 
-## 1. Install Bittensor subnet template
+## 1. Install web-genie-ai
 
 **NOTE: Skip this step if** you already did this during local testing and development.
 
-`cd` into your project directory and clone the bittensor-subnet-template repo:
+`cd` into your project directory and clone the web-genie-ai repo:
 
 ```bash
-git clone https://github.com/opentensor/bittensor-subnet-template.git 
+git clone https://github.com/web-genie-ai/web-genie-ai.git 
 ```
 
-Next, `cd` into bittensor-subnet-template repo directory:
+Next, `cd` into web-genie-ai repo directory:
 
 ```bash
-cd bittensor-subnet-template # Enter the 
+cd web-genie-ai # Enter the 
 ```
 
-Install the bittensor-subnet-template package:
+Install the web-genie-ai package:
 
 ```bash
 python -m pip install -e . 
@@ -129,13 +129,13 @@ This step registers your subnet validator and subnet miner keys to the subnet, g
 Register your miner key to the subnet:
 
 ```bash
-btcli subnet register --netuid 13 --subtensor.network test --wallet.name miner --wallet.hotkey default
+btcli subnet register --netuid 214 --subtensor.network test --wallet.name miner --wallet.hotkey default
 ```
 
 Follow the below prompts:
 
 ```bash
->> Enter netuid [1] (1): # Enter netuid 1 to specify the subnet you just created.
+>> Enter netuid [1] (1): # Enter netuid 214 to specify web-genie-ai test subnet.
 >> Continue Registration?
   hotkey:     ...
   coldkey:    ...
@@ -146,13 +146,13 @@ Follow the below prompts:
 Next, register your validator key to the subnet:
 
 ```bash
-btcli subnet register --netuid 13 --subtensor.network test --wallet.name validator --wallet.hotkey default
+btcli subnet register --netuid 214 --subtensor.network test --wallet.name validator --wallet.hotkey default
 ```
 
 Follow the prompts:
 
 ```bash
->> Enter netuid [1] (1): # Enter netuid 1 to specify the subnet you just created.
+>> Enter netuid [1] (1): # Enter netuid 214 to specify web-genie-ai test subnet.
 >> Continue Registration?
   hotkey:     ...
   coldkey:    ...
@@ -201,7 +201,7 @@ miner    default  1      True   0.00000  0.00000  0.00000    0.00000    0.00000 
 Run the subnet miner:
 
 ```bash
-python neurons/miner.py --netuid 1 --subtensor.network test --wallet.name miner --wallet.hotkey default --logging.debug
+python neurons/miner.py --netuid 214 --subtensor.network test --wallet.name miner --wallet.hotkey default --logging.debug
 ```
 
 You will see the below terminal output:
@@ -213,7 +213,7 @@ You will see the below terminal output:
 Next, run the subnet validator:
 
 ```bash
-python neurons/validator.py --netuid 1 --subtensor.network test --wallet.name validator --wallet.hotkey default --logging.debug
+python neurons/validator.py --netuid 214 --subtensor.network test --wallet.name validator --wallet.hotkey default --logging.debug
 ```
 
 You will see the below terminal output:
