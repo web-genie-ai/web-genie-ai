@@ -1,33 +1,51 @@
 # The MIT License (MIT)
-# Copyright © 2024 Sangar
+# Copyright © 2024 pycorn
 
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the “Software”), to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
-# and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of
-# the Software.
-
-# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-# THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-
+import bittensor as bt
 import pydantic
 import json
 from typing import AsyncIterator, Union, Any
 from starlette.responses import StreamingResponse
 
-import bittensor as bt
-
-from webgenie.tasks import Task
 from webgenie.solution import Solution
+from webgenie.tasks import Task
 
-class webgenieSynapse(bt.StreamingSynapse):
+class WebgenieTextSynapse(bt.Synapse):
     """
-    A protocol for the webgenie.
+    A protocol for the webgenie text task.
+    """
+    prompt: str = pydantic.Field(
+        "",
+        title="Prompt",
+        description="The prompt to be sent to miners."
+    )
+
+    solution: Union[Solution, None] = pydantic.Field(
+        None,
+        title="Solution",
+        description="A solution received from miners."
+    )
+
+class WebgenieImageSynapse(bt.Synapse):
+    """
+    A protocol for the webgenie image task.
+    """
+    base64_image: str = pydantic.Field(
+        "",
+        title="Base64 Image",
+        description="The base64 image to be sent to miners."
+    )
+
+    solution: Union[Solution, None] = pydantic.Field(
+        None,
+        title="Solution",
+        description="A solution received from miners."
+    )
+
+
+class WebgenieStreamingSynapse(bt.StreamingSynapse):
+    """
+    A protocol for the webgenie streaming task.
     """
 
     task: Union[Task, None] = pydantic.Field(

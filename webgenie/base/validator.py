@@ -34,7 +34,7 @@ from webgenie.base.utils.weight_utils import (
 )  # TODO: Replace when bittensor switches to numpy
 from webgenie.mock import MockDendrite
 from webgenie.utils.config import add_validator_args
-from webgenie.protocol import webgenieSynapse
+from webgenie.protocol import WebgenieStreamingSynapse
 from webgenie.validator.organic_forward import forward_organic_synapse
 
 SUBNET_OWNER_HOTKEY = "5G9sRcoaw2H3SYDq7e7PoGhbbMUPHQi6pC6tPrahmSmDtxS8"
@@ -50,27 +50,12 @@ class BaseValidatorNeuron(BaseNeuron):
     def add_args(cls, parser: argparse.ArgumentParser):
         super().add_args(parser)
         add_validator_args(cls, parser)
-    
-    async def organic_forward(self, synapse: webgenieSynapse) -> webgenieSynapse:
-        
-        bt.logging.error(f"OrganicForward Thread Name: {threading.current_thread().name}")
-        bt.logging.info(f"=========> {synapse}")
 
-        return await forward_organic_synapse(self, synapse)
-
-    async def blacklist(self, synapse: webgenieSynapse) -> Tuple[bool, str]:
-        """
-        Only allow the subnet owner to send synapse to the validator.
-        """
-        if synapse.dendrite.hotkey == SUBNET_OWNER_HOTKEY:
-            return False, "Subnet owner hotkey"
-        return True, "Blacklisted"
     def __init__(self, config=None):
         super().__init__(config=config)
 
         # Save a copy of the hotkeys to local memory.
         self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
-        print("=== self.hotkeys ===>", self.hotkeys)
 
         # Dendrite lets us send messages to other nodes (axons) in the network.
         if self.config.mock:
@@ -79,8 +64,6 @@ class BaseValidatorNeuron(BaseNeuron):
             self.dendrite = bt.dendrite(wallet=self.wallet)
         bt.logging.info(f"Dendrite: {self.dendrite}")
 
-        
-        
         # Set up initial scoring weights for validation
         bt.logging.info("Building validation weights.")
         self.scores = np.zeros(self.metagraph.n, dtype=np.float32)
@@ -88,29 +71,26 @@ class BaseValidatorNeuron(BaseNeuron):
         # Init sync with the network. Updates the metagraph.
         self.sync()
 
-        threading.current_thread().name = "MainThread"
-        bt.logging.info(f"MainThread Name: {threading.current_thread().name}")
         # Create asyncio event loop to manage async tasks.
         self.loop = asyncio.get_event_loop()
+
         # Instantiate runners
         self.should_exit: bool = False
         self.is_running: bool = False
         self.thread: Union[threading.Thread, None] = None
         self.lock = asyncio.Lock()
         
-    
     def serve_axon(self):
         """Serve axon to enable external connections."""
 
         bt.logging.info("serving ip to chain...")
         try:
 
-            self.axon = bt.axon(wallet=self.wallet, config=self.config, port = self.config.neuron.axon_port)
+            self.axon = bt.axon(wallet=self.wallet, config=self.config)
             
             self.axon.attach(
                 forward_fn = self.organic_forward,
-                blacklist_fn = self.blacklist,
-                # priority_fn = self.priority
+                blacklist_fn = self.blacklist
             )
             self.axon.serve(
                 netuid=self.config.netuid,
@@ -122,118 +102,22 @@ class BaseValidatorNeuron(BaseNeuron):
             bt.logging.error(f"Failed to serve Axon with exception: {e}")
             pass
 
-    async def concurrent_forward(self):
-        bt.logging.error(f"concurrent_forward thread name{threading.current_thread().name}")
-        coroutines = [
-            self.forward() for _ in range(self.config.neuron.num_concurrent_forwards)
-        ]
-        return await asyncio.gather(*coroutines)
     def run(self):
+        pass
+
+    async def blacklist(self, synapse: WebgenieStreamingSynapse) -> Tuple[bool, str]:
         """
-        Initiates and manages the main loop for the miner on the Bittensor network. The main loop handles graceful shutdown on keyboard interrupts and logs unforeseen errors.
-
-        This function performs the following primary tasks:
-        1. Check for registration on the Bittensor network.
-        2. Continuously forwards queries to the miners on the network, rewarding their responses and updating the scores accordingly.
-        3. Periodically resynchronizes with the chain; updating the metagraph with the latest network state and setting weights.
-
-        The essence of the validator's operations is in the forward function, which is called every step. The forward function is responsible for querying the network and scoring the responses.
-
-        Note:
-            - The function leverages the global configurations set during the initialization of the miner.
-            - The miner's axon serves as its interface to the Bittensor network, handling incoming and outgoing requests.
-
-        Raises:
-            KeyboardInterrupt: If the miner is stopped by a manual interruption.
-            Exception: For unforeseen errors during the miner's operation, which are logged for diagnosis.
+        Only allow the subnet owner to send synapse to the validator.
         """
-        # Check that validator is registered on the network.
-        self.sync()
+        if synapse.dendrite.hotkey == SUBNET_OWNER_HOTKEY:
+            return False, "Subnet owner hotkey"
+        return True, "Blacklisted"
+    async def organic_forward(self, synapse: WebgenieStreamingSynapse) -> WebgenieStreamingSynapse:
+        
+        bt.logging.error(f"OrganicForward Thread Name: {threading.current_thread().name}")
+        bt.logging.info(f"=========> {synapse}")
 
-        bt.logging.info(f"Validator starting at block: {self.block}")
-        # This loop maintains the validator's operations until intentionally stopped.
-        try:
-            
-            if not self.config.neuron.axon_off:
-                self.serve_axon()
-            
-            while True:
-
-                # bt.logging.info(f"step({self.step}) block({self.block})")
-
-                # Run multiple forwards concurrently.
-                
-                self.loop.run_until_complete(self.concurrent_forward())
-
-
-                # Check if we should exit.
-                if self.should_exit:
-                    break
-
-                # Sync metagraph and potentially set weights.
-                self.sync()
-
-                self.step += 1
-
-        # If someone intentionally stops the validator, it'll safely terminate operations.
-        except KeyboardInterrupt:
-            if not self.config.neuron.axon_off:
-                self.axon.stop()
-            bt.logging.success("Validator killed by keyboard interrupt.")
-            exit()
-
-        # In case of unforeseen errors, the validator will log the error and continue operations.
-        except Exception as err:
-            bt.logging.error(f"Error during validation: {str(err)}")
-            bt.logging.debug(str(print_exception(type(err), err, err.__traceback__)))
-
-    def run_in_background_thread(self):
-        """
-        Starts the validator's operations in a background thread upon entering the context.
-        This method facilitates the use of the validator in a 'with' statement.
-        """
-        if not self.is_running:
-            bt.logging.debug("Starting validator in background thread.")
-            self.should_exit = False
-            self.thread = threading.Thread(target=self.run, daemon=True, name = "BackgroundThread")
-            self.thread.start()
-            self.is_running = True
-            bt.logging.debug("Started")
-
-    def stop_run_thread(self):
-        """
-        Stops the validator's operations that are running in the background thread.
-        """
-        if self.is_running:
-            bt.logging.debug("Stopping validator in background thread.")
-            self.should_exit = True
-            self.thread.join(5)
-            self.is_running = False
-            bt.logging.debug("Stopped")
-
-    def __enter__(self):
-        self.run_in_background_thread()
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        """
-        Stops the validator's background operations upon exiting the context.
-        This method facilitates the use of the validator in a 'with' statement.
-
-        Args:
-            exc_type: The type of the exception that caused the context to be exited.
-                      None if the context was exited without an exception.
-            exc_value: The instance of the exception that caused the context to be exited.
-                       None if the context was exited without an exception.
-            traceback: A traceback object encoding the stack trace.
-                       None if the context was exited without an exception.
-        """
-        if self.is_running:
-            bt.logging.debug("Stopping validator in background thread.")
-            self.should_exit = True
-            self.thread.join(5)
-            self.is_running = False
-            bt.logging.debug("Stopped")
+        return await forward_organic_synapse(self, synapse)    
 
     def set_weights(self):
         """

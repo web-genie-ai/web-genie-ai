@@ -1,5 +1,9 @@
+import bittensor as bt
+from typing import List, Tuple
 
 from webgenie.tasks import Task
+from webgenie.solution import Solution
+
 class TaskGenerator:
     """
     A singleton generator for tasks.
@@ -7,6 +11,9 @@ class TaskGenerator:
     def __init__(self):
         pass       
 
-    def next_task(self) -> Task:
-        return Task(query="CommingSoon Page with goback button, navHeader, and footer" , timeout=50)
+    async def generate_task(self) -> Tuple[Task, bt.Synapse]:
+        pass
+
+    async def reward(self, task: Task, responses: List[Solution]) -> List[float]:
+        pass
 

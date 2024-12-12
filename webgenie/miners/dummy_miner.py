@@ -25,7 +25,7 @@ def miner_init(self):
         model_name="gpt-4",
     )
 
-def miner_forward(self, synapse: webgenie.protocol.webgenieSynapse)->Awaitable:
+def miner_forward(self, synapse: webgenie.protocol.WebgenieStreamingSynapse)->Awaitable:
     
     async def _forward(self, chain: RunnableSequence, chain_formatter: Dict[str, str], timeout_threshold: float, init_time: float, send: Send):
         try:

@@ -1,22 +1,12 @@
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import List
-from pydantic import BaseModel
-from webgenie.solution import Solution
+from typing import Any
+from pydantic import BaseModel, Field
 
 class Task(BaseModel):
-    query: str
-    
-    timeout: float = 50
+    timeout: float = Field(default=50)
+    generator: Any = Field(default=None)
 
-    reward_models: List[tuple] = [
-        ("gpt", 0.5),
-        ("speed", 0.5),
-    ]
+class ImageTask(Task):
+    base64_image: str = Field(default="")
 
-    penalty_models: List[tuple] = [
-        ("is_valid", 2),
-    ]
-
-    reward_weight: float = 0.8
-    penalty_weight: float = 0.2
+class TextTask(Task):
+    prompt: str = Field(default="")
