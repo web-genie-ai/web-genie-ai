@@ -41,44 +41,41 @@ class GenieValidator:
                 timeout=task.timeout
             )
 
-            processed_synapses, processed_miner_uids = await self.process_synapses(all_synapse_results, miner_uids)
+            solutions = []
 
-            if len(processed_synapses) == 0:
-                bt.logging.error(f"No valid synapses received")
+            for synapse, miner_uid in zip(all_synapse_results, miner_uids):
+                processed_synapse = await self.process_synapse(synapse, miner_uid)
+                if processed_synapse is not None:
+                    solutions.append(processed_synapse.solution)
+
+            if len(solutions) == 0:
+                bt.logging.error(f"No valid solutions received")
                 return
-            bt.logging.debug(f"Processed synapses: {processed_synapses}")
+            
+            bt.logging.debug(f"Processed solutions: {solutions}")
 
-            self.synthetic_history.append((task, processed_synapses, processed_miner_uids))
+            self.synthetic_history.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in forward: {e}")
             raise e
-
-    async def process_synapses(self, synapses: List[WebgenieStreamingSynapse], miner_uids: List[int]):
-        processed_synapses = []
-        processed_miner_uids = []
-        
-        for synapse, miner_uid in zip(synapses, miner_uids):
-            if synapse.dendrite.status_code == 200:
-                processed_synapses.append(synapse)
-                processed_miner_uids.append(miner_uid)
-
-        return processed_synapses, processed_miner_uids
 
     async def score(self):
         if len(self.synthetic_history) == 0:
             bt.logging.warning(f"No synthetic history to score")
             return 
         
-        task, synapses, miner_uids = self.synthetic_history.pop(0)
+        task, solutions = self.synthetic_history.pop(0)
 
         task_generator = task.generator
-        scores = await task_generator.reward(task, synapses)
-        self.neuron.update_scores(scores, miner_uids)
+        scores = await task_generator.reward(task, solutions)
+        self.neuron.update_scores(scores, [solution.miner_uid for solution in solutions])
         self.neuron.sync()
 
     async def organic_forward(self, synapse: WebgenieTextSynapse):
-        axon = self.metagraph.axons[1]
+        best_miner_uid = 1
         try:
+            axon = self.metagraph.axons[best_miner_uid]
+
             async with bt.dendrite(wallet=self.wallet) as dendrite:
                 bt.logging.info(f"Dendrite: {dendrite}")
                 responses = await dendrite(
@@ -86,10 +83,23 @@ class GenieValidator:
                     synapse=synapse,
                     timeout=synapse.timeout,
                 )
-                return responses[0]
+                
+            processed_synapse = await self.process_synapse(responses[0], best_miner_uid)
+            if processed_synapse is None:
+                raise Exception(f"No valid solution received")
+            
+            return processed_synapse
         except Exception as e:
             bt.logging.error(f"[forward_organic_synapse] Error querying dendrite: {e}")
             synapse.solution = Solution(
-                html = "",
+                html = f"Error: {e}",
+                process_time = 0,
+                miner_uid = best_miner_uid,
             )
             return synapse
+    
+    async def process_synapse(self, synapse: bt.Synapse, miner_uid: int) -> bt.Synapse:
+        if synapse.dendrite.status_code == 200:
+            synapse.solution.miner_uid = miner_uid
+            return synapse
+        return None

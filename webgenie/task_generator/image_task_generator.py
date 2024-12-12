@@ -17,5 +17,5 @@ class ImageTaskGenerator(TaskGenerator):
             generator=self
         ), WebgenieImageSynapse(base64_image="base64_image")
 
-    async def reward(self, task: Task, responses: List[Solution]) -> List[float]:
+    async def reward(self, task: Task, solutions: List[Solution]) -> List[float]:
         pass
