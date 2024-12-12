@@ -166,3 +166,9 @@ testing/
 
 .DS_Store
 temp.txt
+
+# env
+.env
+
+# test
+test.py

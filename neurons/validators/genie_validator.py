@@ -31,12 +31,12 @@ class GenieValidator:
             if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
                 return
 
-            miner_uids = get_random_uids(self, k=self.config.neuron.sample_size)
+            miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)
         
             task, synapse = await random.choice(self.task_generators).generate_task()
 
             all_synapse_results = await self.neuron.dendrite(
-                axons = [self.metagraph.axons[uid] for uid in miner_uids],
+                axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                 synapse=synapse,
                 timeout=task.timeout
             )
@@ -49,7 +49,7 @@ class GenieValidator:
                     solutions.append(processed_synapse.solution)
 
             if len(solutions) == 0:
-                bt.logging.error(f"No valid solutions received")
+                bt.logging.warning(f"No valid solutions received")
                 return
             
             bt.logging.debug(f"Processed solutions: {solutions}")

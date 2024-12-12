@@ -35,7 +35,6 @@ from webgenie.base.utils.weight_utils import (
 from webgenie.mock import MockDendrite
 from webgenie.utils.config import add_validator_args
 from webgenie.protocol import WebgenieStreamingSynapse
-from webgenie.validator.organic_forward import forward_organic_synapse
 
 SUBNET_OWNER_HOTKEY = "5G9sRcoaw2H3SYDq7e7PoGhbbMUPHQi6pC6tPrahmSmDtxS8"
     

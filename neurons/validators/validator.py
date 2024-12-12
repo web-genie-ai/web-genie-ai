@@ -25,13 +25,13 @@ class Validator(BaseValidatorNeuron):
         super(Validator, self).__init__(config=config)
         bt.logging.info("load_state()")
         self.load_state()
-        self.genie_validator = GenieValidator()
+        self.genie_validator = GenieValidator(neuron=self)
 
     async def organic_forward(self, synapse: WebgenieStreamingSynapse):
         return await self.genie_validator.organic_forward(synapse)
 
     async def forward(self):
-        return await self.genie_validator.forward(self)
+        return await self.genie_validator.forward()
 
     async def concurrent_forward(self):
         coroutines = [
