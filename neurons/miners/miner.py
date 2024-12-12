@@ -18,16 +18,11 @@
 
 import time
 import typing
-import importlib
 
 import bittensor as bt
-
-# Bittensor Miner Template:
-import webgenie
-
-# import base miner class which takes care of most of the boilerplate
 from webgenie.base.miner import BaseMinerNeuron
-
+from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
+from webgenie.solution import Solution
 
 class Miner(BaseMinerNeuron):
     """
@@ -41,23 +36,51 @@ class Miner(BaseMinerNeuron):
     def __init__(self, config=None):
         super(Miner, self).__init__(config=config)
 
-        miner_name = "dummy_miner"
-        miner_module = importlib.import_module(f"webgenie.miners.{miner_name}")
+        # Attach determiners which functions are called when servicing a request.
+        bt.logging.info(f"Attaching forward function to miner axon.")
+        self.axon.attach(
+            forward_fn=self.forward_text,
+            blacklist_fn=self.blacklist_text,
+            priority_fn=self.priority_text,
+        ).attach(
+            forward_fn = self.forward_image,
+            blacklist_fn=self.blacklist_image,
+            priority_fn=self.priority_image,
+        )
 
-        self.miner_init = miner_module.miner_init
-        self.miner_forward = miner_module.miner_forward
-
-        self.miner_init(self)
-
-    async def forward(
-        self, synapse: webgenie.protocol.WebgenieStreamingSynapse
-    ) -> webgenie.protocol.WebgenieStreamingSynapse:
+    async def forward_text(
+        self, synapse: WebgenieTextSynapse
+    ) -> WebgenieTextSynapse:
         
-        bt.logging.debug(f"Miner forward called with synapse: {synapse}")
-        return self.miner_forward(self, synapse)
+        bt.logging.debug(f"Miner text forward called with synapse: {synapse}")
+        synapse.solution = Solution(
+            html = "<h1>Hello, world!</h1>"
+        )
+        return synapse
+
+    async def forward_image(
+        self, synapse: WebgenieImageSynapse
+    ) -> WebgenieImageSynapse:
+        bt.logging.debug(f"Miner image forward called with synapse: {synapse}")
+        synapse.solution = Solution(
+            html = "<h1>Hello, Image!</h1>"
+        )
+        return synapse
+
+    async  def blacklist_text(self, synapse: WebgenieTextSynapse) -> typing.Tuple[bool, str]:
+        return await self.blacklist(synapse)
+    
+    async def blacklist_image(self, synapse: WebgenieImageSynapse) -> typing.Tuple[bool, str]:
+        return await self.blacklist(synapse)
+    
+    async def priority_text(self, synapse: WebgenieTextSynapse) -> float:
+        return await self.priority(synapse)
+    
+    async def priority_image(self, synapse: WebgenieImageSynapse) -> float:
+        return await self.priority(synapse)
 
     async def blacklist(
-        self, synapse: webgenie.protocol.WebgenieStreamingSynapse
+        self, synapse: bt.Synapse
     ) -> typing.Tuple[bool, str]:
         """
         Determines whether an incoming request should be blacklisted and thus ignored. Your implementation should
@@ -118,7 +141,7 @@ class Miner(BaseMinerNeuron):
         )
         return False, "Hotkey recognized!"
 
-    async def priority(self, synapse: webgenie.protocol.WebgenieStreamingSynapse) -> float:
+    async def priority(self, synapse: bt.Synapse) -> float:
         """
         The priority function determines the order in which requests are handled. More valuable or higher-priority
         requests are processed before others. You should design your own priority mechanism with care.

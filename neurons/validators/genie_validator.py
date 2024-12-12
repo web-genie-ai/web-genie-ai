@@ -100,6 +100,8 @@ class GenieValidator:
     
     async def process_synapse(self, synapse: bt.Synapse, miner_uid: int) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
+            if synapse.solution is None:
+                return None
             synapse.solution.miner_uid = miner_uid
             return synapse
         return None
