@@ -15,8 +15,12 @@
 # THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+from dotenv import load_dotenv
+
+load_dotenv()
 
 import time
+
 import typing
 
 import bittensor as bt
@@ -24,6 +28,7 @@ from webgenie.base.miner import BaseMinerNeuron
 from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.solution import Solution
+from neurons.miners.openai_miner import OpenaiMiner
 
 class Miner(BaseMinerNeuron):
     """
@@ -49,26 +54,24 @@ class Miner(BaseMinerNeuron):
             priority_fn=self.priority_image,
         )
 
+        self.genie_miner = OpenaiMiner(self)
+
         init_wandb(self)
+        
 
     async def forward_text(
         self, synapse: WebgenieTextSynapse
     ) -> WebgenieTextSynapse:
-        
         bt.logging.debug(f"Miner text forward called with synapse: {synapse}")
-        synapse.solution = Solution(
-            html = "<h1>Hello, world!</h1>"
-        )
-        return synapse
+        
+        return await self.genie_miner.forward_text(synapse)
 
     async def forward_image(
         self, synapse: WebgenieImageSynapse
     ) -> WebgenieImageSynapse:
         bt.logging.debug(f"Miner image forward called with synapse: {synapse}")
-        synapse.solution = Solution(
-            html = "<h1>Hello, Image!</h1>"
-        )
-        return synapse
+        
+        return await self.genie_miner.forward_image(synapse)
 
     async  def blacklist_text(self, synapse: WebgenieTextSynapse) -> typing.Tuple[bool, str]:
         return await self.blacklist(synapse)

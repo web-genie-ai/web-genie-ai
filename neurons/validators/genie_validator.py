@@ -103,5 +103,6 @@ class GenieValidator:
             if synapse.solution is None:
                 return None
             synapse.solution.miner_uid = miner_uid
+            synapse.solution.process_time = synapse.dendrite.process_time
             return synapse
         return None
