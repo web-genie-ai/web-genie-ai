@@ -175,3 +175,6 @@ test.py
 
 # Wandb
 wandb/
+
+# test images
+original.jpg

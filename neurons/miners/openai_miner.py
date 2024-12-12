@@ -2,10 +2,9 @@ import bittensor as bt
 import os
 
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate    
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
+from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate
+from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
-from langchain_core.runnables.base import RunnableSequence
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
@@ -52,8 +51,37 @@ class OpenaiMiner:
 
     async def forward_image(self, synapse: WebgenieImageSynapse) -> WebgenieImageSynapse:
         try:
-            synapse.solution = Solution(html = "Not implemented Yet")
+            
+            prompt_messages = [
+                SystemMessagePromptTemplate.from_template("""
+                You are an expert web developer who specializes in HTML and CSS.
+                A user will provide you with a screenshot of a webpage, along with all texts that they want to put on the webpage.  
+                You need to return a single html file that uses HTML and CSS to reproduce the given website.   
+                Include all CSS code in the HTML file itself.
+                If it involves any images, use "rick.jpg" as the placeholder.
+                Some images on the webpage are replaced with a blue rectangle as the placeholder, use "rick.jpg" for those as well.       
+                Do not hallucinate any dependencies to external files. You do not need to include JavaScript scripts for dynamic interactions.
+                Pay attention to things like size, text, position, and color of all the elements, as well as the overall layout.
+                Respond with the content of the HTML+CSS file:
+                {instructions}"""),
+                HumanMessagePromptTemplate.from_template(
+                    template=[
+                        {"type": "image_url", "image_url": {"url": "{image_url}"}},
+                    ]
+                )
+            ]
+
+            prompt = ChatPromptTemplate(messages=prompt_messages)
+
+            chain = prompt | self.model | self.html_response_parser
+
+            html_response = chain.invoke({
+                "instructions": self.html_response_parser.get_format_instructions(),
+                "image_url": f"data:image/jpeg;base64,{synapse.base64_image}",
+            })
+
+            synapse.solution = Solution(html = html_response["html"])
             return synapse
-        except:
+        except Exception as e:
             bt.logging.error(f"Error in OpenaiMiner forward_image: {e}")
             return synapse
