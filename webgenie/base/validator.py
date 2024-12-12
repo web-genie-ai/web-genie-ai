@@ -36,7 +36,6 @@ from webgenie.mock import MockDendrite
 from webgenie.utils.config import add_validator_args
 from webgenie.protocol import WebgenieStreamingSynapse
 
-SUBNET_OWNER_HOTKEY = "5G9sRcoaw2H3SYDq7e7PoGhbbMUPHQi6pC6tPrahmSmDtxS8"
     
 class BaseValidatorNeuron(BaseNeuron):
     """
@@ -78,45 +77,10 @@ class BaseValidatorNeuron(BaseNeuron):
         self.is_running: bool = False
         self.thread: Union[threading.Thread, None] = None
         self.lock = asyncio.Lock()
-        
-    def serve_axon(self):
-        """Serve axon to enable external connections."""
-
-        bt.logging.info("serving ip to chain...")
-        try:
-
-            self.axon = bt.axon(wallet=self.wallet, config=self.config)
-            
-            self.axon.attach(
-                forward_fn = self.organic_forward,
-                blacklist_fn = self.blacklist
-            )
-            self.axon.serve(
-                netuid=self.config.netuid,
-                subtensor=self.subtensor,
-            )
-            self.axon.start()
-            bt.logging.info(f"Validator running in organic mode on port {self.config.neuron.axon_port}")
-        except Exception as e:
-            bt.logging.error(f"Failed to serve Axon with exception: {e}")
-            pass
+    
 
     def run(self):
         pass
-
-    async def blacklist(self, synapse: WebgenieStreamingSynapse) -> Tuple[bool, str]:
-        """
-        Only allow the subnet owner to send synapse to the validator.
-        """
-        if synapse.dendrite.hotkey == SUBNET_OWNER_HOTKEY:
-            return False, "Subnet owner hotkey"
-        return True, "Blacklisted"
-    async def organic_forward(self, synapse: WebgenieStreamingSynapse) -> WebgenieStreamingSynapse:
-        
-        bt.logging.error(f"OrganicForward Thread Name: {threading.current_thread().name}")
-        bt.logging.info(f"=========> {synapse}")
-
-        return await forward_organic_synapse(self, synapse)    
 
     def set_weights(self):
         """

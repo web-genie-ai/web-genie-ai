@@ -1,17 +1,18 @@
 # The MIT License (MIT)
 # Copyright © 2023 Yuma Rao
 # Copyright © 2024 pycorn
+import bittensor as bt
 import asyncio
 from dotenv import load_dotenv
 load_dotenv()
-import time
-
-import bittensor as bt
+from typing import Tuple, Union
 
 from webgenie.base.validator import BaseValidatorNeuron
 from webgenie.helpers.weights import init_wandb
-from webgenie.protocol import WebgenieStreamingSynapse
+from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from neurons.validators.genie_validator import GenieValidator
+
+API_HOTKEY = "5D72esHuc1DxD6PD8S6VyU24bTHGQjHHyodzTGsem1sejUYj"
 
 class Validator(BaseValidatorNeuron):
     """
@@ -26,12 +27,57 @@ class Validator(BaseValidatorNeuron):
         super(Validator, self).__init__(config=config)
         bt.logging.info("load_state()")
         self.load_state()
+        init_wandb(self)
+        
+        if not self.config.axon_off:
+            self.serve_axon()
+        
         self.genie_validator = GenieValidator(neuron=self)
 
-        init_wandb(self)
-
-    async def organic_forward(self, synapse: WebgenieStreamingSynapse):
+    async def blacklist_text(self, synapse: WebgenieTextSynapse) -> Tuple[bool, str]:
+        """
+        Only allow the subnet owner to send synapse to the validator.
+        """
+        if synapse.dendrite.hotkey == API_HOTKEY:
+            return False, "Subnet owner hotkey"
+        return True, "Blacklisted"  
+    async def blacklist_image(self, synapse: WebgenieImageSynapse) -> Tuple[bool, str]:
+        """
+        Only allow the subnet owner to send synapse to the validator.
+        """
+        if synapse.dendrite.hotkey == API_HOTKEY:
+            return False, "Subnet owner hotkey"
+        return True, "Blacklisted"  
+    
+    async def organic_forward_text(self, synapse: WebgenieTextSynapse):
         return await self.genie_validator.organic_forward(synapse)
+
+    async def organic_forward_image(self, synapse: WebgenieImageSynapse):
+        return await self.genie_validator.organic_forward(synapse)
+
+    def serve_axon(self):
+        """Serve axon to enable external connections."""
+        bt.logging.info("serving ip to chain...")
+        try:
+            self.axon = bt.axon(wallet=self.wallet, config=self.config)
+            
+            self.axon.attach(
+                forward_fn = self.organic_forward_text,
+                blacklist_fn = self.blacklist_text
+            ).attach(
+                forward_fn = self.organic_forward_image,
+                blacklist_fn = self.blacklist_image
+            )
+
+            self.axon.serve(
+                netuid=self.config.netuid,
+                subtensor=self.subtensor,
+            )
+            self.axon.start()
+            bt.logging.info(f"Validator running in organic mode on port {self.config.neuron.axon_port}")
+        except Exception as e:
+            bt.logging.error(f"Failed to serve Axon with exception: {e}")
+            pass
 
     async def forward(self):
         return await self.genie_validator.forward()
@@ -69,8 +115,8 @@ class Validator(BaseValidatorNeuron):
             await asyncio.sleep(5)
 
     async def __aenter__(self):
-        self.loop.create_task(self.forward_loop())
-        self.loop.create_task(self.scoring_loop())
+        #self.loop.create_task(self.forward_loop())
+        #self.loop.create_task(self.scoring_loop())
         self.is_running = True
         bt.logging.debug("Starting validator in background thread")
         return self

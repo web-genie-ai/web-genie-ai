@@ -1,16 +1,14 @@
 import bittensor as bt
 import random
-import torch
-from typing import List
+from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
-from webgenie.protocol import WebgenieStreamingSynapse, WebgenieTextSynapse
+from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.rewards import RewardManager
 from webgenie.solution import Solution
 from webgenie.task_generator.image_task_generator import ImageTaskGenerator
 from webgenie.task_generator.text_task_generator import TextTaskGenerator
 from webgenie.utils.uids import get_random_uids
-
 
 MAX_SYNTHETIC_HISTORY_SIZE = 10
 
@@ -71,12 +69,13 @@ class GenieValidator:
         self.neuron.update_scores(scores, [solution.miner_uid for solution in solutions])
         self.neuron.sync()
 
-    async def organic_forward(self, synapse: WebgenieTextSynapse):
+    async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
+        bt.logging.debug(f"Organic forward: {synapse}")
         best_miner_uid = 1
         try:
-            axon = self.metagraph.axons[best_miner_uid]
+            axon = self.neuron.metagraph.axons[best_miner_uid]
 
-            async with bt.dendrite(wallet=self.wallet) as dendrite:
+            async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 bt.logging.info(f"Dendrite: {dendrite}")
                 responses = await dendrite(
                     axons=[axon],
