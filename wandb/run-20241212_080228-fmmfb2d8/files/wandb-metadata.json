@@ -1,0 +1,45 @@
+{
+  "os": "Linux-5.4.0-105-generic-x86_64-with-glibc2.31",
+  "python": "CPython 3.12.7",
+  "startedAt": "2024-12-12T14:02:28.547811Z",
+  "args": [
+    "--netuid",
+    "214",
+    "--subtensor.network",
+    "test",
+    "--wallet.name",
+    "sc-val1",
+    "--wallet.hotkey",
+    "sh-val1",
+    "--logging.debug",
+    "--neuron.axon_port",
+    "8091"
+  ],
+  "program": "/home/dev2user/workspace/sangar/web-genie-ai/neurons/validators/validator.py",
+  "codePath": "neurons/validators/validator.py",
+  "git": {
+    "remote": "https://github.com/web-genie-ai/web-genie-ai.git",
+    "commit": "5cf0c922e756248e98d8a3885581aed3944ca900"
+  },
+  "email": "hayesdominique0729@gmail.com",
+  "root": "/home/dev2user/workspace/sangar/web-genie-ai",
+  "host": "vmi1162577.contaboserver.net",
+  "username": "root",
+  "executable": "/home/dev2user/workspace/sangar/web-genie-ai/venv/bin/python3.12",
+  "codePathLocal": "neurons/validators/validator.py",
+  "cpu_count": 6,
+  "cpu_count_logical": 6,
+  "disk": {
+    "/": {
+      "total": "630869753856",
+      "used": "33456181248"
+    }
+  },
+  "memory": {
+    "total": "16786370560"
+  },
+  "cpu": {
+    "count": 6,
+    "countLogical": 6
+  }
+}

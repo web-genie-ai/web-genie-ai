@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # Copyright © 2023 Yuma Rao
-# Copyright © 2023 Sangar, pycorn0729
+# Copyright © 2024 pycorn0729
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the “Software”), to deal in the Software without restriction, including without limitation
@@ -21,6 +21,7 @@ import typing
 
 import bittensor as bt
 from webgenie.base.miner import BaseMinerNeuron
+from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.solution import Solution
 
@@ -47,6 +48,8 @@ class Miner(BaseMinerNeuron):
             blacklist_fn=self.blacklist_image,
             priority_fn=self.priority_image,
         )
+
+        init_wandb(self)
 
     async def forward_text(
         self, synapse: WebgenieTextSynapse

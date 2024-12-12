@@ -9,6 +9,7 @@ import time
 import bittensor as bt
 
 from webgenie.base.validator import BaseValidatorNeuron
+from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import WebgenieStreamingSynapse
 from neurons.validators.genie_validator import GenieValidator
 
@@ -26,6 +27,8 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info("load_state()")
         self.load_state()
         self.genie_validator = GenieValidator(neuron=self)
+
+        init_wandb(self)
 
     async def organic_forward(self, synapse: WebgenieStreamingSynapse):
         return await self.genie_validator.organic_forward(synapse)

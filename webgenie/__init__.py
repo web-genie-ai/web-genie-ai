@@ -19,13 +19,15 @@
 
 # Change this value when updating your code base.
 # Define the version of the webgenie.
-__version__ = "0.0.1"
+__version__ = "1.0.0"
 version_split = __version__.split(".")
 __spec_version__ = (
     (1000 * int(version_split[0]))
     + (10 * int(version_split[1]))
     + (1 * int(version_split[2]))
 )
+
+PROJECT_NAME = f"webgenie-{__version__}"
 
 # Import all submodules.
 from . import protocol
