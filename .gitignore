@@ -172,3 +172,6 @@ temp.txt
 
 # test
 test.py
+
+# wandb
+wandb/
