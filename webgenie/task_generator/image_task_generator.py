@@ -18,5 +18,8 @@ class ImageTaskGenerator(TaskGenerator):
         ), WebgenieImageSynapse(base64_image="base64_image")
 
     async def reward(self, task: Task, solutions: List[Solution]) -> List[float]:
+        if not isinstance(task, ImageTask):
+            raise ValueError(f"Task is not a ImageTask: {type(task)}")
+        bt.logging.debug(task.base64_image)
         bt.logging.debug(f"Rewarding image task {task} with solutions {solutions}")
         return [1.0] * len(solutions)
