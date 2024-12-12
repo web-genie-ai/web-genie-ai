@@ -16,7 +16,7 @@ def init_wandb(self):
         wandb_on = True
         wandb.login(key=os.getenv("WANDB_API_KEY"))
 
-        run_name = f"{self.config.neuron.name}-{self.uid}--{webgenie.__version__}"
+        run_name = f"{self.config.neuron.name}-{self.uid}"
         run = wandb.init(
             project=webgenie.PROJECT_NAME, 
             entity=os.getenv("WANDB_ENTITY_NAME"), 
