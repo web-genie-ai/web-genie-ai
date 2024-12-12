@@ -18,4 +18,5 @@ class TextTaskGenerator(TaskGenerator):
         ), WebgenieTextSynapse(prompt="CommingSoon Page with goback button, navHeader, and footer")
 
     async def reward(self, task: Task, solutions: List[Solution]) -> List[float]:
-        pass
+        bt.logging.debug(f"Rewarding text task {task} with solutions {solutions}")
+        return [1.0] * len(solutions)
