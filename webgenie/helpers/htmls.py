@@ -17,8 +17,14 @@ def html_to_screenshot(html: str) -> str:
         f.write(html)
     png_path = f"{WORK_DIR}/screenshot_{uuid.uuid4()}.png"
     os.system(f"{PYTHON_CMD} {SCREENSHOT_SCRIPT_PATH} --html {html_path} --png {png_path}")
+    
     time.sleep(0.1)
-    return image_to_base64(png_path)
+    base64_image = image_to_base64(png_path)
+
+    time.sleep(0.1)
+    os.remove(html_path)
+    os.remove(png_path)
+    return base64_image
 
 def beautify_html(html: str) -> str:
     soup = BeautifulSoup(html, 'html.parser')
