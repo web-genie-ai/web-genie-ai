@@ -1,7 +1,6 @@
 # The MIT License (MIT)
-# Copyright © 2023 webgenie
-# Sangar
-# Copyright © 2023 <webgenie>
+# Copyright © 2023 Yuma Rao
+# Copyright © 2023 Sangar, pycorn0729
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the “Software”), to deal in the Software without restriction, including without limitation
@@ -69,10 +68,10 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/webgenie/webgenie",  
-    author="Sangar", 
+    author="Sangar, pycorn0729", 
     packages=find_packages(),
     include_package_data=True,
-    author_email="sangar.work1028@gmail.com",
+    author_email="sangar.work1028@gmail.com, hayesdominique0729@gmail.com",
     license="MIT",
     python_requires=">=3.8",
     install_requires=requirements,
