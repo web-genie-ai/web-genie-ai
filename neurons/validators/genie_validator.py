@@ -22,6 +22,16 @@ class GenieValidator:
             ImageTaskGenerator(),
         ]
 
+        self.make_work_dir()
+
+    def make_work_dir(self):
+        import os
+        from webgenie.constants import WORK_DIR
+        
+        if not os.path.exists(WORK_DIR):
+            os.makedirs(WORK_DIR)
+            bt.logging.info(f"Created work directory at {WORK_DIR}")
+
     async def forward(self):
         try:
             if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
