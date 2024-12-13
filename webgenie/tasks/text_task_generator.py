@@ -6,6 +6,7 @@ from typing import List, Tuple
 from webgenie.datasets.dataset import MockUpPromptDataset
 from webgenie.protocol import WebgenieTextSynapse
 from webgenie.rewards.bert_reward import BertReward
+from webgenie.rewards.rtc_reward import RtcReward
 from webgenie.tasks.task import Task, TextTask
 from webgenie.tasks.task_generator import TaskGenerator
 
@@ -13,7 +14,8 @@ class TextTaskGenerator(TaskGenerator):
     def __init__(self):
         super().__init__()
         self.rewards = [
-            (BertReward(), 1.0)
+            (BertReward(), 0.5),
+            (RtcReward(), 0.5)
         ]
         self.datasets = [
             MockUpPromptDataset()
