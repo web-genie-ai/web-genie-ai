@@ -1,10 +1,12 @@
 # The MIT License (MIT)
 # Copyright © 2023 Yuma Rao
-# Copyright © 2024 pycorn
+# Copyright © 2024 pycorn, Sangar
 import bittensor as bt
 import asyncio
-from dotenv import load_dotenv
-load_dotenv()
+
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv(filename=".env.validator"))
+    
 from typing import Tuple, Union
 
 from webgenie.base.validator import BaseValidatorNeuron

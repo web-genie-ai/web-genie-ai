@@ -168,7 +168,8 @@ testing/
 temp.txt
 
 # env
-.env
+.env.miner
+.env.validator
 
 # test
 test.py
