@@ -1,5 +1,6 @@
 import os
 from bs4 import BeautifulSoup
+from lxml import etree
 import time
 import re
 import uuid
@@ -10,6 +11,14 @@ from webgenie.constants import (
     PYTHON_CMD
 )
 from webgenie.helpers.images import image_to_base64
+
+def is_valid_html(html_code: str):
+    try:
+        parser = etree.XMLParser(recover=False)
+        etree.fromstring(html_code, parser)
+        return True
+    except etree.XMLSyntaxError as e:
+        return False
 
 def seperate_html_css(html_content: str): 
     soup = BeautifulSoup(html_content, 'lxml')
@@ -73,6 +82,19 @@ def replace_image_sources(html_content, new_url = PLACE_HOLDER_IMAGE_URL):
     return str(soup)
 
 def preprocess_html(html: str) -> str:
+    if not is_valid_html(html):
+        return ""
     html = beautify_html(html)
     html = replace_image_sources(html)
     return html
+
+if __name__ == "__main__":
+    html = """
+    <html>
+        <body>
+            <h1>Hello, World!</h1>
+        </body>
+    </html>
+    """
+
+    print(preprocess_html(html))

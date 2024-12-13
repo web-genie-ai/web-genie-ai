@@ -103,5 +103,7 @@ class GenieValidator:
     async def process_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
             synapse.html = preprocess_html(synapse.html)
+            if synapse.html == "":
+                return None
             return synapse
         return None
