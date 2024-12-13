@@ -28,7 +28,7 @@ def html_to_screenshot(html: str) -> str:
 
 def beautify_html(html: str) -> str:
     soup = BeautifulSoup(html, 'html.parser')
-    return str(soup)
+    return soup.prettify()
 
 def replace_image_sources(html_content, new_url = PLACE_HOLDER_IMAGE_URL):
     soup = BeautifulSoup(html_content, 'html.parser')
