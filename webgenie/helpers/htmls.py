@@ -12,3 +12,6 @@ def html_to_screenshot(html: str) -> str:
     os.system(f"python3 {SCREENSHOT_SCRIPT_PATH} --html {html_path} --png {png_path}")
     time.sleep(0.1)
     return image_to_base64(png_path)
+
+def preprocess_html(html: str) -> str:
+    return html

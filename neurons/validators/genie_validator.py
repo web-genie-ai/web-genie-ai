@@ -4,6 +4,7 @@ from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE
+from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks.solution import Solution
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
@@ -92,5 +93,6 @@ class GenieValidator:
     
     async def process_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
+            synapse.html = preprocess_html(synapse.html)
             return synapse
         return None
