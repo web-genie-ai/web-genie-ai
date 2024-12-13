@@ -43,6 +43,8 @@ The WebGenieAI subnet incentivizes miners and validators to ensure high-quality 
 
 ## Evaluation Process
 
+1) Image to HTML Model
+
 ### Automatic evaluation of ImageToHTML task for design-wise
 We automatically evaluate generated webpages by calculating the similarity between the original input image and the rendered screenshot of generated webpage.
 We break down the evaluation into both high-level visual similarity and low-level element matching.
@@ -83,6 +85,20 @@ blocks are, the lower this score is.
 - Position: The positioning of the blocks largely impacts the overall layout. For each matched pair (p, q), we calculate the position similarity **sim**<sub>pos</sub>($r_p$, $g_q$) = 1 − max(abs($x_q$ − $x_p$), abs($y_q$ − $y_p$)), where ($x_p$, $y_p$) and ($x_q$, $y_q$) are normalized coordinates (in [0, 1]) of $r_p$ and $g_q$’s centors. The overall score is averaged across all matched pairs.
 
 - Color: We use the [CIEDE2000](https://en.wikipedia.org/wiki/Color_difference) color difference formula to assess the perceptual difference between the colors of the generated text in block $g_q$ and the reference text in block $r_p$, denoted as **sim**<sub>color</sub>(rp, gq), where the formula considers the complexities of human color vision. The overall score is averaged across all matched pairs.
+
+2) Text Prompt to Html Model
+
+### Unsupervised Evaluation of Model by Round-Trip Correctness
+We draw inspiration from a software testing technique known as property-based testing. It allows defining properties that must hold between inputs and outputs of a program (e.g., all items in the input list must also appear in the output list) Round-trip correctness is one such property (e.g., compressing and subsequently decompressing data must yield the original data).
+
+Consider two forms of data X and Y, such as text prompt and HTML and two (probabilistic) models whose task is to “translate” from one form of data to the other, i.e., a forward model M : X → Y and a backward model M<sup>-1</sup>: Y → X. These models could be a single LLM prompted differently.
+
+The central idea for unsupervised evaluation is the concept of round-trip correctness (RTC). Intuitively, for a “good” forward and backward model we expect ̂x =M<sup>-1</sup> M(x) to be semantically equivalent to x. For example, we can describe the HTML code with text prompt in the forward pass and then generate back the code from the text prompt. To compute RTC we need some function sim(x, ̂x) that estimates the semantic equivalence between the original x and each predicted sample ̂x. Such functions may include discrete or continuous metrics such as exact match, BLEU and so on.
+
+### Supervised Evaluation of Model by CodeBERTScore 
+Let x is prompt, y is the ground truth html, ̂y is the generated html.
+To evaluate the performance of the model, we can use [CodeBERTScore](https://github.com/neulab/code-bert-score). sim(y, ̂y ) = bert_score(y, ̂y)
+CodeBERTScore is an evaluation metric for code generation, which builds on BERTScore. Instead of encoding only the generated tokens as in [BERTScore](https://huggingface.co/spaces/evaluate-metric/bertscore), CodeBERTScore also encodes the natural language input preceding the generated code, thus modeling the consistency between the generated code and its given natural language context as well.
 
 
 ### Example Scenario
