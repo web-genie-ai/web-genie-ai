@@ -166,3 +166,20 @@ testing/
 
 .DS_Store
 temp.txt
+
+# env
+.env.miner
+.env.validator
+
+# test
+test.py
+
+# Wandb
+wandb/
+
+# work dir
+work/
+
+# scripts
+run_miner.sh
+run_validator.sh
