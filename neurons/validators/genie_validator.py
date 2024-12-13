@@ -84,7 +84,6 @@ class GenieValidator:
             axon = self.neuron.metagraph.axons[best_miner_uid]
 
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
-                bt.logging.info(f"Dendrite: {dendrite}")
                 responses = await dendrite(
                     axons=[axon],
                     synapse=synapse,
