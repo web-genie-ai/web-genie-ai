@@ -143,10 +143,133 @@ footer p {
 
 class MockUpPromptDataset(Dataset):
     async def generate_context(self)->DatasetEntry:
+        html = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coming Soon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Header styles */
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+        }
+
+        header nav {
+            display: flex;
+            justify-content: center;
+        }
+
+        header nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        header nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Coming Soon section styles */
+        .coming-soon {
+            margin-top: 50px;
+        }
+
+        .coming-soon h1 {
+            font-size: 2.5em;
+            color: #333;
+        }
+
+        .coming-soon p {
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        /* Go back button styles */
+        .go-back-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .go-back-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Footer styles */
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 1em;
+        }
+
+        footer a {
+            color: #00bcd4;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header with Navigation -->
+    <header>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Coming Soon Section -->
+    <div class="coming-soon">
+        <h1>Coming Soon!</h1>
+        <p>We're working hard to launch something amazing. Stay tuned!</p>
+        <button class="go-back-btn" onclick="window.history.back();">Go Back</button>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Your Website | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+    </footer>
+
+</body>
+</html>
+
+"""
         return DatasetEntry(
             src="mockup",
             topic="tech company",
-            ground_truth_html="",
+            ground_truth_html=html,
             prompt="CommingSoon Page with goback button, navHeader, and footer",
             base64_image=""
         )

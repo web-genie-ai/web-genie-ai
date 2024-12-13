@@ -5,14 +5,16 @@ from typing import List, Tuple
 
 from webgenie.datasets.dataset import MockUpPromptDataset
 from webgenie.protocol import WebgenieTextSynapse
-from webgenie.tasks.solution import Solution
+from webgenie.rewards.bert_reward import BertReward
 from webgenie.tasks.task import Task, TextTask
 from webgenie.tasks.task_generator import TaskGenerator
 
 class TextTaskGenerator(TaskGenerator):
     def __init__(self):
         super().__init__()
-        self.rewards = []
+        self.rewards = [
+            BertReward(),
+        ]
         self.datasets = [
             MockUpPromptDataset()
         ]
@@ -21,6 +23,7 @@ class TextTaskGenerator(TaskGenerator):
         dataset_entry = await random.choice(self.datasets).generate_context()
         return TextTask(
             prompt=dataset_entry.prompt, 
+            ground_truth_html=dataset_entry.ground_truth_html,
             timeout=50,
             generator=self
         ), WebgenieTextSynapse(prompt=dataset_entry.prompt)
