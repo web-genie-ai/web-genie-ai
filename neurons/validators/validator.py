@@ -114,8 +114,8 @@ class Validator(BaseValidatorNeuron):
             await asyncio.sleep(5)
 
     async def __aenter__(self):
-        self.loop.create_task(self.forward_loop())
-        self.loop.create_task(self.scoring_loop())
+        #self.loop.create_task(self.forward_loop())
+        #self.loop.create_task(self.scoring_loop())
         self.is_running = True
         bt.logging.debug("Starting validator in background thread")
         return self

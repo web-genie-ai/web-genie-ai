@@ -3,7 +3,12 @@ from bs4 import BeautifulSoup
 import time
 import re
 import uuid
-from webgenie.constants import SCREENSHOT_SCRIPT_PATH, WORK_DIR, PLACE_HOLDER_IMAGE_URL
+from webgenie.constants import (
+    SCREENSHOT_SCRIPT_PATH,
+    WORK_DIR,
+    PLACE_HOLDER_IMAGE_URL,
+    PYTHON_CMD
+)
 from webgenie.helpers.images import image_to_base64
 
 def html_to_screenshot(html: str) -> str:
@@ -11,7 +16,7 @@ def html_to_screenshot(html: str) -> str:
     with open(html_path, "w") as f:
         f.write(html)
     png_path = f"{WORK_DIR}/screenshot_{uuid.uuid4()}.png"
-    os.system(f"python3 {SCREENSHOT_SCRIPT_PATH} --html {html_path} --png {png_path}")
+    os.system(f"{PYTHON_CMD} {SCREENSHOT_SCRIPT_PATH} --html {html_path} --png {png_path}")
     time.sleep(0.1)
     return image_to_base64(png_path)
 

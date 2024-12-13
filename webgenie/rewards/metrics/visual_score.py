@@ -33,7 +33,7 @@ from colormath.color_diff import delta_e_cie2000
 
 from ocr_free_utils import get_blocks_ocr_free
 from dedup_post_gen import check_repetitive_content
-from webgenie.constants import SCREENSHOT_SCRIPT_PATH, WORK_DIR
+from webgenie.constants import SCREENSHOT_SCRIPT_PATH, WORK_DIR, PYTHON_CMD
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
@@ -445,12 +445,12 @@ def visual_eval_v3_multi(input_list, debug=False):
         predict_img = predict_html.replace(".html", ".png")
         # This will help fix some html syntax error
         pre_process(predict_html)
-        os.system(f"python3 {SCREENSHOT_SCRIPT_PATH} --html {predict_html} --png {predict_img}")
+        os.system(f"{PYTHON_CMD} {SCREENSHOT_SCRIPT_PATH} --html {predict_html} --png {predict_img}")
         predict_blocks = get_blocks_ocr_free(predict_img)
         predict_blocks_list.append(predict_blocks)
 
     original_img = original_html.replace(".html", ".png")
-    os.system(f"python3 {SCREENSHOT_SCRIPT_PATH} --html {original_html} --png {original_img}")
+    os.system(f"{PYTHON_CMD} {SCREENSHOT_SCRIPT_PATH} --html {original_html} --png {original_img}")
     original_blocks = get_blocks_ocr_free(original_img)
     original_blocks = merge_blocks_by_bbox(original_blocks)
 
