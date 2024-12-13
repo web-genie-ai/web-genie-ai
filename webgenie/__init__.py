@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # Copyright © 2023 Yuma Rao
-# Copyright © 2024 Sangar
+# Copyright © 2023 Sangar, pycorn0729
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the “Software”), to deal in the Software without restriction, including without limitation
@@ -15,40 +15,21 @@
 # THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-import numpy as np
-from typing import List
-import bittensor as bt
 
+# Change this value when updating your code base.
+# Define the version of the webgenie.
+__version__ = "1.0.0"
+version_split = __version__.split(".")
+__spec_version__ = (
+    (1000 * int(version_split[0]))
+    + (10 * int(version_split[1]))
+    + (1 * int(version_split[2]))
+)
 
-def reward(query: int, response: int) -> float:
-    """
-    Reward the miner response to the dummy request. This method returns a reward
-    value for the miner, which is used to update the miner's score.
+PROJECT_NAME = f"webgenie-{__version__}"
 
-    Returns:
-    - float: The reward value for the miner.
-    """
-    bt.logging.info(f"In rewards, query val: {query}, response val: {response}, rewards val: {1.0 if response == query * 2 else 0}")
-    return 1.0 if response == query * 2 else 0
-
-
-def get_rewards(
-    self,
-    query: int,
-    responses: List[float],
-) -> np.ndarray:
-    """
-    Returns an array of rewards for the given query and responses.
-
-    Args:
-    - query (int): The query sent to the miner.
-    - responses (List[float]): A list of responses from the miner.
-
-    Returns:
-    - np.ndarray: An array of rewards for the given query and responses.
-    """
-    # Get all the reward results by iteratively calling your reward() function.
-    
-    return np.array(
-        [reward(query, response) for response in responses]
-    )
+# Import all submodules.
+from . import protocol
+from . import base
+from . import api
+from .subnet_links import SUBNET_LINKS

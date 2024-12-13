@@ -1,6 +1,6 @@
-# Contributing to BTCopilot
+# Contributing to webgenie
 
-The following is a set of guidelines for contributing to the BTCopilot Subnet. These are **HIGHLY RECOMMENDED** guidelines, but not hard-and-fast rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
+The following is a set of guidelines for contributing to the webgenie Subnet. These are **HIGHLY RECOMMENDED** guidelines, but not hard-and-fast rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
 ## Table Of Contents
 1. [How Can I Contribute?](#how-can-i-contribute)
@@ -99,7 +99,7 @@ After you submit a pull request, it will be reviewed by the maintainers. They ma
 > Note: Be sure to merge the latest from "upstream" before making a pull request:
 
 ```bash
-git remote add upstream https://github.com/BTCopilot/btcopilot.git
+git remote add upstream https://github.com/webgenie/webgenie.git
 git fetch upstream
 git merge upstream/<your-branch-name>
 git push origin <your-branch-name>
