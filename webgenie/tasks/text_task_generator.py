@@ -13,7 +13,7 @@ class TextTaskGenerator(TaskGenerator):
     def __init__(self):
         super().__init__()
         self.rewards = [
-            BertReward(),
+            (BertReward(), 1.0)
         ]
         self.datasets = [
             MockUpPromptDataset()
