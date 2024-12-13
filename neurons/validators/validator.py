@@ -8,11 +8,10 @@ load_dotenv()
 from typing import Tuple, Union
 
 from webgenie.base.validator import BaseValidatorNeuron
+from webgenie.constants import API_HOTKEY
 from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from neurons.validators.genie_validator import GenieValidator
-
-API_HOTKEY = "5D72esHuc1DxD6PD8S6VyU24bTHGQjHHyodzTGsem1sejUYj"
 
 class Validator(BaseValidatorNeuron):
     """
@@ -115,8 +114,8 @@ class Validator(BaseValidatorNeuron):
             await asyncio.sleep(5)
 
     async def __aenter__(self):
-        self.loop.create_task(self.forward_loop())
-        self.loop.create_task(self.scoring_loop())
+        #self.loop.create_task(self.forward_loop())
+        #self.loop.create_task(self.scoring_loop())
         self.is_running = True
         bt.logging.debug("Starting validator in background thread")
         return self
