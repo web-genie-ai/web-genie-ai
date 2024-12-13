@@ -27,7 +27,7 @@ import bittensor as bt
 from webgenie.base.miner import BaseMinerNeuron
 from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
-from webgenie.solution import Solution
+from webgenie.tasks import Solution
 from neurons.miners.openai_miner import OpenaiMiner
 
 class Miner(BaseMinerNeuron):
@@ -188,5 +188,4 @@ class Miner(BaseMinerNeuron):
 if __name__ == "__main__":
     with Miner() as miner:
         while True:
-            bt.logging.info(f"Miner running... {time.time()}")
             time.sleep(5)

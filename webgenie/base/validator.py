@@ -34,7 +34,6 @@ from webgenie.base.utils.weight_utils import (
 )  # TODO: Replace when bittensor switches to numpy
 from webgenie.mock import MockDendrite
 from webgenie.utils.config import add_validator_args
-from webgenie.protocol import WebgenieStreamingSynapse
 
     
 class BaseValidatorNeuron(BaseNeuron):

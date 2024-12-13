@@ -3,14 +3,12 @@ import random
 from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
+from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
-from webgenie.rewards import RewardManager
-from webgenie.solution import Solution
-from webgenie.task_generator.image_task_generator import ImageTaskGenerator
-from webgenie.task_generator.text_task_generator import TextTaskGenerator
+from webgenie.tasks.solution import Solution
+from webgenie.tasks.image_task_generator import ImageTaskGenerator
+from webgenie.tasks.text_task_generator import TextTaskGenerator
 from webgenie.utils.uids import get_random_uids
-
-MAX_SYNTHETIC_HISTORY_SIZE = 10
 
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
@@ -18,7 +16,6 @@ class GenieValidator:
         self.config = neuron.config
         self.synthetic_history = []
 
-        self.reward_manager = RewardManager()
         self.task_generators = [
             TextTaskGenerator(),
             ImageTaskGenerator(),
@@ -42,9 +39,9 @@ class GenieValidator:
             solutions = []
 
             for synapse, miner_uid in zip(all_synapse_results, miner_uids):
-                processed_synapse = await self.process_synapse(synapse, miner_uid)
+                processed_synapse = await self.process_synapse(synapse)
                 if processed_synapse is not None:
-                    solutions.append(processed_synapse.solution)
+                    solutions.append(Solution(html = processed_synapse.html, miner_uid = miner_uid, process_time = processed_synapse.dendrite.process_time))
 
             if len(solutions) == 0:
                 bt.logging.warning(f"No valid solutions received")
@@ -82,26 +79,18 @@ class GenieValidator:
                     synapse=synapse,
                     timeout=synapse.timeout,
                 )
-                
-            processed_synapse = await self.process_synapse(responses[0], best_miner_uid)
+
+            processed_synapse = await self.process_synapse(responses[0])
             if processed_synapse is None:
                 raise Exception(f"No valid solution received")
-            
+ 
             return processed_synapse
         except Exception as e:
             bt.logging.error(f"[forward_organic_synapse] Error querying dendrite: {e}")
-            synapse.solution = Solution(
-                html = f"Error: {e}",
-                process_time = 0,
-                miner_uid = best_miner_uid,
-            )
+            synapse.html = f"Error: {e}"
             return synapse
     
-    async def process_synapse(self, synapse: bt.Synapse, miner_uid: int) -> bt.Synapse:
+    async def process_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
-            if synapse.solution is None:
-                return None
-            synapse.solution.miner_uid = miner_uid
-            synapse.solution.process_time = synapse.dendrite.process_time
             return synapse
         return None

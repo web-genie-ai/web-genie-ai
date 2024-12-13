@@ -178,3 +178,6 @@ wandb/
 
 # test images
 original.jpg
+
+# work dir
+work/

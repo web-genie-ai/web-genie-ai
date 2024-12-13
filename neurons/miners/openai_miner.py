@@ -8,7 +8,7 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
-from webgenie.solution.solution import Solution
+from webgenie.tasks.solution import Solution
 
 class HTMLResponse(BaseModel):
     html: str = Field(default="", description="The HTML code for the webpage")
@@ -43,7 +43,7 @@ class OpenaiMiner:
                 "instructions": self.html_response_parser.get_format_instructions()
             })
             
-            synapse.solution = Solution(html=html_response["html"])
+            synapse.html = html_response["html"]
             return synapse
         except:
             bt.logging.error(f"Error in OpenaiMiner forward_text: {e}")
@@ -80,7 +80,7 @@ class OpenaiMiner:
                 "image_url": f"data:image/jpeg;base64,{synapse.base64_image}",
             })
 
-            synapse.solution = Solution(html = html_response["html"])
+            synapse.html = html_response["html"]
             return synapse
         except Exception as e:
             bt.logging.error(f"Error in OpenaiMiner forward_image: {e}")
