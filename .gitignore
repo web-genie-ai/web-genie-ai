@@ -177,8 +177,9 @@ test.py
 # Wandb
 wandb/
 
-# test images
-original.jpg
-
 # work dir
 work/
+
+# scripts
+run_miner.sh
+run_validator.sh
