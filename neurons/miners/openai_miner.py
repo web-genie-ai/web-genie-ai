@@ -45,8 +45,9 @@ class OpenaiMiner:
             
             synapse.html = html_response["html"]
             return synapse
-        except:
+        except Exception as e:
             bt.logging.error(f"Error in OpenaiMiner forward_text: {e}")
+            synapse.html = f"Error in OpenaiMiner forward_text: {e}"
             return synapse
 
     async def forward_image(self, synapse: WebgenieImageSynapse) -> WebgenieImageSynapse:
@@ -84,4 +85,5 @@ class OpenaiMiner:
             return synapse
         except Exception as e:
             bt.logging.error(f"Error in OpenaiMiner forward_image: {e}")
+            synapse.html = f"Error in OpenaiMiner forward_image: {e}"
             return synapse
