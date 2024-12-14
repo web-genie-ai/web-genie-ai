@@ -1,5 +1,7 @@
-# The paper [Unlocking the conversion of Web Screenshots into HTML Code with the WebSight Dataset](https://arxiv.org/pdf/2403.09029v1#bib.bib5) is our inspiration.
-# We should use Mistral-7B-Instruct to generate concepts and use Deepseek-Coder-33b-instruct to generate html, but now we are using openai models here.
+# The paper [Unlocking the conversion of Web Screenshots into HTML Code with the WebSight Dataset]
+# (https://arxiv.org/pdf/2403.09029v1#bib.bib5) is our inspiration.
+# The paper suggests using Mistral-7B-Instruct to generate concepts and use Deepseek-Coder-33b-instruct 
+# to generate html, but now we are using openai models here. We are going to use that models on the mainnet
 
 import bittensor as bt
 import os
