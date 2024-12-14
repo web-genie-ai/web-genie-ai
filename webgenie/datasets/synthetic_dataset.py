@@ -33,6 +33,7 @@ class SyntheticDataset(Dataset):
 
         self.concept_parser = JsonOutputParser(pydantic_object=ConceptResponse)
         self.html_parser = JsonOutputParser(pydantic_object=HTMLResponse)
+        self.concepts = []
 
     async def _generate_concepts(self):
         prompt = ChatPromptTemplate.from_messages([
