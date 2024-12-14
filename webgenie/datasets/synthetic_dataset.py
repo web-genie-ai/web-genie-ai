@@ -20,7 +20,9 @@ class HTMLResponse(BaseModel):
     html: str = Field(description="The html code of the website")
 
 class SyntheticDataset(Dataset):
-    def __init__(self):
+    def __init__(self, has_ground_truth_html: bool = True):
+        self.has_ground_truth_html = has_ground_truth_html
+        
         self.model = ChatOpenAI(
             api_key= os.getenv("OPENAI_API_KEY"),
             model_name="gpt-4o",
@@ -56,7 +58,12 @@ class SyntheticDataset(Dataset):
             self.concepts = await self._generate_concepts()
         
         concept = self.concepts.pop(0)
-        ground_truth_html = await self._generate_html(concept)
+        
+        if self.has_ground_truth_html == True:
+            ground_truth_html = await self._generate_html(concept)
+        else:
+            ground_truth_html = ""
+
         return DatasetEntry(
             src="synthetic",
             prompt=concept,

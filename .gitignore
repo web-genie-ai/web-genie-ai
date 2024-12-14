@@ -183,3 +183,6 @@ work/
 # scripts
 run_miner.sh
 run_validator.sh
+
+# developer doc
+developer_doc.md
