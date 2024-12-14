@@ -1,4 +1,4 @@
-from dataset import Dataset, DatasetEntry
+from webgenie.datasets.dataset import Dataset, DatasetEntry
 
 class MockUpDataset(Dataset):
     async def generate_context(self)->DatasetEntry:
