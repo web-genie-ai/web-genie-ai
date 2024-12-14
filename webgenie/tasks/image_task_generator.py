@@ -9,7 +9,8 @@ from webgenie.tasks.solution import Solution
 from webgenie.tasks.task import Task, ImageTask
 from webgenie.tasks.task_generator import TaskGenerator
 from webgenie.rewards.visual_reward import VisualReward
-from webgenie.datasets.dataset import MockUpDataset
+from webgenie.datasets.mockup_dataset import MockUpDataset
+from webgenie.datasets.synthetic_dataset import SyntheticDataset
 
 class ImageTaskGenerator(TaskGenerator):
     def __init__(self):
@@ -18,12 +19,16 @@ class ImageTaskGenerator(TaskGenerator):
             (VisualReward(), 1.0)
         ]
         self.datasets = [
-            MockUpDataset()
+            MockUpDataset(),
+            SyntheticDataset()
         ]
 
     async def generate_task(self) -> Tuple[Task, bt.Synapse]:
         dataset_entry = await random.choice(self.datasets).generate_context()
         ground_truth_html = preprocess_html(dataset_entry.ground_truth_html)
+        if ground_truth_html == "":
+            raise ValueError("Invalid ground truth html")
+        
         base64_image = html_to_screenshot(ground_truth_html)
         return ImageTask(
             base64_image=base64_image, 
