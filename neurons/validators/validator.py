@@ -1,6 +1,7 @@
 # The MIT License (MIT)
 # Copyright © 2023 Yuma Rao
 # Copyright © 2024 pycorn, Sangar
+
 import bittensor as bt
 import asyncio
 
@@ -42,6 +43,7 @@ class Validator(BaseValidatorNeuron):
         if synapse.dendrite.hotkey == API_HOTKEY:
             return False, "Subnet owner hotkey"
         return True, "Blacklisted"  
+    
     async def blacklist_image(self, synapse: WebgenieImageSynapse) -> Tuple[bool, str]:
         """
         Only allow the subnet owner to send synapse to the validator.
@@ -93,7 +95,6 @@ class Validator(BaseValidatorNeuron):
     async def forward_loop(self):
         self.sync()
         bt.logging.info(f"Validator starting at block: {self.block}")
-
         while True:
             try:
                 bt.logging.info(f"step({self.step}) block({self.block})")
@@ -116,8 +117,8 @@ class Validator(BaseValidatorNeuron):
             await asyncio.sleep(5)
 
     async def __aenter__(self):
-        self.loop.create_task(self.forward_loop())
-        self.loop.create_task(self.scoring_loop())
+        #self.loop.create_task(self.forward_loop())
+        #self.loop.create_task(self.scoring_loop())
         self.is_running = True
         bt.logging.debug("Starting validator in background thread")
         return self
