@@ -13,7 +13,7 @@ class BertReward(Reward):
 
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
         bt.logging.debug(f"Rewarding task in bert reward")
-        if task.ground_truth_html == "":
+        if not task.ground_truth_html:
             raise ValueError(f"Ground truth html is empty")
         
         original_htmls= []

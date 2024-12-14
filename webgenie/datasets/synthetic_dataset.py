@@ -57,7 +57,7 @@ class SyntheticDataset(Dataset):
         return response["html"]
         
     async def generate_context(self)->DatasetEntry:
-        if len(self.concepts) == 0:
+        if not self.concepts:
             self.concepts = await self._generate_concepts()
         
         concept = self.concepts.pop(0)

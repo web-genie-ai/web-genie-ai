@@ -26,7 +26,7 @@ class ImageTaskGenerator(TaskGenerator):
     async def generate_task(self) -> Tuple[Task, bt.Synapse]:
         dataset_entry = await random.choice(self.datasets).generate_context()
         ground_truth_html = preprocess_html(dataset_entry.ground_truth_html)
-        if ground_truth_html == "":
+        if not ground_truth_html :
             raise ValueError("Invalid ground truth html")
         
         base64_image = html_to_screenshot(ground_truth_html)
