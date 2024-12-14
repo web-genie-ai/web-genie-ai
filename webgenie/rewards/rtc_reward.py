@@ -1,3 +1,6 @@
+# The paper [Unsupervised Evaluation of Code LLMs with Round-Trip Correctness]
+# (https://arxiv.org/pdf/2402.08699#page=11&zoom=100,384,458) is our inspiration for this reward.
+
 import bittensor as bt
 import bert_score
 import os

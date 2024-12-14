@@ -1,3 +1,6 @@
+# The paper [Design2Code: Benchmarking Multimodal Code Generation for Automated Front-End Engineering]
+# (https://arxiv.org/pdf/2403.03163) is our inspiration for this reward.
+
 import bittensor as bt
 import numpy as np
 from typing import List
