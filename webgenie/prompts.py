@@ -21,7 +21,6 @@ each.
 
 PROMPT_GEN_HTML = """
 Code a complete website with a good design in HTML and Tailwind CSS about this: {concept}
-Write the code inside a tag <body>.
 Write real and long sentences about the business. NEVER USE sentences starting with Lorem
 ipsum, NEVER.
 You don’t have to include images, but if you do, use only this source

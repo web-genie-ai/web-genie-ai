@@ -1,3 +1,4 @@
+import bittensor as bt
 import os
 from bs4 import BeautifulSoup
 from lxml import etree
@@ -12,16 +13,16 @@ from webgenie.constants import (
 )
 from webgenie.helpers.images import image_to_base64
 
-def is_valid_html(html_code: str):
+def is_valid_html(html: str):
     try:
-        parser = etree.XMLParser(recover=False)
-        etree.fromstring(html_code, parser)
+        soup = BeautifulSoup(html, 'html.parser')
         return True
-    except etree.XMLSyntaxError as e:
+    except Exception as e:
+        bt.logging.debug(f"Error during HTML parsing: {e}")
         return False
 
 def seperate_html_css(html_content: str): 
-    soup = BeautifulSoup(html_content, 'lxml')
+    soup = BeautifulSoup(html_content, 'html.parser')
 
     css = ''
     for style_tag in soup.find_all('style'):
