@@ -67,14 +67,7 @@ Based on the two sets of detected blocks, we use the Jonker-Volgenant algorithm 
 Given R, G, and matched pairs in M, we evaluate similarity along the following aspects:
 - **Block-Match**: The first desideratum of the task is that all visual elements from the image should be reproduced in the generated webpage, and the generated webpage should not hallucinate non-existent new elements. We measure this by computing the total sizes of all matched blocks divided by the total sizes of all blocks, including unmatched ones (either because the generated webpages missed them or because the generated webpages contain hallucinated blocks):
 
-![Incentive Mechanism Fomula](docs/incentive-fomula.png)
-<!-- $$
-\mathbf{match}_{\text{block}}(r_p, g_q) = \frac{S(r_p) + S(g_q)}{\sum_{(i,j) \in M} (S(r_i) + S(g_j)) + \left(\sum_{i \in U_R} S(r_i) + \sum_{j \in U_G} S(g_j)\right)}
-$$
-
-$$
-\mathbf{match}_{\text{block}}(R, G) = \sum_{(p,q) \in M} \mathbf{match}_{\text{block}}(r_p, g_q)
-$$ -->
+![Incentive Mechanism Formula](docs/incentive-formula.png "WebGenieAI Incentive Formula")
 
 where S(·) returns the size of the blocks, $U_R$ and $U_G$ denotes the unmatched blocks in R
 and G. The intuition here is that unmatched blocks will lower the score as they indicate
@@ -100,6 +93,8 @@ The central idea for unsupervised evaluation is the concept of round-trip correc
 Let x is prompt, y is the ground truth html, ̂y is the generated html.
 To evaluate the performance of the model, we can use [CodeBERTScore](https://github.com/neulab/code-bert-score). sim(y, ̂y ) = bert_score(y, ̂y)
 CodeBERTScore is an evaluation metric for code generation, which builds on BERTScore. Instead of encoding only the generated tokens as in [BERTScore](https://huggingface.co/spaces/evaluate-metric/bertscore), CodeBERTScore also encodes the natural language input preceding the generated code, thus modeling the consistency between the generated code and its given natural language context as well.
+
+![Webgenie Subnet workflow](docs/webgenie-workflow.png "WebGenieAI workflow")
 
 
 ### Example Scenario
