@@ -6,7 +6,7 @@ Welcome to WebGenieAI Subnet, a pioneering Bittensor-based subnet designed to re
 
 - [Overview](#overview)
 - [Features](#features)
-- [Incentive Mechanism](#incentive-mechanism)
+- [Incentive Mechanism](#incentive-mechanism-v1)
 - [Roadmap](#roadmap)
 
 ## Overview
