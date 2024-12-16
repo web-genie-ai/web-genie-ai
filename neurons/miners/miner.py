@@ -57,19 +57,16 @@ class Miner(BaseMinerNeuron):
 
         init_wandb(self)
         
-
     async def forward_text(
         self, synapse: WebgenieTextSynapse
     ) -> WebgenieTextSynapse:
         bt.logging.debug(f"Miner text forward called with synapse: {synapse}")
-        
         return await self.genie_miner.forward_text(synapse)
 
     async def forward_image(
         self, synapse: WebgenieImageSynapse
     ) -> WebgenieImageSynapse:
         bt.logging.debug(f"Miner image forward called with synapse: {synapse}")
-        
         return await self.genie_miner.forward_image(synapse)
 
     async  def blacklist_text(self, synapse: WebgenieTextSynapse) -> typing.Tuple[bool, str]:

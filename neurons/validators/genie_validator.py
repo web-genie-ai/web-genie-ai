@@ -37,10 +37,8 @@ class GenieValidator:
             if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
                 return
 
-            miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)
-        
+            miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
             task, synapse = await random.choice(self.task_generators).generate_task()
-
             all_synapse_results = await self.neuron.dendrite(
                 axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                 synapse=synapse,
@@ -48,30 +46,27 @@ class GenieValidator:
             )
 
             solutions = []
-
             for synapse, miner_uid in zip(all_synapse_results, miner_uids):
                 processed_synapse = await self.process_synapse(synapse)
                 if processed_synapse is not None:
                     solutions.append(Solution(html = processed_synapse.html, miner_uid = miner_uid, process_time = processed_synapse.dendrite.process_time))
 
-            if len(solutions) == 0:
+            if not solutions:
                 bt.logging.warning(f"No valid solutions received")
                 return
-            
-            bt.logging.debug(f"Processed solutions: {solutions}")
 
+            bt.logging.debug(f"Processed solutions: {solutions}")
             self.synthetic_history.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in forward: {e}")
             raise e
 
     async def score(self):
-        if len(self.synthetic_history) == 0:
+        if not self.synthetic_history:
             bt.logging.warning(f"No synthetic history to score")
             return 
         
         task, solutions = self.synthetic_history.pop(0)
-
         task_generator = task.generator
         scores = await task_generator.reward(task, solutions)
         self.neuron.update_scores(scores, [solution.miner_uid for solution in solutions])
@@ -82,7 +77,6 @@ class GenieValidator:
         best_miner_uid = 1
         try:
             axon = self.neuron.metagraph.axons[best_miner_uid]
-
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 responses = await dendrite(
                     axons=[axon],
@@ -103,7 +97,7 @@ class GenieValidator:
     async def process_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
             synapse.html = preprocess_html(synapse.html)
-            if synapse.html == "":
+            if not synapse.html:
                 return None
             return synapse
         return None
