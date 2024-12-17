@@ -3,7 +3,7 @@ import random
 from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
-from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE
+from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE, MAX_SYNTHETIC_TASK_SIZE
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks.solution import Solution
@@ -16,6 +16,7 @@ class GenieValidator:
         self.neuron = neuron
         self.config = neuron.config
         self.synthetic_history = []
+        self.synthetic_tasks = []
 
         self.task_generators = [
             TextTaskGenerator(),
@@ -37,8 +38,11 @@ class GenieValidator:
             if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
                 return
 
+            if not self.synthetic_tasks:
+                return
+            
+            task, synapse = self.synthetic_tasks.pop(0)
             miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
-            task, synapse = await random.choice(self.task_generators).generate_task()
             all_synapse_results = await self.neuron.dendrite(
                 axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                 synapse=synapse,
@@ -71,6 +75,16 @@ class GenieValidator:
         scores = await task_generator.reward(task, solutions)
         self.neuron.update_scores(scores, [solution.miner_uid for solution in solutions])
         self.neuron.sync()
+
+    async def synthensize_task(self):
+        try:
+            if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
+                return
+
+            task, synapse = await random.choice(self.task_generators).generate_task()
+            self.synthetic_tasks.append((task, synapse))
+        except Exception as e:
+            bt.logging.error(f"Error in synthensize_task: {e}")
 
     async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
         bt.logging.debug(f"Organic forward: {synapse}")
