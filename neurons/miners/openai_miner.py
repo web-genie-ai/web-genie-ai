@@ -52,7 +52,6 @@ class OpenaiMiner:
 
     async def forward_image(self, synapse: WebgenieImageSynapse) -> WebgenieImageSynapse:
         try:
-            
             prompt_messages = [
                 SystemMessagePromptTemplate.from_template("""
                 You are an expert web developer who specializes in HTML and CSS.
