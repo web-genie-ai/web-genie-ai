@@ -30,13 +30,13 @@ class RtcReward(Reward):
 
         self.prompt_response_parser = JsonOutputParser(pydantic_object=PromptResponse)
 
-    def _get_prompt(self, task: Task, solutions: List[Solution]) -> str:
+    async def _get_prompt(self, task: Task, solutions: List[Solution]) -> str:
         prompt = ChatPromptTemplate.from_messages([
             SystemMessagePromptTemplate.from_template(PROMPT_RTC)
         ])
 
         chain = prompt | self.model | self.prompt_response_parser
-        prompt_response = chain.invoke({
+        prompt_response = await chain.ainvoke({
             "html": task.ground_truth_html,
             "prompt": task.prompt,
             "instructions": self.prompt_response_parser.get_format_instructions()
@@ -47,7 +47,7 @@ class RtcReward(Reward):
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
         bt.logging.debug(f"Rewarding task in rtc reward")
         original_prompts = [task.prompt for _ in solutions]
-        miner_prompts = [self._get_prompt(task, solution) for solution in solutions]
+        miner_prompts = [await self._get_prompt(task, solution) for solution in solutions]
         P, R, F1 = bert_score.score(original_prompts, miner_prompts, lang='en')
         return np.array(R)
 

@@ -32,7 +32,7 @@ class HuggingfaceDesign2CodeDataset(Dataset):
             ("system", PROMPT_MAKE_HTML_COMPLEX),
         ])
         chain = prompt | self.model | self.output_parser
-        response = chain.invoke({
+        response = await chain.ainvoke({
             "html": html, 
             "instructions": self.output_parser.get_format_instructions()
         })

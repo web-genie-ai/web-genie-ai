@@ -40,7 +40,7 @@ class GenieValidator:
                 return
 
             if not self.synthetic_tasks:
-                bt.logging.debug(f"No synthetic tasks")
+                bt.logging.warning(f"No synthetic tasks")
                 return
             bt.logging.debug(f"Synthetic tasks: {self.synthetic_tasks}")
             task, synapse = self.synthetic_tasks.pop(0)

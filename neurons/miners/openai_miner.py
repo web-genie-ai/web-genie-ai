@@ -38,7 +38,7 @@ class OpenaiMiner:
             ])
 
             chain = prompt | self.model | self.html_response_parser
-            html_response = chain.invoke({
+            html_response = await chain.ainvoke({
                 "query": synapse.prompt, 
                 "instructions": self.html_response_parser.get_format_instructions()
             })
