@@ -43,6 +43,8 @@ class GenieValidator:
             
             task, synapse = self.synthetic_tasks.pop(0)
             miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
+            bt.logging.debug(f"Selected miner uids: {miner_uids}")
+
             all_synapse_results = await self.neuron.dendrite(
                 axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                 synapse=synapse,
@@ -73,7 +75,11 @@ class GenieValidator:
         task, solutions = self.synthetic_history.pop(0)
         task_generator = task.generator
         scores = await task_generator.reward(task, solutions)
-        self.neuron.update_scores(scores, [solution.miner_uid for solution in solutions])
+        miner_uids = [solution.miner_uid for solution in solutions]
+        bt.logging.debug(f"Miner uids: {miner_uids}")
+        bt.logging.debug(f"Scores: {scores}")
+        
+        self.neuron.update_scores(scores, miner_uids)
         self.neuron.sync()
 
     async def synthensize_task(self):
