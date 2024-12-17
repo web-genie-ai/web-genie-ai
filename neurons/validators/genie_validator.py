@@ -19,7 +19,7 @@ class GenieValidator:
         self.synthetic_tasks = []
 
         self.task_generators = [
-            TextTaskGenerator(),
+        #    TextTaskGenerator(),
             ImageTaskGenerator(),
         ]
 
@@ -34,13 +34,15 @@ class GenieValidator:
             bt.logging.info(f"Created work directory at {WORK_DIR}")
 
     async def forward(self):
+        bt.logging.debug(f"Forward")
         try:
             if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
                 return
 
             if not self.synthetic_tasks:
+                bt.logging.debug(f"No synthetic tasks")
                 return
-            
+            bt.logging.debug(f"Synthetic tasks: {self.synthetic_tasks}")
             task, synapse = self.synthetic_tasks.pop(0)
             miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
             bt.logging.debug(f"Selected miner uids: {miner_uids}")
@@ -83,6 +85,7 @@ class GenieValidator:
         self.neuron.sync()
 
     async def synthensize_task(self):
+        bt.logging.debug(f"Synthensize task")
         try:
             if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
                 return

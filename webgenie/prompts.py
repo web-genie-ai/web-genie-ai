@@ -31,3 +31,12 @@ by the desired width and height, and ‘?keyword‘ by a keyword describing the 
 
 {instructions}
 """
+
+PROMPT_MAKE_HTML_COMPLEX = """
+You are an HTML, CSS expert. I have an HTML code.
+I want you to make the html code more complex.
+The following is the given html code:
+{html}
+
+{instructions}
+"""
