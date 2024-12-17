@@ -103,8 +103,7 @@ class Validator(BaseValidatorNeuron):
                 self.step += 1
             except Exception as e:
                 bt.logging.error(f"Error during forward loop: {str(e)}")
-
-            await asyncio.sleep(5)
+            await asyncio.sleep(1)
 
     async def scoring_loop(self):
         bt.logging.info(f"Scoring loop starting")
@@ -113,14 +112,16 @@ class Validator(BaseValidatorNeuron):
                 await self.genie_validator.score()
             except Exception as e:
                 bt.logging.error(f"Error during scoring: {str(e)}")
-
-            await asyncio.sleep(5)
+            await asyncio.sleep(1)
 
     async def synthensize_task_loop(self):
         bt.logging.info(f"Synthensize task loop starting")
         while True:
-            await self.genie_validator.synthensize_task()
-            await asyncio.sleep(5)
+            try:
+                await self.genie_validator.synthensize_task()
+            except Exception as e:
+                bt.logging.error(f"Error during synthensize task: {str(e)}")
+            await asyncio.sleep(1)
 
     async def __aenter__(self):
         self.loop.create_task(self.synthensize_task_loop())
