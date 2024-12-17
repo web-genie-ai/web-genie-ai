@@ -27,7 +27,8 @@ class SyntheticDataset(Dataset):
         
         self.model = ChatOpenAI(
             api_key= os.getenv("OPENAI_API_KEY"),
-            model_name="gpt-4o",
+            model_name=os.getenv("LLM_MODEL_ID"),
+            base_url=os.getenv("LLM_MODEL_URL"),
             temperature=0.6,
         )
 

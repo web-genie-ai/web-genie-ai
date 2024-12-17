@@ -24,7 +24,8 @@ class RtcReward(Reward):
     def __init__(self):
         self.model = ChatOpenAI(
             api_key= os.getenv("OPENAI_API_KEY"),
-            model_name="gpt-4o",
+            model_name=os.getenv("LLM_MODEL_ID"),
+            base_url=os.getenv("LLM_MODEL_URL"),
         )
 
         self.prompt_response_parser = JsonOutputParser(pydantic_object=PromptResponse)

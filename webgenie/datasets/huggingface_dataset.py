@@ -1,6 +1,7 @@
 # https://huggingface.co/datasets/SALT-NLP/Design2Code_human_eval_pairwise
 
 import bittensor as bt
+import os
 import random
 from datasets import load_dataset
 
@@ -19,7 +20,11 @@ class HTMLResponse(BaseModel):
 class HuggingfaceDesign2CodeDataset(Dataset):
     def __init__(self):
         self.dataset = load_dataset("SALT-NLP/Design2Code_human_eval_pairwise", split="train")
-        self.model = ChatOpenAI(model="gpt-4o-mini")
+        self.model = ChatOpenAI(
+            base_url=os.getenv("LLM_MODEL_URL"),
+            model=os.getenv("LLM_MODEL_ID"),
+            api_key=os.getenv("OPENAI_API_KEY")
+        )
         self.output_parser = JsonOutputParser(pydantic_object=HTMLResponse)
 
     async def _make_html_complex(self, html: str)->str:
@@ -34,14 +39,20 @@ class HuggingfaceDesign2CodeDataset(Dataset):
         return response["complex_html"]
 
     async def generate_context(self)->DatasetEntry:
-        random_index = random.randint(0, len(self.dataset) - 1)
-        html = self.dataset[random_index]["ref_html"]
-        complex_html = await self._make_html_complex(html)
-        bt.logging.debug(f"Complex HTML: {complex_html}")
-        return DatasetEntry(
-            src="huggingface",
-            topic="design2code",
-            ground_truth_html=complex_html,
-            prompt="",
-            base64_image=""
-        )
+        try:
+            random_index = random.randint(0, len(self.dataset) - 1)
+            html = self.dataset[random_index]["ref_html"]
+            bt.logging.debug(f"HTML: {html}")
+            complex_html = await self._make_html_complex(html)
+            bt.logging.debug(f"Complex HTML: {complex_html}")
+            return DatasetEntry(
+                src="huggingface",
+                topic="design2code",
+                ground_truth_html=complex_html,
+                prompt="",
+                base64_image=""
+            )
+        except Exception as e:
+            bt.logging.error(f"Error in generate_context: {e}")
+            raise e
+            
