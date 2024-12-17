@@ -17,9 +17,10 @@ from webgenie.prompts import PROMPT_MAKE_HTML_COMPLEX
 class HTMLResponse(BaseModel):
     complex_html: str = Field(description="the complex html code")
 
-class HuggingfaceDesign2CodeDataset(Dataset):
-    def __init__(self):
-        self.dataset = load_dataset("SALT-NLP/Design2Code_human_eval_pairwise", split="train")
+class HuggingfaceDataset(Dataset):
+    def __init__(self , dataset_name: str, split: str, html_field: str):
+        self.dataset = load_dataset(dataset_name, split=split)
+        self.html_field = html_field
         self.model = ChatOpenAI(
             base_url=os.getenv("LLM_MODEL_URL"),
             model=os.getenv("LLM_MODEL_ID"),
@@ -41,7 +42,7 @@ class HuggingfaceDesign2CodeDataset(Dataset):
     async def generate_context(self)->DatasetEntry:
         try:
             random_index = random.randint(0, len(self.dataset) - 1)
-            html = self.dataset[random_index]["ref_html"]
+            html = self.dataset[random_index][self.html_field]
             bt.logging.debug(f"HTML: {html}")
             complex_html = await self._make_html_complex(html)
             bt.logging.debug(f"Complex HTML: {complex_html}")
