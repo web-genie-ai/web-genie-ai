@@ -67,7 +67,7 @@ class Miner(BaseMinerNeuron):
     async def forward_image(
         self, synapse: WebgenieImageSynapse
     ) -> WebgenieImageSynapse:
-        bt.logging.debug(f"Miner image forward called with image: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}")
+        bt.logging.debug(f"Miner image forward called with image: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}...")
         return await self.genie_miner.forward_image(synapse)
 
     async  def blacklist_text(self, synapse: WebgenieTextSynapse) -> typing.Tuple[bool, str]:
