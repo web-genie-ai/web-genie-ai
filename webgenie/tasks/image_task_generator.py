@@ -21,7 +21,7 @@ class ImageTaskGenerator(TaskGenerator):
         ]
         self.datasets = [
         #    MockUpDataset(),
-        #    SyntheticDataset(),
+            SyntheticDataset(),
             HuggingfaceDesign2CodeDataset()
         ]
 

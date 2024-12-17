@@ -19,8 +19,8 @@ class GenieValidator:
         self.synthetic_tasks = []
 
         self.task_generators = [
-        #    TextTaskGenerator(),
-            ImageTaskGenerator(),
+            (TextTaskGenerator(), 0.1),
+            (ImageTaskGenerator(), 0.9),
         ]
 
         self.make_work_dir()
@@ -90,7 +90,12 @@ class GenieValidator:
             if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
                 return
 
-            task, synapse = await random.choice(self.task_generators).generate_task()
+            task_generator, _ = random.choices(
+                self.task_generators,
+                weights=[weight for _, weight in self.task_generators]
+            )[0]
+            
+            task, synapse = await task_generator.generate_task()
             self.synthetic_tasks.append((task, synapse))
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
