@@ -38,7 +38,7 @@ class ImageTaskGenerator(TaskGenerator):
         return ImageTask(
             base64_image=base64_image, 
             ground_truth_html=ground_truth_html,
-            timeout=50,
+            timeout=250,
             generator=self,
         ), WebgenieImageSynapse(base64_image=base64_image)
 

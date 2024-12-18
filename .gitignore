@@ -179,6 +179,7 @@ wandb/
 
 # work dir
 work/
+work_save/
 
 # scripts
 run_miner.sh

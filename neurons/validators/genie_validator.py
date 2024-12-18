@@ -83,11 +83,12 @@ class GenieValidator:
         self.neuron.sync()
 
     async def synthensize_task(self):
-        bt.logging.debug(f"Synthensize task")
         try:
             if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
                 return
 
+            bt.logging.debug(f"Synthensize task")
+            
             task_generator, _ = random.choices(
                 self.task_generators,
                 weights=[weight for _, weight in self.task_generators]
