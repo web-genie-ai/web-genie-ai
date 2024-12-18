@@ -4,9 +4,11 @@ bert-score==0.3.13
 bittensor==8.4.5
 clip==1.0
 colormath==3.0.0
+datasets==3.2.0
 ddt==1.6.0
 langchain==0.3.11
 langchain-openai==0.2.12
+lxml==5.3.0
 matplotlib-inline==0.1.7
 open-clip-torch==2.29.0
 opencv-python==4.10.0.84
