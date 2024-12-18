@@ -11,7 +11,7 @@ from webgenie.tasks.task_generator import TaskGenerator
 from webgenie.rewards.visual_reward import VisualReward
 from webgenie.datasets.mockup_dataset import MockUpDataset
 from webgenie.datasets.synthetic_dataset import SyntheticDataset
-from webgenie.datasets.huggingface_dataset import HuggingfaceDesign2CodeDataset    
+from webgenie.datasets.huggingface_dataset import HuggingfaceDataset    
 
 class ImageTaskGenerator(TaskGenerator):
     def __init__(self):
@@ -21,8 +21,8 @@ class ImageTaskGenerator(TaskGenerator):
         ]
         self.datasets = [
         #    MockUpDataset(),
-        #    SyntheticDataset(),
-            HuggingfaceDesign2CodeDataset()
+            SyntheticDataset(),
+            HuggingfaceDataset("SALT-NLP/Design2Code-hf", "train", "text"),
         ]
 
     async def generate_task(self) -> Tuple[Task, bt.Synapse]:

@@ -2,6 +2,7 @@ import bittensor as bt
 import numpy as np
 from typing import List, Tuple
 
+from webgenie.rewards.incentive_rewards import get_incentive_rewards
 from webgenie.tasks import Task
 from webgenie.tasks.solution import Solution
 
@@ -20,5 +21,6 @@ class TaskGenerator:
         for reward, weight in self.rewards:
             reward_scores = await reward.reward(task, solutions)
             scores += weight * np.array(reward_scores)
-        return scores
+        rewards = get_incentive_rewards(scores)
+        return rewards
 
