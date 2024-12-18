@@ -6,11 +6,11 @@ from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE, MAX_SYNTHETIC_TASK_SIZE
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
+from webgenie.rewards import get_incentive_rewards
 from webgenie.tasks.solution import Solution
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.tasks.text_task_generator import TextTaskGenerator
 from webgenie.utils.uids import get_random_uids
-
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
@@ -80,8 +80,9 @@ class GenieValidator:
         miner_uids = [solution.miner_uid for solution in solutions]
         bt.logging.debug(f"Miner uids: {miner_uids}")
         bt.logging.debug(f"Scores: {scores}")
-        
-        self.neuron.update_scores(scores, miner_uids)
+        rewards = get_incentive_rewards(scores)
+        bt.logging.debug(f"Incentive rewards: {rewards}")
+        self.neuron.update_scores(rewards, miner_uids)
         self.neuron.sync()
 
     async def synthensize_task(self):
