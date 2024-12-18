@@ -13,3 +13,8 @@ def pil_image_to_base64(img: Image.Image) -> str:
 def image_to_base64(image_path: str) -> str:
     img = Image.open(image_path)
     return pil_image_to_base64(img)
+
+def base64_to_image(base64_str: str) -> Image.Image:
+    img_bytes = base64.b64decode(base64_str)
+    img = Image.open(io.BytesIO(img_bytes))
+    return img
