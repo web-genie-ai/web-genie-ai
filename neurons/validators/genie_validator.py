@@ -6,7 +6,7 @@ from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE, MAX_SYNTHETIC_TASK_SIZE
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
-from webgenie.rewards import get_incentive_rewards
+from webgenie.rewards.incentive_rewards import get_incentive_rewards
 from webgenie.tasks.solution import Solution
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.tasks.text_task_generator import TextTaskGenerator
