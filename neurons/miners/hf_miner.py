@@ -22,7 +22,9 @@ class HfMiner:
 
     async def forward_image(self, synapse: WebgenieImageSynapse) -> WebgenieImageSynapse:
         try:
+            bt.logging.debug(f"Generating HTML from image")
             synapse.html = generate_html_from_image(base64_to_image(synapse.base64_image))
+            bt.logging.debug(f"Generated HTML: {synapse.html}")
             return synapse
         except Exception as e:
             bt.logging.error(f"Error in OpenaiMiner forward_image: {e}")
