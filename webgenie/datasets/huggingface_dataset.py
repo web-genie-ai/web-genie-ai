@@ -42,9 +42,7 @@ class HuggingfaceDesign2CodeDataset(Dataset):
         try:
             random_index = random.randint(0, len(self.dataset) - 1)
             html = self.dataset[random_index]["ref_html"]
-            bt.logging.debug(f"HTML: {html}")
             complex_html = await self._make_html_complex(html)
-            bt.logging.debug(f"Complex HTML: {complex_html}")
             return DatasetEntry(
                 src="huggingface",
                 topic="design2code",

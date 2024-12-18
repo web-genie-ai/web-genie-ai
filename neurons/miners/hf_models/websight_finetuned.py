@@ -1,3 +1,4 @@
+import os
 import torch
 
 from PIL import Image
@@ -6,7 +7,7 @@ from transformers import AutoModelForCausalLM, AutoProcessor
 from transformers.image_utils import to_numpy_array, PILImageResampling, ChannelDimension
 from transformers.image_transforms import resize, to_channel_dimension_format\
 
-API_TOKEN = "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"
+API_TOKEN = os.getenv("HF_TOKEN")
 DEVICE = torch.device("cuda")
 PROCESSOR = AutoProcessor.from_pretrained(
     "HuggingFaceM4/VLM_WebSight_finetuned",

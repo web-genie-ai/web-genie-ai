@@ -38,18 +38,18 @@ class Validator(BaseValidatorNeuron):
 
     async def blacklist_text(self, synapse: WebgenieTextSynapse) -> Tuple[bool, str]:
         """
-        Only allow the subnet owner to send synapse to the validator.
+        Only allow the backend owner to send synapse to the validator.
         """
         if synapse.dendrite.hotkey == API_HOTKEY:
-            return False, "Subnet owner hotkey"
+            return False, "Backend hotkey"
         return True, "Blacklisted"  
     
     async def blacklist_image(self, synapse: WebgenieImageSynapse) -> Tuple[bool, str]:
         """
-        Only allow the subnet owner to send synapse to the validator.
+        Only allow the backend owner to send synapse to the validator.
         """
         if synapse.dendrite.hotkey == API_HOTKEY:
-            return False, "Subnet owner hotkey"
+            return False, "Backend hotkey"
         return True, "Blacklisted"  
     
     async def organic_forward_text(self, synapse: WebgenieTextSynapse):

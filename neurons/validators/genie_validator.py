@@ -3,7 +3,7 @@ import random
 from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
-from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE, MAX_SYNTHETIC_TASK_SIZE
+from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE, MAX_SYNTHETIC_TASK_SIZE, MAX_DEBUG_IMAGE_STRING_LENGTH
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks.solution import Solution
@@ -34,15 +34,13 @@ class GenieValidator:
             bt.logging.info(f"Created work directory at {WORK_DIR}")
 
     async def forward(self):
-        bt.logging.debug(f"Forward")
         try:
             if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
                 return
 
             if not self.synthetic_tasks:
-                bt.logging.warning(f"No synthetic tasks")
                 return
-            bt.logging.debug(f"Synthetic tasks: {self.synthetic_tasks}")
+
             task, synapse = self.synthetic_tasks.pop(0)
             miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
             bt.logging.debug(f"Selected miner uids: {miner_uids}")
@@ -63,7 +61,6 @@ class GenieValidator:
                 bt.logging.warning(f"No valid solutions received")
                 return
 
-            bt.logging.debug(f"Processed solutions: {solutions}")
             self.synthetic_history.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in forward: {e}")
@@ -71,7 +68,6 @@ class GenieValidator:
 
     async def score(self):
         if not self.synthetic_history:
-            bt.logging.warning(f"No synthetic history to score")
             return 
         
         task, solutions = self.synthetic_history.pop(0)
@@ -96,7 +92,11 @@ class GenieValidator:
             bt.logging.error(f"Error in synthensize_task: {e}")
 
     async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
-        bt.logging.debug(f"Organic forward: {synapse}")
+        if isinstance(synapse, WebgenieTextSynapse):
+            bt.logging.debug(f"Organic text forward: {synapse.prompt}")
+        else:
+            bt.logging.debug(f"Organic image forward: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}...")
+
         best_miner_uid = 1
         try:
             axon = self.neuron.metagraph.axons[best_miner_uid]

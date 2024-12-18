@@ -7,7 +7,7 @@ from webgenie.helpers.images import base64_to_image
 
 from neurons.miners.hf_models.websight_finetuned import generate_html_from_image
 
-class OpenaiMiner:
+class HfMiner:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
 
