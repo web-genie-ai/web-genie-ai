@@ -62,7 +62,7 @@ def beautify_html(html: str) -> str:
 import re
 from bs4 import BeautifulSoup
 
-def replace_image_sources(html_content, new_url="PLACE_HOLDER_IMAGE_URL"):
+def replace_image_sources(html_content, new_url=PLACE_HOLDER_IMAGE_URL):
     soup = BeautifulSoup(html_content, 'html.parser')
     
     # Replace 'src' attribute in <img> tags
