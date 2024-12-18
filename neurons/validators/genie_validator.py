@@ -11,6 +11,7 @@ from webgenie.tasks.solution import Solution
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.tasks.text_task_generator import TextTaskGenerator
 from webgenie.utils.uids import get_random_uids
+
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
@@ -76,12 +77,16 @@ class GenieValidator:
         
         task, solutions = self.synthetic_history.pop(0)
         task_generator = task.generator
-        scores = await task_generator.reward(task, solutions)
+        
         miner_uids = [solution.miner_uid for solution in solutions]
         bt.logging.debug(f"Miner uids: {miner_uids}")
+        
+        scores = await task_generator.reward(task, solutions)
         bt.logging.debug(f"Scores: {scores}")
+        
         rewards = get_incentive_rewards(scores)
         bt.logging.debug(f"Incentive rewards: {rewards}")
+        
         self.neuron.update_scores(rewards, miner_uids)
         self.neuron.sync()
 
