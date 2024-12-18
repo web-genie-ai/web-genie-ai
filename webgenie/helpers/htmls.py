@@ -89,6 +89,28 @@ def preprocess_html(html: str) -> str:
     html = replace_image_sources(html)
     return html
 
+def is_empty_html(html: str) -> bool:
+    """Check if HTML body is empty or missing.
+    
+    Args:
+        html (str): HTML string to check
+        
+    Returns:
+        bool: True if body is empty or missing, False otherwise
+    """
+    soup = BeautifulSoup(html, 'html.parser')
+    body = soup.find('body')
+    
+    # Return True if no body tag exists
+    if not body:
+        return True
+        
+    # Return True if body has no content (whitespace is stripped)
+    if not body.get_text(strip=True):
+        return True
+        
+    return False
+
 if __name__ == "__main__":
     html = """
     <html>

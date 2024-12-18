@@ -3,7 +3,7 @@ import numpy as np
 import random
 from typing import List, Tuple
 
-from webgenie.helpers.htmls import html_to_screenshot, preprocess_html
+from webgenie.helpers.htmls import html_to_screenshot, preprocess_html, is_empty_html
 from webgenie.protocol import WebgenieImageSynapse
 from webgenie.tasks.solution import Solution
 from webgenie.tasks.task import Task, ImageTask
@@ -30,6 +30,9 @@ class ImageTaskGenerator(TaskGenerator):
         ground_truth_html = preprocess_html(dataset_entry.ground_truth_html)
         if not ground_truth_html :
             raise ValueError("Invalid ground truth html")
+
+        if is_empty_html(ground_truth_html):
+            raise ValueError("Empty ground truth html")
         
         base64_image = html_to_screenshot(ground_truth_html)
         return ImageTask(
