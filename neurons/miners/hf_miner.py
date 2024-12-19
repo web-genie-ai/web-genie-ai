@@ -5,6 +5,7 @@ from webgenie.base.neuron import BaseNeuron
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.helpers.images import base64_to_image
 
+from neurons.miners.hf_models.falcon7b import generate_html_from_text
 from neurons.miners.hf_models.websight_finetuned import generate_html_from_image
 
 class HfMiner:
@@ -13,11 +14,11 @@ class HfMiner:
 
     async def forward_text(self, synapse: WebgenieTextSynapse) -> WebgenieTextSynapse:  
         try:  
-            synapse.html = "dummy text response"
+            synapse.html = generate_html_from_text(synapse.prompt)
             return synapse
         except Exception as e:
-            bt.logging.error(f"Error in OpenaiMiner forward_text: {e}")
-            synapse.html = f"Error in OpenaiMiner forward_text: {e}"
+            bt.logging.error(f"Error in HfMiner forward_text: {e}")
+            synapse.html = f"Error in HfMiner forward_text: {e}"
             return synapse
 
     async def forward_image(self, synapse: WebgenieImageSynapse) -> WebgenieImageSynapse:

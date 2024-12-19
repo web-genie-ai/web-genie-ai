@@ -180,6 +180,7 @@ wandb/
 # work dir
 work/
 work_save/
+*.png
 
 # scripts
 run_miner.sh
