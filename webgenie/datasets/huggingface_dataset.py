@@ -42,7 +42,7 @@ class HuggingfaceDataset(Dataset):
 
     async def generate_context(self)->DatasetEntry:
         try:
-            bt.logging.info("Generating context")
+            bt.logging.info("Generating Huggingface context")
             random_index = random.randint(0, len(self.dataset) - 1)
             html = self.dataset[random_index][self.html_field]
             complex_html = await self._make_html_complex(html)
