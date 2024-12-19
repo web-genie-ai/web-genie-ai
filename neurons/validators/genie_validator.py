@@ -105,7 +105,7 @@ class GenieValidator:
         else:
             bt.logging.debug(f"Organic image forward: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}...")
 
-        best_miner_uid = 1
+        best_miner_uid = 3
         try:
             axon = self.neuron.metagraph.axons[best_miner_uid]
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:

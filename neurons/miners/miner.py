@@ -28,7 +28,7 @@ from webgenie.constants import MAX_DEBUG_IMAGE_STRING_LENGTH
 from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 
-from neurons.miners.hf_miner import HfMiner
+from neurons.miners.openai_miner import OpenaiMiner
 
 class Miner(BaseMinerNeuron):
     """
@@ -54,7 +54,7 @@ class Miner(BaseMinerNeuron):
             priority_fn=self.priority_image,
         )
 
-        self.genie_miner = HfMiner(self)
+        self.genie_miner = OpenaiMiner(self)
 
         init_wandb(self)
         
