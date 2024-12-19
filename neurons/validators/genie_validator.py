@@ -3,7 +3,7 @@ import random
 from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
-from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE, MAX_SYNTHETIC_TASK_SIZE
+from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE, MAX_SYNTHETIC_TASK_SIZE, MAX_DEBUG_IMAGE_STRING_LENGTH
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks.solution import Solution
@@ -19,8 +19,8 @@ class GenieValidator:
         self.synthetic_tasks = []
 
         self.task_generators = [
-        #    TextTaskGenerator(),
-            ImageTaskGenerator(),
+            (TextTaskGenerator(), 0.1),
+            (ImageTaskGenerator(), 0.9),
         ]
 
         self.make_work_dir()
@@ -34,15 +34,13 @@ class GenieValidator:
             bt.logging.info(f"Created work directory at {WORK_DIR}")
 
     async def forward(self):
-        bt.logging.debug(f"Forward")
         try:
             if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
                 return
 
             if not self.synthetic_tasks:
-                bt.logging.warning(f"No synthetic tasks")
                 return
-            bt.logging.debug(f"Synthetic tasks: {self.synthetic_tasks}")
+            bt.logging.info("Popping synthetic task and sending it to miners")
             task, synapse = self.synthetic_tasks.pop(0)
             miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
             bt.logging.debug(f"Selected miner uids: {miner_uids}")
@@ -62,8 +60,7 @@ class GenieValidator:
             if not solutions:
                 bt.logging.warning(f"No valid solutions received")
                 return
-
-            bt.logging.debug(f"Processed solutions: {solutions}")
+            bt.logging.info(f"Received {len(solutions)} solutions")
             self.synthetic_history.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in forward: {e}")
@@ -71,33 +68,44 @@ class GenieValidator:
 
     async def score(self):
         if not self.synthetic_history:
-            bt.logging.warning(f"No synthetic history to score")
             return 
         
         task, solutions = self.synthetic_history.pop(0)
         task_generator = task.generator
-        scores = await task_generator.reward(task, solutions)
+        
         miner_uids = [solution.miner_uid for solution in solutions]
         bt.logging.debug(f"Miner uids: {miner_uids}")
-        bt.logging.debug(f"Scores: {scores}")
         
-        self.neuron.update_scores(scores, miner_uids)
+        rewards = await task_generator.reward(task, solutions)
+        bt.logging.debug(f"Incentive rewards: {rewards}")
+        
+        self.neuron.update_scores(rewards, miner_uids)
         self.neuron.sync()
 
     async def synthensize_task(self):
-        bt.logging.debug(f"Synthensize task")
         try:
             if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
                 return
 
-            task, synapse = await random.choice(self.task_generators).generate_task()
+            bt.logging.debug(f"Synthensize task")
+            
+            task_generator, _ = random.choices(
+                self.task_generators,
+                weights=[weight for _, weight in self.task_generators]
+            )[0]
+            
+            task, synapse = await task_generator.generate_task()
             self.synthetic_tasks.append((task, synapse))
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
 
     async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
-        bt.logging.debug(f"Organic forward: {synapse}")
-        best_miner_uid = 1
+        if isinstance(synapse, WebgenieTextSynapse):
+            bt.logging.debug(f"Organic text forward: {synapse.prompt}")
+        else:
+            bt.logging.debug(f"Organic image forward: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}...")
+
+        best_miner_uid = 3
         try:
             axon = self.neuron.metagraph.axons[best_miner_uid]
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:

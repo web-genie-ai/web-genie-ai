@@ -36,6 +36,7 @@ class TextTaskGenerator(TaskGenerator):
             ]
 
     async def generate_task(self) -> Tuple[Task, bt.Synapse]:
+        bt.logging.info("Generating Text task")
         dataset_entry = await random.choice(self.datasets).generate_context()
         return TextTask(
             prompt=dataset_entry.prompt, 
