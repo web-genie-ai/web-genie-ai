@@ -1,42 +1,60 @@
 import torch
-from peft import PeftModel
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+# Loading original model
+model_name = "ybelkada/falcon-7b-sharded-bf16"
 
-BASE_MODEL = AutoModelForCausalLM.from_pretrained("ybelkada/falcon-7b-sharded-bf16")
-MODEL = PeftModel.from_pretrained(
-    BASE_MODEL, 
-    "PrincySinghal991/falcon-7b-sharded-bf16-finetuned-html-code-generation"
-).to(DEVICE)
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_compute_dtype=torch.float16,
+)
 
-TOKENIZER = AutoTokenizer.from_pretrained("ybelkada/falcon-7b-sharded-bf16")
-TOKENIZER.pad_token = TOKENIZER.eos_token
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    quantization_config=bnb_config,
+    device_map="auto",
+    trust_remote_code=True,
+)
 
-def generate_html_from_text(prompt, max_length=4096, num_return_sequences=1):
-    """
-    Generate text from a prompt using the Falcon-7B model
-    
-    Args:
-        prompt (str): Input text prompt
-        max_length (int): Maximum length of generated text
-        num_return_sequences (int): Number of sequences to generate
-        
-    Returns:
-        str: Generated text response
-    """ 
-    input_ids = TOKENIZER(prompt, return_tensors="pt").input_ids.to(DEVICE)
+tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+tokenizer.pad_token = tokenizer.eos_token
+PEFT_MODEL = "PrincySinghal991/falcon-7b-sharded-bf16-finetuned-html-code-generation"
+# PEFT_MODEL = "kasperius/falcon-7b-sharded-bf16-finetuned-html-code-generation-the-css-only"
 
-    outputs = MODEL.generate(
-        input_ids=input_ids,
-        max_length=max_length,
-        num_return_sequences=num_return_sequences,
-        pad_token_id=MODEL.config.eos_token_id,
-        do_sample=True
+peft_model = AutoModelForCausalLM.from_pretrained(
+    PEFT_MODEL,
+    quantization_config=bnb_config,
+    device_map="auto",  # Let the transformers library handle device placement
+    trust_remote_code=True,
+    torch_dtype=torch.float16,  # Use mixed precision to reduce memory usage
+    low_cpu_mem_usage=True
+)
+
+# Load tokenizer
+peft_tokenizer = AutoTokenizer.from_pretrained(PEFT_MODEL, trust_remote_code=True)
+peft_tokenizer.pad_token = peft_tokenizer.eos_token
+ 
+def generate_html_from_text(prompt):
+    # Tokenize and generate with the PEFT model
+    peft_encoding = peft_tokenizer(prompt, return_tensors="pt")
+    peft_outputs = peft_model.generate(
+        input_ids=peft_encoding["input_ids"].to(peft_model.device), 
+        attention_mask=peft_encoding["attention_mask"].to(peft_model.device),
+        max_length=2048, 
+        pad_token_id=peft_tokenizer.eos_token_id,
+        eos_token_id=peft_tokenizer.eos_token_id
     )
+    peft_model_html = peft_tokenizer.decode(peft_outputs[0], skip_special_tokens=True)
+    return peft_model_html[len(prompt):]
     
-    response = TOKENIZER.decode(outputs[0], skip_special_tokens=True)
-    return response
-
 if __name__ == "__main__":
-    print(generate_html_from_text("Write a simple HTML page with a header, a paragraph, and a footer."))
+
+    # Example usage
+    prompt="create a simple login page with html and css"
+    print("=================")
+    html = generate_html_from_text(prompt)
+    print("=================")
+    print(html)
+     
