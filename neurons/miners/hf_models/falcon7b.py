@@ -54,7 +54,12 @@ if __name__ == "__main__":
     # Example usage
     prompt="create a simple login page with html and css"
     print("=================")
+    import time
+    start_time = time.time()
+    print(f"Prompt: {prompt}")
     html = generate_html_from_text(prompt)
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time} seconds")
     print("=================")
     print(html)
      
