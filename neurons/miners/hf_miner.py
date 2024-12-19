@@ -11,7 +11,9 @@ total_memory_mb, _, _ = get_gpu_info()
 if total_memory_mb is None:
     raise ValueError("No GPU detected. HfMiner requires a GPU.")
 
-if total_memory_mb < 1024 * 25:
+bt.logging.info(f"Total memory: {total_memory_mb}")
+
+if total_memory_mb < 1024 * 23:
     raise ValueError("Insufficient GPU memory. HfMiner requires at least 25GB of GPU memory.")
 
 from neurons.miners.hf_models.websight_finetuned import generate_html_from_image

@@ -26,6 +26,7 @@ class ImageTaskGenerator(TaskGenerator):
         ]
 
     async def generate_task(self) -> Tuple[Task, bt.Synapse]:
+        bt.logging.info("Generating Image task")
         dataset_entry = await random.choice(self.datasets).generate_context()
         ground_truth_html = preprocess_html(dataset_entry.ground_truth_html)
         if not ground_truth_html :
