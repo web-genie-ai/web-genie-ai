@@ -40,7 +40,7 @@ class GenieValidator:
 
             if not self.synthetic_tasks:
                 return
-
+            bt.logging.info("Popping synthetic task and sending it to miners")
             task, synapse = self.synthetic_tasks.pop(0)
             miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
             bt.logging.debug(f"Selected miner uids: {miner_uids}")
