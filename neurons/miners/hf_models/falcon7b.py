@@ -1,10 +1,19 @@
+import torch
 from peft import PeftModel
-from transformers import AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-base_model = AutoModelForCausalLM.from_pretrained("ybelkada/falcon-7b-sharded-bf16")
-model = PeftModel.from_pretrained(base_model, "kasperius/falcon-7b-sharded-bf16-finetuned-html-code-generation-the-css-v2")
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-def generate_html_from_text(prompt, max_length=1024 * 10, num_return_sequences=1):
+BASE_MODEL = AutoModelForCausalLM.from_pretrained("ybelkada/falcon-7b-sharded-bf16")
+MODEL = PeftModel.from_pretrained(
+    BASE_MODEL, 
+    "PrincySinghal991/falcon-7b-sharded-bf16-finetuned-html-code-generation"
+).to(DEVICE)
+
+TOKENIZER = AutoTokenizer.from_pretrained("ybelkada/falcon-7b-sharded-bf16")
+TOKENIZER.pad_token = TOKENIZER.eos_token
+
+def generate_html_from_text(prompt, max_length=4096, num_return_sequences=1):
     """
     Generate text from a prompt using the Falcon-7B model
     
@@ -15,18 +24,18 @@ def generate_html_from_text(prompt, max_length=1024 * 10, num_return_sequences=1
         
     Returns:
         str: Generated text response
-    """
-    inputs = model.tokenizer(prompt, return_tensors="pt", padding=True)
-    
-    outputs = model.generate(
-        **inputs,
+    """ 
+    input_ids = TOKENIZER(prompt, return_tensors="pt").input_ids.to(DEVICE)
+
+    outputs = MODEL.generate(
+        input_ids=input_ids,
         max_length=max_length,
         num_return_sequences=num_return_sequences,
-        pad_token_id=model.config.eos_token_id,
+        pad_token_id=MODEL.config.eos_token_id,
         do_sample=True
     )
     
-    response = model.tokenizer.decode(outputs[0], skip_special_tokens=True)
+    response = TOKENIZER.decode(outputs[0], skip_special_tokens=True)
     return response
 
 if __name__ == "__main__":
