@@ -60,7 +60,7 @@ class GenieValidator:
             if not solutions:
                 bt.logging.warning(f"No valid solutions received")
                 return
-
+            bt.logging.info(f"Received {len(solutions)} solutions")
             self.synthetic_history.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in forward: {e}")

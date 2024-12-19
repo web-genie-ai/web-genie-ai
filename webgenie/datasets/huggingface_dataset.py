@@ -29,6 +29,7 @@ class HuggingfaceDataset(Dataset):
         self.output_parser = JsonOutputParser(pydantic_object=HTMLResponse)
 
     async def _make_html_complex(self, html: str)->str:
+        bt.logging.info("Making HTML complex")
         prompt = ChatPromptTemplate.from_messages([
             ("system", PROMPT_MAKE_HTML_COMPLEX),
         ])
@@ -41,9 +42,9 @@ class HuggingfaceDataset(Dataset):
 
     async def generate_context(self)->DatasetEntry:
         try:
+            bt.logging.info("Generating context")
             random_index = random.randint(0, len(self.dataset) - 1)
             html = self.dataset[random_index][self.html_field]
-            bt.logging.debug(f"HTML: {html}")
             complex_html = await self._make_html_complex(html)
             return DatasetEntry(
                 src="huggingface",
