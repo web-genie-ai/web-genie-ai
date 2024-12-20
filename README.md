@@ -8,6 +8,7 @@ Welcome to WebGenieAI Subnet, a pioneering Bittensor-based subnet designed to re
 - [Features](#features)
 - [Incentive Mechanism](#incentive-mechanism-v1)
 - [Roadmap](#roadmap)
+- [References](#references)
 
 ## Overview
 
@@ -45,7 +46,7 @@ The WebGenieAI subnet incentivizes miners and validators to ensure high-quality 
 
 1) Image to HTML Model
 
-### Automatic evaluation of ImageToHTML task for design-wise
+### Automatic evaluation of ImageToHTML task for design-wise [Ref: [[1]](#references)]
 We automatically evaluate generated webpages by calculating the similarity between the original input image and the rendered screenshot of generated webpage.
 We break down the evaluation into both high-level visual similarity and low-level element matching.
 
@@ -82,7 +83,7 @@ blocks are, the lower this score is.
 
 2) Text Prompt to Html Model
 
-### Unsupervised Evaluation of Model by Round-Trip Correctness
+### Unsupervised Evaluation of Model by Round-Trip Correctness (Ref: [[2]](#references))
 We draw inspiration from a software testing technique known as property-based testing. It allows defining properties that must hold between inputs and outputs of a program (e.g., all items in the input list must also appear in the output list) Round-trip correctness is one such property (e.g., compressing and subsequently decompressing data must yield the original data).
 
 Consider two forms of data X and Y, such as text prompt and HTML and two (probabilistic) models whose task is to “translate” from one form of data to the other, i.e., a forward model M : X → Y and a backward model M<sup>-1</sup>: Y → X. These models could be a single LLM prompted differently.
@@ -168,3 +169,12 @@ pm2 start --name auto_update auto_update.sh
    - Automate the downloading of fully functional projects
 - [ ] Market and B2B sales expansion
 - [ ] Grow the team
+
+## References
+- [1] [Design2Code: Benchmarking Multimodal Code Generation for Automated Front-End Engineering](https://arxiv.org/pdf/2403.03163)
+- [2] [Unsupervised Evaluation of Code LLMs with Round-Trip Correctness](https://arxiv.org/pdf/2402.08699#page=11&zoom=100,384,458)
+- [3] [Unlocking the conversion of Web Screenshots into HTML Code with the WebSight Dataset](https://arxiv.org/pdf/2403.09029v1#bib.bib5)
+- [4] [VLM_WebSight_finetuned](https://huggingface.co/HuggingFaceM4/VLM_WebSight_finetuned)
+- [5] [falcon-7b-sharded-bf16-finetuned-html-code-generation](https://huggingface.co/PrincySinghal991/falcon-7b-sharded-bf16-finetuned-html-code-generation)
+- [6] [SALT/NLP](https://huggingface.co/datasets/SALT-NLP/Design2Code)
+- [7] [How you can train an AI to convert your design mockups into HTML and CSS](https://www.freecodecamp.org/news/how-you-can-train-an-ai-to-convert-your-design-mockups-into-html-and-css-cc7afd82fed4/)
