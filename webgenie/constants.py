@@ -1,5 +1,5 @@
 # backend api hotkey
-API_HOTKEY = "5D72esHuc1DxD6PD8S6VyU24bTHGQjHHyodzTGsem1sejUYj"
+API_HOTKEY = "5DXDCYTuPfLqQXbxfvvnarG31SdTDtaubqpQrzjrcMgoP9dp"
 
 # max synthetic history size
 MAX_SYNTHETIC_HISTORY_SIZE = 3

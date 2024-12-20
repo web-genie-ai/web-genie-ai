@@ -6,7 +6,7 @@ import numpy as np
 from typing import List
 
 from webgenie.constants import WORK_DIR
-from webgenie.rewards import Reward
+from webgenie.rewards.reward import Reward
 from webgenie.rewards.metrics.visual_score import visual_eval_v3_multi
 from webgenie.tasks.task import Task, ImageTask
 from webgenie.tasks.solution import Solution
@@ -33,4 +33,5 @@ class VisualReward(Reward):
             miner_html_paths.append(path)
 
         visual_scores = visual_eval_v3_multi([miner_html_paths, original_html_path])
+        bt.logging.debug(f"Visual scores: {visual_scores}")
         return np.array([score[1] for score in visual_scores])

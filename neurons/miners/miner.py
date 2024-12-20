@@ -27,7 +27,7 @@ from webgenie.base.miner import BaseMinerNeuron
 from webgenie.constants import MAX_DEBUG_IMAGE_STRING_LENGTH
 from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
-from webgenie.tasks import Solution
+
 from neurons.miners.openai_miner import OpenaiMiner
 
 class Miner(BaseMinerNeuron):

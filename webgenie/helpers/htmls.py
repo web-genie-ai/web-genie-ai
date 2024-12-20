@@ -59,25 +59,36 @@ def beautify_html(html: str) -> str:
     soup = BeautifulSoup(html, 'html.parser')
     return soup.prettify()
 
-def replace_image_sources(html_content, new_url = PLACE_HOLDER_IMAGE_URL):
+import re
+from bs4 import BeautifulSoup
+
+def replace_image_sources(html_content, new_url=PLACE_HOLDER_IMAGE_URL):
     soup = BeautifulSoup(html_content, 'html.parser')
     
+    # Replace 'src' attribute in <img> tags
     for img_tag in soup.find_all('img'):
         img_tag['src'] = new_url
     
+    # Replace 'srcset' attribute in <source> tags
     for source_tag in soup.find_all('source'):
         if 'srcset' in source_tag.attrs:
             source_tag['srcset'] = new_url
     
+    # Replace URLs in inline styles (background-image) in elements
     for tag in soup.find_all(style=True):
         style = tag['style']
-        updated_style = re.sub(r'background-image\s*:\s*url\([^)]+\)', f'background-image: url({new_url})', style)
+        # Match both background-image and shorthand background property
+        updated_style = re.sub(r'background\s*:\s*[^;]*url\([^)]+\)', f'background: url({new_url})', style)
+        updated_style = re.sub(r'background-image\s*:\s*url\([^)]+\)', f'background-image: url({new_url})', updated_style)
         tag['style'] = updated_style
     
+    # Replace URLs in <style> blocks
     for style_tag in soup.find_all('style'):
         style_content = style_tag.string
         if style_content:
-            updated_content = re.sub(r'background-image\s*:\s*url\([^)]+\)', f'background-image: url({new_url})', style_content)
+            # Update both shorthand background and background-image URLs
+            updated_content = re.sub(r'background\s*:\s*[^;]*url\([^)]+\)', f'background: url({new_url})', style_content)
+            updated_content = re.sub(r'background-image\s*:\s*url\([^)]+\)', f'background-image: url({new_url})', updated_content)
             style_tag.string.replace_with(updated_content)
     
     return str(soup)
@@ -88,6 +99,28 @@ def preprocess_html(html: str) -> str:
     html = beautify_html(html)
     html = replace_image_sources(html)
     return html
+
+def is_empty_html(html: str) -> bool:
+    """Check if HTML body is empty or missing.
+    
+    Args:
+        html (str): HTML string to check
+        
+    Returns:
+        bool: True if body is empty or missing, False otherwise
+    """
+    soup = BeautifulSoup(html, 'html.parser')
+    body = soup.find('body')
+    
+    # Return True if no body tag exists
+    if not body:
+        return True
+        
+    # Return True if body has no content (whitespace is stripped)
+    if not body.get_text(strip=True):
+        return True
+        
+    return False
 
 if __name__ == "__main__":
     html = """

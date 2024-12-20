@@ -37,6 +37,7 @@ class SyntheticDataset(Dataset):
         self.concepts = []
 
     async def _generate_concepts(self):
+        bt.logging.info("Generating concepts")
         prompt = ChatPromptTemplate.from_messages([
             ("system", PROMPT_GEN_CONCEPT),
         ]) 
@@ -47,6 +48,7 @@ class SyntheticDataset(Dataset):
         return response["concepts"]
 
     async def _generate_html(self, concept: str):
+        bt.logging.info("Generating HTML from concept")
         prompt = ChatPromptTemplate.from_messages([
             ("system", PROMPT_GEN_HTML),
         ])
@@ -58,6 +60,7 @@ class SyntheticDataset(Dataset):
         return response["html"]
         
     async def generate_context(self)->DatasetEntry:
+        bt.logging.info("Generating Synthetic context")
         if not self.concepts:
             self.concepts = await self._generate_concepts()
         

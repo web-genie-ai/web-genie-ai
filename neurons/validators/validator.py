@@ -12,7 +12,6 @@ from typing import Tuple, Union
 
 from webgenie.base.validator import BaseValidatorNeuron
 from webgenie.constants import API_HOTKEY
-from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from neurons.validators.genie_validator import GenieValidator
 
@@ -27,10 +26,6 @@ class Validator(BaseValidatorNeuron):
 
     def __init__(self, config=None):
         super(Validator, self).__init__(config=config)
-        bt.logging.info("load_state()")
-        self.load_state()
-        init_wandb(self)
-        
         if not self.config.axon_off:
             self.serve_axon()
         
@@ -38,18 +33,18 @@ class Validator(BaseValidatorNeuron):
 
     async def blacklist_text(self, synapse: WebgenieTextSynapse) -> Tuple[bool, str]:
         """
-        Only allow the subnet owner to send synapse to the validator.
+        Only allow the backend owner to send synapse to the validator.
         """
         if synapse.dendrite.hotkey == API_HOTKEY:
-            return False, "Subnet owner hotkey"
+            return False, "Backend hotkey"
         return True, "Blacklisted"  
     
     async def blacklist_image(self, synapse: WebgenieImageSynapse) -> Tuple[bool, str]:
         """
-        Only allow the subnet owner to send synapse to the validator.
+        Only allow the backend owner to send synapse to the validator.
         """
         if synapse.dendrite.hotkey == API_HOTKEY:
-            return False, "Subnet owner hotkey"
+            return False, "Backend hotkey"
         return True, "Blacklisted"  
     
     async def organic_forward_text(self, synapse: WebgenieTextSynapse):
