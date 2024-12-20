@@ -12,7 +12,6 @@ from typing import Tuple, Union
 
 from webgenie.base.validator import BaseValidatorNeuron
 from webgenie.constants import API_HOTKEY
-from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from neurons.validators.genie_validator import GenieValidator
 
@@ -27,10 +26,6 @@ class Validator(BaseValidatorNeuron):
 
     def __init__(self, config=None):
         super(Validator, self).__init__(config=config)
-        bt.logging.info("load_state()")
-        self.load_state()
-        init_wandb(self)
-        
         if not self.config.axon_off:
             self.serve_axon()
         

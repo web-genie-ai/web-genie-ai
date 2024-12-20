@@ -33,4 +33,5 @@ class VisualReward(Reward):
             miner_html_paths.append(path)
 
         visual_scores = visual_eval_v3_multi([miner_html_paths, original_html_path])
+        bt.logging.debug(f"Visual scores: {visual_scores}")
         return np.array([score[1] for score in visual_scores])

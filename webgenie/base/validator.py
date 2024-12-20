@@ -32,10 +32,10 @@ from webgenie.base.utils.weight_utils import (
     process_weights_for_netuid,
     convert_weights_and_uids_for_emit,
 )  # TODO: Replace when bittensor switches to numpy
+from webgenie.helpers.weights import init_wandb
 from webgenie.mock import MockDendrite
 from webgenie.utils.config import add_validator_args
 
-    
 class BaseValidatorNeuron(BaseNeuron):
     """
     Base class for Bittensor validators. Your validator should inherit from this class.
@@ -49,7 +49,8 @@ class BaseValidatorNeuron(BaseNeuron):
         add_validator_args(cls, parser)
 
     def __init__(self, config=None):
-        super().__init__(config=config)
+        super().__init__(config=config)        
+        init_wandb(self)
 
         # Save a copy of the hotkeys to local memory.
         self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
@@ -64,7 +65,10 @@ class BaseValidatorNeuron(BaseNeuron):
         # Set up initial scoring weights for validation
         bt.logging.info("Building validation weights.")
         self.scores = np.zeros(self.metagraph.n, dtype=np.float32)
-
+        
+        bt.logging.info("load_state()")
+        self.load_state()
+        
         # Init sync with the network. Updates the metagraph.
         self.sync()
 
@@ -228,7 +232,7 @@ class BaseValidatorNeuron(BaseNeuron):
 
     def save_state(self):
         """Saves the state of the validator to a file."""
-        #bt.logging.info("Saving validator state.")
+        bt.logging.info("Saving validator state.")
 
         # Save the state of the validator to file.
         np.savez(
@@ -237,6 +241,8 @@ class BaseValidatorNeuron(BaseNeuron):
             scores=self.scores,
             hotkeys=self.hotkeys,
         )
+        
+        bt.logging.debug(f"Saved state: step={self.step}, scores={self.scores}, hotkeys={self.hotkeys}")
 
     def load_state(self):
         """Loads the state of the validator from a file."""
@@ -244,6 +250,14 @@ class BaseValidatorNeuron(BaseNeuron):
 
         # Load the state of the validator from file.
         state = np.load(self.config.neuron.full_path + "/state.npz")
-        self.step = state["step"]
-        self.scores = state["scores"]
-        self.hotkeys = state["hotkeys"]
+        if "step" in state:
+            self.step = state["step"]
+            self.scores = state["scores"]
+            self.hotkeys = state["hotkeys"]
+        else:
+            bt.logging.warning("No state found. Initializing with default values.")
+            self.step = 0
+            self.scores = np.zeros(self.metagraph.n, dtype=np.float32)
+            self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
+
+        bt.logging.debug(f"Loaded state: step={self.step}, scores={self.scores}, hotkeys={self.hotkeys}")

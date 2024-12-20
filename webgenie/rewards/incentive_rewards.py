@@ -1,3 +1,4 @@
+import bittensor as bt
 import numpy as np
 
 def get_incentive_rewards(scores: np.ndarray, base_reward=100, alpha=1.5) -> np.ndarray:
@@ -13,6 +14,7 @@ def get_incentive_rewards(scores: np.ndarray, base_reward=100, alpha=1.5) -> np.
     Returns:
     - rewards: NumPy array of rewards corresponding to the original order of scores.
     """
+    bt.logging.debug(f"Scores: {scores}")
     threshold = scores.shape[0] // 2
 
     # Ensure input is a NumPy array
@@ -35,7 +37,8 @@ def get_incentive_rewards(scores: np.ndarray, base_reward=100, alpha=1.5) -> np.
             reward = base_reward * (alpha ** (rank - threshold))  # Exponential scaling
         
         rewards[idx] = reward  # Assign reward to the corresponding index
-    
+
+    bt.logging.debug(f"Rewards: {rewards}")
     return rewards
 
 
