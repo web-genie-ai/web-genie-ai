@@ -14,8 +14,10 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 
 from webgenie.prompts import PROMPT_RTC
 from webgenie.rewards import Reward
+from webgenie.rewards.metrics import s_bert
 from webgenie.tasks.task import Task
 from webgenie.tasks.solution import Solution
+
 
 class PromptResponse(BaseModel):
     prompt: str = Field(default="", description="The prompt that generates the given html code")
@@ -29,7 +31,7 @@ class RtcReward(Reward):
         )
 
         self.prompt_response_parser = JsonOutputParser(pydantic_object=PromptResponse)
-
+        
     async def _get_prompt(self, task: Task, solutions: List[Solution]) -> str:
         prompt = ChatPromptTemplate.from_messages([
             SystemMessagePromptTemplate.from_template(PROMPT_RTC)
@@ -48,8 +50,11 @@ class RtcReward(Reward):
         bt.logging.debug(f"Rewarding task in rtc reward")
         original_prompts = [task.prompt for _ in solutions]
         miner_prompts = [await self._get_prompt(task, solution) for solution in solutions]
-        P, R, F1 = bert_score.score(original_prompts, miner_prompts, lang='en')
-        return np.array(R)
+        
+        #P, R, F1 = bert_score.score(original_prompts, miner_prompts, lang='en')
+        scores = s_bert.score(original_prompts, miner_prompts)
+        return np.array(scores)
+
 
 
 

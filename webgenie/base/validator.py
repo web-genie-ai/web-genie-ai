@@ -242,7 +242,7 @@ class BaseValidatorNeuron(BaseNeuron):
             hotkeys=self.hotkeys,
         )
         
-        bt.logging.debug(f"Saved state: step={self.step}, scores={self.scores}, hotkeys={self.hotkeys}")
+        bt.logging.debug(f"Saved state: step={self.step}, scores={self.scores}")
 
     def load_state(self):
         """Loads the state of the validator from a file."""
@@ -260,4 +260,4 @@ class BaseValidatorNeuron(BaseNeuron):
             self.scores = np.zeros(self.metagraph.n, dtype=np.float32)
             self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
 
-        bt.logging.debug(f"Loaded state: step={self.step}, scores={self.scores}, hotkeys={self.hotkeys}")
+        bt.logging.debug(f"Loaded state: step={self.step}, scores={self.scores}")
