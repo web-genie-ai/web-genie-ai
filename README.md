@@ -153,7 +153,6 @@ pm2 start --name auto_update auto_update.sh
 ### Phase 2: Upgrade (Q1 2025)
 - [ ] Build dashboard to track miner performance and progress
 - [ ] Upgrade front-end application to v2
-    - Enable figma design inputs
 - [ ] Upgrade incentive mechanism to v2
     - Output CMS such as Wordpress, shopify, and Magento
 
