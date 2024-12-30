@@ -139,12 +139,6 @@ pm2 start neurons/validators/validator.py --name "webgenie_validator" --interpre
 pm2 start --name auto_update auto_update.sh
 ```
 
-## Requirements
-
-- Miners can use any port.
-- Miners can use OpenAI API key or can use their own model.
-- Validators need to use OpenAI API key to generate a task for miners.
-
 ## Roadmap
 
 ### Phase 1: Foundation (Q4 2024)
@@ -161,9 +155,11 @@ pm2 start --name auto_update auto_update.sh
 - [ ] Upgrade front-end application to v2
     - Enable figma design inputs
 - [ ] Upgrade incentive mechanism to v2
-    - Generate full framework based on React, Vue, and Next.js projects from text, image, and figma prompts
+    - Output CMS such as Wordpress, shopify, and Magento
 
 ### Phase 3: Expand (Q2 2025)
+- [ ] Upgrade incentive mechanism to v3
+   - Generate full framework based projects on React, Vue, and Next.js from text and image prompts
 - [ ] Add features to monetize the application
    - Add payment gateways
    - Automate the downloading of fully functional projects
