@@ -1,11 +1,20 @@
+import os
 import bittensor as bt
+import numpy as np
 import random
-from typing import Union
+from typing import Union, List
 
 from webgenie.base.neuron import BaseNeuron
-from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE, MAX_SYNTHETIC_TASK_SIZE, MAX_DEBUG_IMAGE_STRING_LENGTH
+from webgenie.constants import (
+    MAX_SYNTHETIC_HISTORY_SIZE, 
+    MAX_SYNTHETIC_TASK_SIZE, 
+    MAX_DEBUG_IMAGE_STRING_LENGTH, 
+    UPDATE_SCORES_STEP,
+    WORK_DIR
+)
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
+from webgenie.rewards.incentive_rewards import get_incentive_rewards
 from webgenie.tasks.solution import Solution
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.tasks.text_task_generator import TextTaskGenerator
@@ -26,9 +35,6 @@ class GenieValidator:
         self.make_work_dir()
 
     def make_work_dir(self):
-        import os
-        from webgenie.constants import WORK_DIR
-        
         if not os.path.exists(WORK_DIR):
             os.makedirs(WORK_DIR)
             bt.logging.info(f"Created work directory at {WORK_DIR}")
@@ -65,7 +71,18 @@ class GenieValidator:
         except Exception as e:
             bt.logging.error(f"Error in forward: {e}")
             raise e
-
+    
+    def update_raw_scores(self, rewards: np.ndarray, uids: List[int]):
+        rewards = np.asarray(rewards)
+        uids = np.asarray(uids)
+        
+        self.neuron.raw_scores[uids] += rewards
+        self.neuron.step += 1
+        
+        if self.neuron.step % UPDATE_SCORES_STEP == 0:
+            incentive_rewards = get_incentive_rewards(self.neuron.raw_scores)
+            self.neuron.update_scores(incentive_rewards, [i for i in range(self.neuron.metagraph.n)])
+        
     async def score(self):
         if not self.synthetic_history:
             return 
@@ -79,8 +96,7 @@ class GenieValidator:
         rewards = await task_generator.reward(task, solutions)
         bt.logging.debug(f"Incentive rewards: {rewards}")
         
-        self.neuron.update_scores(rewards, miner_uids)
-        self.neuron.sync()
+        self.update_raw_scores(rewards, miner_uids)
 
     async def synthensize_task(self):
         try:

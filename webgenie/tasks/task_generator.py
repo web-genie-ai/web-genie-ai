@@ -21,6 +21,5 @@ class TaskGenerator:
         for reward, weight in self.rewards:
             reward_scores = await reward.reward(task, solutions)
             scores += weight * np.array(reward_scores)
-        rewards = get_incentive_rewards(scores)
-        return rewards
+        return scores
 

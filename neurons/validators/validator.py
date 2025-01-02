@@ -92,10 +92,8 @@ class Validator(BaseValidatorNeuron):
         bt.logging.info(f"Validator starting at block: {self.block}")
         while True:
             try:
-                bt.logging.info(f"step({self.step}) block({self.block})")
                 self.loop.run_until_complete(self.concurrent_forward())
                 self.sync()
-                self.step += 1
             except Exception as e:
                 bt.logging.error(f"Error during forward loop: {str(e)}")
             await asyncio.sleep(1)
@@ -105,6 +103,7 @@ class Validator(BaseValidatorNeuron):
         while True:
             try:
                 await self.genie_validator.score()
+                self.sync()
             except Exception as e:
                 bt.logging.error(f"Error during scoring: {str(e)}")
             await asyncio.sleep(1)

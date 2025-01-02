@@ -61,10 +61,6 @@ class BaseValidatorNeuron(BaseNeuron):
         else:
             self.dendrite = bt.dendrite(wallet=self.wallet)
         bt.logging.info(f"Dendrite: {self.dendrite}")
-
-        # Set up initial scoring weights for validation
-        bt.logging.info("Building validation weights.")
-        self.scores = np.zeros(self.metagraph.n, dtype=np.float32)
         
         bt.logging.info("load_state()")
         self.load_state()
@@ -238,6 +234,7 @@ class BaseValidatorNeuron(BaseNeuron):
         np.savez(
             self.config.neuron.full_path + "/state.npz",
             step=self.step,
+            raw_scores=self.raw_scores,
             scores=self.scores,
             hotkeys=self.hotkeys,
         )
@@ -252,11 +249,13 @@ class BaseValidatorNeuron(BaseNeuron):
         state = np.load(self.config.neuron.full_path + "/state.npz")
         if "step" in state:
             self.step = state["step"]
+            self.raw_scores = state["raw_scores"]
             self.scores = state["scores"]
             self.hotkeys = state["hotkeys"]
         else:
             bt.logging.warning("No state found. Initializing with default values.")
             self.step = 0
+            self.raw_scores = np.zeros(self.metagraph.n, dtype=np.float32)
             self.scores = np.zeros(self.metagraph.n, dtype=np.float32)
             self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
 

@@ -9,7 +9,7 @@ def score(sentences1, sentences2):
     similarities = cosine_similarity(embeddings1, embeddings2)
     # Scale similarities to be between 0 and 1
     scores = [(float(similarity[0]) + 1) / 2 for similarity in similarities]
-    return scores
+    return [similarity[0] for similarity in similarities]
 
 if __name__ == "__main__":
     # Define a list of sentence pairs
