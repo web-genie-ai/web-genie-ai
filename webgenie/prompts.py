@@ -45,7 +45,8 @@ PROMPT_QUALITY = """
 You are an HTML, CSS expert. I have an HTML code.
 I want you to evaluate the html code on the following criteria and give a score from 0 to 100.
 1. The html code is in the professional style.
-2. The html code is not using redundant code.
+2. The html code is using SEO-friendly practices.
+3. The html code is not using redundant code.
 
 The following is the given html code:
 {html}
