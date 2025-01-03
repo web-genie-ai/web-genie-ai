@@ -8,6 +8,7 @@ from webgenie.datasets import (
 )
 from webgenie.protocol import WebgenieTextSynapse
 from webgenie.rewards.bert_reward import BertReward
+from webgenie.rewards.quality_reward import QualityReward
 from webgenie.rewards.rtc_reward import RtcReward
 from webgenie.tasks.task import Task, TextTask
 from webgenie.tasks.task_generator import TaskGenerator
@@ -17,8 +18,9 @@ class TextTaskGenerator(TaskGenerator):
         super().__init__()
         if has_ground_truth_html:
             self.rewards = [
-                (BertReward(), 0.5),
-                (RtcReward(), 0.5)
+                (BertReward(), 0.4),
+                (RtcReward(), 0.5),
+                (QualityReward(), 0.1)
             ]
         
             self.datasets = [
@@ -27,7 +29,8 @@ class TextTaskGenerator(TaskGenerator):
             ]
         else:
             self.rewards = [
-                (RtcReward(), 1.0)
+                (RtcReward(), 0.9),
+                (QualityReward(), 0.1)
             ]
         
             self.datasets = [

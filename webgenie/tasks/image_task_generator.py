@@ -8,6 +8,7 @@ from webgenie.protocol import WebgenieImageSynapse
 from webgenie.tasks.solution import Solution
 from webgenie.tasks.task import Task, ImageTask
 from webgenie.tasks.task_generator import TaskGenerator
+from webgenie.rewards.quality_reward import QualityReward
 from webgenie.rewards.visual_reward import VisualReward
 from webgenie.datasets.mockup_dataset import MockUpDataset
 from webgenie.datasets.synthetic_dataset import SyntheticDataset
@@ -17,7 +18,8 @@ class ImageTaskGenerator(TaskGenerator):
     def __init__(self):
         super().__init__()
         self.rewards = [
-            (VisualReward(), 1.0)
+            (VisualReward(), 0.9),
+            (QualityReward(), 0.1)
         ]
         self.datasets = [
         #    MockUpDataset(),
