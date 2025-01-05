@@ -115,7 +115,7 @@ CodeBERTScore is an evaluation metric for code generation, which builds on BERTS
 - See [Running on Testnet](docs/running_on_testnet.md) for instructions on how to run the subnet on testnet.
 - See [Running on Mainnet](docs/running_on_mainnet.md) for instructions on how to run the subnet on mainnet.
 
-#### Scripts for running miners and validators on the test network
+#### Scripts for running miners and validators
 ```bash
 npm install pm2 -g
 git clone https://github.com/web-genie-ai/web-genie-ai.git
@@ -126,13 +126,13 @@ pip install -r requirements.txt
 ```
 - miner
 ```bash
-pm2 start neurons/miners/miner.py --name "webgenie_miner" --interpreter python -- --netuid 214 --subtensor.network test --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --axon.port [axon_port]
+pm2 start neurons/miners/miner.py --name "webgenie_miner" --interpreter python -- --netuid [NET_UID] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --axon.port [axon_port]
 ```
 - validator
 ```bash
 playwright install-deps
 playwright install
-pm2 start neurons/validators/validator.py --name "webgenie_validator" --interpreter python -- --netuid 214 --subtensor.network test --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --neuron.axon_port [axon_port]
+pm2 start neurons/validators/validator.py --name "webgenie_validator" --interpreter python -- --netuid [NET_UID] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --neuron.axon_port [axon_port]
 ```
 - running auto_update script for validators
 ```bash
