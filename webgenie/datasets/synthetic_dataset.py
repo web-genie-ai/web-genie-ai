@@ -26,7 +26,7 @@ class SyntheticDataset(Dataset):
         self.has_ground_truth_html = has_ground_truth_html
         
         self.model = ChatOpenAI(
-            api_key= os.getenv("OPENAI_API_KEY"),
+            api_key= os.getenv("LLM_API_KEY"),
             model_name=os.getenv("LLM_MODEL_ID"),
             base_url=os.getenv("LLM_MODEL_URL"),
             temperature=0.6,

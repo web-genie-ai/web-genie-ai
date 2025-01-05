@@ -24,7 +24,7 @@ class HuggingfaceDataset(Dataset):
         self.model = ChatOpenAI(
             base_url=os.getenv("LLM_MODEL_URL"),
             model=os.getenv("LLM_MODEL_ID"),
-            api_key=os.getenv("OPENAI_API_KEY")
+            api_key=os.getenv("LLM_API_KEY")
         )
         self.output_parser = JsonOutputParser(pydantic_object=HTMLResponse)
 

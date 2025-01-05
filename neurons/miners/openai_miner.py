@@ -18,7 +18,7 @@ class OpenaiMiner:
         self.neuron = neuron
 
         self.model = ChatOpenAI(
-            api_key= os.getenv("OPENAI_API_KEY"),
+            api_key= os.getenv("LLM_API_KEY"),
             model_name="gpt-4o",
         )
 

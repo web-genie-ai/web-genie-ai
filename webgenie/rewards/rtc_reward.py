@@ -25,7 +25,7 @@ class PromptResponse(BaseModel):
 class RtcReward(Reward):
     def __init__(self):
         self.model = ChatOpenAI(
-            api_key= os.getenv("OPENAI_API_KEY"),
+            api_key= os.getenv("LLM_API_KEY"),
             model_name=os.getenv("LLM_MODEL_ID"),
             base_url=os.getenv("LLM_MODEL_URL"),
         )

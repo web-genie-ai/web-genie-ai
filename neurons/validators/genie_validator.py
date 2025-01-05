@@ -26,6 +26,7 @@ class GenieValidator:
         self.config = neuron.config
         self.synthetic_history = []
         self.synthetic_tasks = []
+        self.un_responsed_count = [0] * self.neuron.metagraph.n
 
         self.task_generators = [
             (TextTaskGenerator(), 0.1),
@@ -39,15 +40,17 @@ class GenieValidator:
             os.makedirs(WORK_DIR)
             bt.logging.info(f"Created work directory at {WORK_DIR}")
 
-    async def forward(self):
+    async def query_miners(self):
         try:
             if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
                 return
 
             if not self.synthetic_tasks:
                 return
-            bt.logging.info("Popping synthetic task and sending it to miners")
+
             task, synapse = self.synthetic_tasks.pop(0)
+            bt.logging.info("Popping synthetic task and sending it to miners")
+
             miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
             bt.logging.debug(f"Selected miner uids: {miner_uids}")
 
@@ -58,45 +61,44 @@ class GenieValidator:
             )
 
             solutions = []
+
             for synapse, miner_uid in zip(all_synapse_results, miner_uids):
                 processed_synapse = await self.process_synapse(synapse)
                 if processed_synapse is not None:
                     solutions.append(Solution(html = processed_synapse.html, miner_uid = miner_uid, process_time = processed_synapse.dendrite.process_time))
-
+                else:
+                    self.un_responsed_count[miner_uid] += 1
+                    
             if not solutions:
                 bt.logging.warning(f"No valid solutions received")
                 return
             bt.logging.info(f"Received {len(solutions)} solutions")
+
             self.synthetic_history.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in forward: {e}")
             raise e
-    
-    def update_raw_scores(self, rewards: np.ndarray, uids: List[int]):
-        rewards = np.asarray(rewards)
-        uids = np.asarray(uids)
-        
-        self.neuron.raw_scores[uids] += rewards
-        self.neuron.step += 1
-        
-        if self.neuron.step % UPDATE_SCORES_STEP == 0:
-            incentive_rewards = get_incentive_rewards(self.neuron.raw_scores)
-            self.neuron.update_scores(incentive_rewards, [i for i in range(self.neuron.metagraph.n)])
         
     async def score(self):
         if not self.synthetic_history:
             return 
         
-        task, solutions = self.synthetic_history.pop(0)
+        task, solutions = random.choice(self.synthetic_history)
+        self.synthetic_history = []
+
         task_generator = task.generator
         
         miner_uids = [solution.miner_uid for solution in solutions]
         bt.logging.debug(f"Miner uids: {miner_uids}")
         
         rewards = await task_generator.reward(task, solutions)
-        bt.logging.debug(f"Incentive rewards: {rewards}")
         
-        self.update_raw_scores(rewards, miner_uids)
+        for i in range(len(miner_uids)):
+            responsed_ratio = 1 - self.un_responsed_count[miner_uids[i]] / len(self.synthetic_history)
+            rewards[i] = rewards[i] * responsed_ratio * responsed_ratio
+        
+        bt.logging.debug(f"Incentive rewards: {rewards}")
+        self.neuron.update_scores(rewards, miner_uids)
 
     async def synthensize_task(self):
         try:
