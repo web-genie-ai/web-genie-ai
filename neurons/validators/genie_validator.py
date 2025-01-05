@@ -1,9 +1,17 @@
+import os
 import bittensor as bt
+import numpy as np
 import random
-from typing import Union
+from typing import Union, List
 
 from webgenie.base.neuron import BaseNeuron
-from webgenie.constants import MAX_SYNTHETIC_HISTORY_SIZE, MAX_SYNTHETIC_TASK_SIZE, MAX_DEBUG_IMAGE_STRING_LENGTH
+from webgenie.constants import (
+    MAX_SYNTHETIC_HISTORY_SIZE, 
+    MAX_SYNTHETIC_TASK_SIZE, 
+    MAX_DEBUG_IMAGE_STRING_LENGTH, 
+    MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE,
+    WORK_DIR
+)
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks.solution import Solution
@@ -17,6 +25,7 @@ class GenieValidator:
         self.config = neuron.config
         self.synthetic_history = []
         self.synthetic_tasks = []
+        self.un_responsed_count = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
 
         self.task_generators = [
             (TextTaskGenerator(), 0.1),
@@ -26,22 +35,21 @@ class GenieValidator:
         self.make_work_dir()
 
     def make_work_dir(self):
-        import os
-        from webgenie.constants import WORK_DIR
-        
         if not os.path.exists(WORK_DIR):
             os.makedirs(WORK_DIR)
             bt.logging.info(f"Created work directory at {WORK_DIR}")
 
-    async def forward(self):
+    async def query_miners(self):
         try:
             if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
                 return
 
             if not self.synthetic_tasks:
                 return
-            bt.logging.info("Popping synthetic task and sending it to miners")
+
             task, synapse = self.synthetic_tasks.pop(0)
+            bt.logging.info("Popping synthetic task and sending it to miners")
+
             miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
             bt.logging.debug(f"Selected miner uids: {miner_uids}")
 
@@ -52,35 +60,45 @@ class GenieValidator:
             )
 
             solutions = []
+
             for synapse, miner_uid in zip(all_synapse_results, miner_uids):
                 processed_synapse = await self.process_synapse(synapse)
                 if processed_synapse is not None:
                     solutions.append(Solution(html = processed_synapse.html, miner_uid = miner_uid, process_time = processed_synapse.dendrite.process_time))
-
+                else:
+                    self.un_responsed_count[miner_uid] += 1
+                    
             if not solutions:
                 bt.logging.warning(f"No valid solutions received")
                 return
             bt.logging.info(f"Received {len(solutions)} solutions")
+
             self.synthetic_history.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in forward: {e}")
             raise e
-
+        
     async def score(self):
-        if not self.synthetic_history:
+        if len(self.synthetic_history) < MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE:
             return 
         
-        task, solutions = self.synthetic_history.pop(0)
+        task, solutions = random.choice(self.synthetic_history)
+        self.synthetic_history = []
+
         task_generator = task.generator
         
         miner_uids = [solution.miner_uid for solution in solutions]
         bt.logging.debug(f"Miner uids: {miner_uids}")
         
         rewards = await task_generator.reward(task, solutions)
-        bt.logging.debug(f"Incentive rewards: {rewards}")
         
+        for i in range(len(miner_uids)):
+            responsed_ratio = 1 - self.un_responsed_count[miner_uids[i]] / len(self.synthetic_history)
+            rewards[i] = rewards[i] * responsed_ratio * responsed_ratio
+        
+        bt.logging.debug(f"Incentive rewards: {rewards}")
         self.neuron.update_scores(rewards, miner_uids)
-        self.neuron.sync()
+        self.neuron.step += 1
 
     async def synthensize_task(self):
         try:

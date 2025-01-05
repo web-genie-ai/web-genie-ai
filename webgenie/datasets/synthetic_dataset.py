@@ -13,6 +13,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 from webgenie.datasets.dataset import Dataset, DatasetEntry
+from webgenie.helpers.llms import call_llm
 from webgenie.prompts import PROMPT_GEN_CONCEPT, PROMPT_GEN_HTML
 
 class ConceptResponse(BaseModel):
@@ -24,39 +25,30 @@ class HTMLResponse(BaseModel):
 class SyntheticDataset(Dataset):
     def __init__(self, has_ground_truth_html: bool = True):
         self.has_ground_truth_html = has_ground_truth_html
-        
-        self.model = ChatOpenAI(
-            api_key= os.getenv("OPENAI_API_KEY"),
-            model_name=os.getenv("LLM_MODEL_ID"),
-            base_url=os.getenv("LLM_MODEL_URL"),
-            temperature=0.6,
-        )
-
         self.concept_parser = JsonOutputParser(pydantic_object=ConceptResponse)
         self.html_parser = JsonOutputParser(pydantic_object=HTMLResponse)
         self.concepts = []
 
     async def _generate_concepts(self):
         bt.logging.info("Generating concepts")
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", PROMPT_GEN_CONCEPT),
-        ]) 
-        chain = prompt | self.model | self.concept_parser
-        response = await chain.ainvoke({
-            "instructions": self.concept_parser.get_format_instructions()
-        })
+        response = await call_llm(
+            template=[
+                ("system", PROMPT_GEN_CONCEPT),
+            ],
+            params={"instructions": self.concept_parser.get_format_instructions()},
+            output_parser=self.concept_parser
+        )
         return response["concepts"]
 
     async def _generate_html(self, concept: str):
         bt.logging.info("Generating HTML from concept")
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", PROMPT_GEN_HTML),
-        ])
-        chain = prompt | self.model | self.html_parser
-        response = await chain.ainvoke({
-            "concept": concept, 
-            "instructions": self.html_parser.get_format_instructions()
-        })
+        response = await call_llm(
+            template=[
+                ("system", PROMPT_GEN_HTML),
+            ],
+            params={"concept": concept, "instructions": self.html_parser.get_format_instructions()},
+            output_parser=self.html_parser
+        )
         return response["html"]
         
     async def generate_context(self)->DatasetEntry:

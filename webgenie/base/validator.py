@@ -61,10 +61,6 @@ class BaseValidatorNeuron(BaseNeuron):
         else:
             self.dendrite = bt.dendrite(wallet=self.wallet)
         bt.logging.info(f"Dendrite: {self.dendrite}")
-
-        # Set up initial scoring weights for validation
-        bt.logging.info("Building validation weights.")
-        self.scores = np.zeros(self.metagraph.n, dtype=np.float32)
         
         bt.logging.info("load_state()")
         self.load_state()
@@ -80,10 +76,6 @@ class BaseValidatorNeuron(BaseNeuron):
         self.is_running: bool = False
         self.thread: Union[threading.Thread, None] = None
         self.lock = asyncio.Lock()
-    
-
-    def run(self):
-        pass
 
     def set_weights(self):
         """
@@ -232,7 +224,6 @@ class BaseValidatorNeuron(BaseNeuron):
 
     def save_state(self):
         """Saves the state of the validator to a file."""
-        bt.logging.info("Saving validator state.")
 
         # Save the state of the validator to file.
         np.savez(
@@ -242,8 +233,6 @@ class BaseValidatorNeuron(BaseNeuron):
             hotkeys=self.hotkeys,
         )
         
-        bt.logging.debug(f"Saved state: step={self.step}, scores={self.scores}")
-
     def load_state(self):
         """Loads the state of the validator from a file."""
         bt.logging.info("Loading validator state.")

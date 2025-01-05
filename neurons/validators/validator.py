@@ -77,34 +77,33 @@ class Validator(BaseValidatorNeuron):
             bt.logging.error(f"Failed to serve Axon with exception: {e}")
             pass
 
-    async def forward(self):
-        return await self.genie_validator.forward()
+    async def query_miners(self):
+        return await self.genie_validator.query_miners()
 
-    async def concurrent_forward(self):
+    async def concurrent_query(self):
         coroutines = [
-            self.forward()
+            self.query_miners()
             for _ in range(self.config.neuron.num_concurrent_forwards)
         ]
         await asyncio.gather(*coroutines)
 
-    async def forward_loop(self):
-        self.sync()
+    async def query_miners_loop(self):
         bt.logging.info(f"Validator starting at block: {self.block}")
+        self.sync()
         while True:
             try:
-                bt.logging.info(f"step({self.step}) block({self.block})")
-                self.loop.run_until_complete(self.concurrent_forward())
+                self.loop.run_until_complete(self.concurrent_query())
                 self.sync()
-                self.step += 1
             except Exception as e:
                 bt.logging.error(f"Error during forward loop: {str(e)}")
             await asyncio.sleep(1)
 
-    async def scoring_loop(self):
+    async def score_loop(self):
         bt.logging.info(f"Scoring loop starting")
         while True:
             try:
                 await self.genie_validator.score()
+                self.sync()
             except Exception as e:
                 bt.logging.error(f"Error during scoring: {str(e)}")
             await asyncio.sleep(1)
@@ -120,17 +119,20 @@ class Validator(BaseValidatorNeuron):
 
     async def __aenter__(self):
         self.loop.create_task(self.synthensize_task_loop())
-        self.loop.create_task(self.forward_loop())
-        self.loop.create_task(self.scoring_loop())
+        self.loop.create_task(self.query_miners_loop())
+        self.loop.create_task(self.score_loop())
         self.is_running = True
+
         bt.logging.debug("Starting validator in background thread")
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        if self.is_running:
-            self.should_exit = True
-            self.is_running = False
-            bt.logging.debug("Stopping validator in background thread")
+        if not self.is_running:
+            return
+        
+        self.should_exit = True
+        self.is_running = False
+        bt.logging.debug("Stopping validator in background thread")
 
 async def main():
     async with Validator() as validator:

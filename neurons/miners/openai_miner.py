@@ -7,6 +7,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 from webgenie.base.neuron import BaseNeuron
+from webgenie.helpers.llms import call_llm
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.tasks.solution import Solution
 
@@ -17,16 +18,11 @@ class OpenaiMiner:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
 
-        self.model = ChatOpenAI(
-            api_key= os.getenv("OPENAI_API_KEY"),
-            model_name="gpt-4o",
-        )
-
         self.html_response_parser = JsonOutputParser(pydantic_object=HTMLResponse)
 
     async def forward_text(self, synapse: WebgenieTextSynapse) -> WebgenieTextSynapse:  
         try:  
-            prompt = ChatPromptTemplate.from_messages([
+            template = [
                 ("system", """You are an expert web developer who specializes in HTML and CSS. A user will provide you with the webpage requirements. You need to return a single html file that uses HTML and CSS to satisfy the requirements. 
                 Include all CSS code in the HTML file itself.
                 If it involves any images, use "rick.jpg" as the placeholder.
@@ -35,13 +31,13 @@ class OpenaiMiner:
                 Respond with the content of the HTML+CSS file:
                 {instructions}"""),
                 ("user", "{query}"),
-            ])
+            ]
 
-            chain = prompt | self.model | self.html_response_parser
-            html_response = await chain.ainvoke({
-                "query": synapse.prompt, 
-                "instructions": self.html_response_parser.get_format_instructions()
-            })
+            html_response = await call_llm(
+                template=template,
+                params={"query": synapse.prompt, "instructions": self.html_response_parser.get_format_instructions()},
+                output_parser=self.html_response_parser
+            )
             
             synapse.html = html_response["html"]
             return synapse
@@ -71,14 +67,11 @@ class OpenaiMiner:
                 )
             ]
 
-            prompt = ChatPromptTemplate(messages=prompt_messages)
-
-            chain = prompt | self.model | self.html_response_parser
-
-            html_response = chain.invoke({
-                "instructions": self.html_response_parser.get_format_instructions(),
-                "image_url": f"data:image/jpeg;base64,{synapse.base64_image}",
-            })
+            html_response = await call_llm(
+                template=prompt_messages,
+                params={"instructions": self.html_response_parser.get_format_instructions(), "image_url": f"data:image/jpeg;base64,{synapse.base64_image}"},
+                output_parser=self.html_response_parser
+            )
 
             synapse.html = html_response["html"]
             return synapse
