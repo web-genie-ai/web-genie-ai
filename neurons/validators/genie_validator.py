@@ -81,22 +81,18 @@ class GenieValidator:
     async def score(self):
         if len(self.synthetic_history) < MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE:
             return 
-        
+        history_size = len(self.synthetic_history)
         task, solutions = random.choice(self.synthetic_history)
-        self.synthetic_history = []
-
         task_generator = task.generator
-        
         miner_uids = [solution.miner_uid for solution in solutions]
-        bt.logging.debug(f"Miner uids: {miner_uids}")
         
         rewards = await task_generator.reward(task, solutions)
         
         for i in range(len(miner_uids)):
-            responsed_ratio = 1 - self.un_responsed_count[miner_uids[i]] / len(self.synthetic_history)
+            responsed_ratio = 1 - self.un_responsed_count[miner_uids[i]] / history_size
             rewards[i] = rewards[i] * responsed_ratio * responsed_ratio
         
-        bt.logging.debug(f"Incentive rewards: {rewards}")
+        bt.logging.success(f"Incentive rewards for {miner_uids}: {rewards}")
         self.neuron.update_scores(rewards, miner_uids)
         self.neuron.step += 1
 
