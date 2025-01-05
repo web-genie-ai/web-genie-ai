@@ -224,7 +224,6 @@ class BaseValidatorNeuron(BaseNeuron):
 
     def save_state(self):
         """Saves the state of the validator to a file."""
-        bt.logging.info("Saving validator state.")
 
         # Save the state of the validator to file.
         np.savez(
@@ -234,8 +233,6 @@ class BaseValidatorNeuron(BaseNeuron):
             hotkeys=self.hotkeys,
         )
         
-        bt.logging.debug(f"Saved state: step={self.step}, scores={self.scores}")
-
     def load_state(self):
         """Loads the state of the validator from a file."""
         bt.logging.info("Loading validator state.")

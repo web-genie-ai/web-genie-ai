@@ -9,12 +9,11 @@ from webgenie.constants import (
     MAX_SYNTHETIC_HISTORY_SIZE, 
     MAX_SYNTHETIC_TASK_SIZE, 
     MAX_DEBUG_IMAGE_STRING_LENGTH, 
-    UPDATE_SCORES_STEP,
+    MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE,
     WORK_DIR
 )
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
-from webgenie.rewards.incentive_rewards import get_incentive_rewards
 from webgenie.tasks.solution import Solution
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.tasks.text_task_generator import TextTaskGenerator
@@ -26,7 +25,9 @@ class GenieValidator:
         self.config = neuron.config
         self.synthetic_history = []
         self.synthetic_tasks = []
-        self.un_responsed_count = [0] * self.neuron.metagraph.n
+        bt.logging.info(f"GenieValidator initialized with neuron: {self.neuron.metagraph.n}")
+        self.un_responsed_count = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        bt.logging.info(f"Un responsed count: {self.un_responsed_count}")
 
         self.task_generators = [
             (TextTaskGenerator(), 0.1),
@@ -80,7 +81,7 @@ class GenieValidator:
             raise e
         
     async def score(self):
-        if not self.synthetic_history:
+        if len(self.synthetic_history) < MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE:
             return 
         
         task, solutions = random.choice(self.synthetic_history)
@@ -99,6 +100,7 @@ class GenieValidator:
         
         bt.logging.debug(f"Incentive rewards: {rewards}")
         self.neuron.update_scores(rewards, miner_uids)
+        self.neuron.step += 1
 
     async def synthensize_task(self):
         try:

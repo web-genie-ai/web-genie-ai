@@ -1,8 +1,17 @@
 # backend api hotkey
 API_HOTKEY = "5DXDCYTuPfLqQXbxfvvnarG31SdTDtaubqpQrzjrcMgoP9dp"
 
+# image task timeout
+IMAGE_TASK_TIMEOUT = 100
+
+# text task timeout
+TEXT_TASK_TIMEOUT = 100
+
 # max synthetic history size
 MAX_SYNTHETIC_HISTORY_SIZE = 30
+
+# min synthetic history size to score
+MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE = 5
 
 # max synthensize task size
 MAX_SYNTHETIC_TASK_SIZE = 30

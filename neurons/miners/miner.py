@@ -168,7 +168,6 @@ class Miner(BaseMinerNeuron):
             bt.logging.warning("Received a request without a dendrite or hotkey.")
             return 0.0
         
-        # TODO(developer): Define how miners should prioritize requests.
         caller_uid = self.metagraph.hotkeys.index(
             synapse.dendrite.hotkey
         )  # Get the caller index.

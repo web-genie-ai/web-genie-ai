@@ -1,0 +1,2 @@
+export PYTHONPATH=.
+pm2 start neurons/miners/miner.py --name "webgenie_miner" --interpreter python -- --netuid 214 --subtensor.network test --wallet.name s-miner --wallet.hotkey miner2 --logging.debug --axon.port 8090
