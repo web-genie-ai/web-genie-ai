@@ -103,7 +103,7 @@ class GenieValidator:
         
         rewards = await task_generator.reward(task, solutions)
         bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
-        self.update_raw_scores(rewards, miner_uids)
+        self.update_raw_scores(rewards * len(self.synthetic_history), miner_uids)
         self.synthetic_history = []
 
     async def synthensize_task(self):
