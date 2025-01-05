@@ -53,11 +53,12 @@ class GenieValidator:
             miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
             bt.logging.debug(f"Selected miner uids: {miner_uids}")
 
-            all_synapse_results = await self.neuron.dendrite(
-                axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
-                synapse=synapse,
-                timeout=task.timeout
-            )
+            async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
+                all_synapse_results = await dendrite(
+                    axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
+                    synapse=synapse,
+                    timeout=task.timeout
+                )
 
             solutions = []
 
