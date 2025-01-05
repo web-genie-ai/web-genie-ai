@@ -25,9 +25,7 @@ class GenieValidator:
         self.config = neuron.config
         self.synthetic_history = []
         self.synthetic_tasks = []
-        bt.logging.info(f"GenieValidator initialized with neuron: {self.neuron.metagraph.n}")
         self.un_responsed_count = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        bt.logging.info(f"Un responsed count: {self.un_responsed_count}")
 
         self.task_generators = [
             (TextTaskGenerator(), 0.1),
