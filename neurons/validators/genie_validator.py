@@ -10,6 +10,7 @@ from webgenie.constants import (
     MAX_SYNTHETIC_TASK_SIZE, 
     MAX_DEBUG_IMAGE_STRING_LENGTH, 
     MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE,
+    UPDATE_SCORE_STEPS,
     WORK_DIR
 )
 from webgenie.helpers.htmls import preprocess_html
@@ -78,24 +79,32 @@ class GenieValidator:
         except Exception as e:
             bt.logging.error(f"Error in forward: {e}")
             raise e
-        
+
+    def update_raw_scores(self, rewards: List[float], miner_uids: List[int]):
+        for i in range(len(miner_uids)):
+            self.neuron.raw_scores[miner_uids[i]] += rewards[i]
+        self.neuron.step += 1
+
+        if self.neuron.step % UPDATE_SCORE_STEPS == 0:
+            rewards_array = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+            rewards_array[:] = self.neuron.raw_scores[:] ** 3
+            
+            bt.logging.success(f"Blockchain rewards: {rewards_array}")
+            self.neuron.update_scores(rewards_array, range(self.neuron.metagraph.n))
+            self.neuron.raw_scores[:] = 0
+
     async def score(self):
         if len(self.synthetic_history) < MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE:
             return 
-        history_size = len(self.synthetic_history)
+    
         task, solutions = random.choice(self.synthetic_history)
         task_generator = task.generator
         miner_uids = [solution.miner_uid for solution in solutions]
         
         rewards = await task_generator.reward(task, solutions)
-        
-        for i in range(len(miner_uids)):
-            responsed_ratio = 1 - self.un_responsed_count[miner_uids[i]] / history_size
-            rewards[i] = rewards[i] * responsed_ratio * responsed_ratio
-        
-        bt.logging.success(f"Incentive rewards for {miner_uids}: {rewards}")
-        self.neuron.update_scores(rewards, miner_uids)
-        self.neuron.step += 1
+        bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
+        self.update_raw_scores(rewards, miner_uids)
+        self.synthetic_history = []
 
     async def synthensize_task(self):
         try:
