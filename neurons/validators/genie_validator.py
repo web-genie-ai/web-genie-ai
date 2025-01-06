@@ -8,7 +8,7 @@ from typing import Union, List
 from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import (
     NUM_CONCURRENT_QUERIES,
-    MAX_SYNTHETIC_HISTORY_SIZE, 
+    MAX_COMPETETION_HISTORY_SIZE, 
     MAX_SYNTHETIC_TASK_SIZE, 
     MAX_DEBUG_IMAGE_STRING_LENGTH, 
     WORK_DIR
@@ -28,8 +28,8 @@ class GenieValidator:
         self.synthetic_tasks = []
 
         self.task_generators = [
-            (TextTaskGenerator(), 0.1),
-            (ImageTaskGenerator(), 0.9),
+            (TextTaskGenerator(), 0.5),
+            (ImageTaskGenerator(), 0.5),
         ]
 
         self.make_work_dir()
@@ -62,7 +62,7 @@ class GenieValidator:
 
     async def query_miners(self):
         try:
-            if len(self.competetions) > MAX_SYNTHETIC_HISTORY_SIZE:
+            if len(self.competetions) > MAX_COMPETETION_HISTORY_SIZE:
                 return
 
             if len(self.synthetic_tasks) < NUM_CONCURRENT_QUERIES:
