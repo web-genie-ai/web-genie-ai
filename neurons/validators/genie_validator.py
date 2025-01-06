@@ -24,7 +24,7 @@ class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
         self.config = neuron.config
-        self.competetions = []
+        self.competitions = []
         self.synthetic_tasks = []
 
         self.task_generators = [
@@ -41,7 +41,7 @@ class GenieValidator:
 
     async def query_miners(self):
         try:
-            if len(self.competetions) > MAX_COMPETETION_HISTORY_SIZE:
+            if len(self.competitions) > MAX_COMPETETION_HISTORY_SIZE:
                 return
 
             if not self.synthetic_tasks:
@@ -65,16 +65,16 @@ class GenieValidator:
                 if processed_synapse is not None:
                     solutions.append(Solution(html = processed_synapse.html, miner_uid = miner_uid, process_time = processed_synapse.dendrite.process_time))
             
-            self.competetions.append((task, solutions))
+            self.competitions.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in query_miners: {e}")
             raise e
 
     async def score(self):
-        if not self.competetions:
+        if not self.competitions:
             return
 
-        task, solutions = self.competetions.pop(0)
+        task, solutions = self.competitions.pop(0)
         if not solutions:
             return
 
