@@ -1,16 +1,16 @@
 import os
 import bittensor as bt
+import asyncio
 import numpy as np
 import random
 from typing import Union, List
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import (
+    NUM_CONCURRENT_QUERIES,
     MAX_SYNTHETIC_HISTORY_SIZE, 
     MAX_SYNTHETIC_TASK_SIZE, 
     MAX_DEBUG_IMAGE_STRING_LENGTH, 
-    MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE,
-    UPDATE_SCORE_STEPS,
     WORK_DIR
 )
 from webgenie.helpers.htmls import preprocess_html
@@ -26,7 +26,6 @@ class GenieValidator:
         self.config = neuron.config
         self.synthetic_history = []
         self.synthetic_tasks = []
-        self.un_responsed_count = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
 
         self.task_generators = [
             (TextTaskGenerator(), 0.1),
@@ -40,20 +39,8 @@ class GenieValidator:
             os.makedirs(WORK_DIR)
             bt.logging.info(f"Created work directory at {WORK_DIR}")
 
-    async def query_miners(self):
-        try:
-            if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
-                return
-
-            if not self.synthetic_tasks:
-                return
-
-            task, synapse = self.synthetic_tasks.pop(0)
-            bt.logging.info("Popping synthetic task and sending it to miners")
-
-            miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)        
-            bt.logging.debug(f"Selected miner uids: {miner_uids}")
-
+    async def query_one_task(self, task, synapse, miner_uids):
+        try:    
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 all_synapse_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
@@ -67,44 +54,61 @@ class GenieValidator:
                 processed_synapse = await self.process_synapse(synapse)
                 if processed_synapse is not None:
                     solutions.append(Solution(html = processed_synapse.html, miner_uid = miner_uid, process_time = processed_synapse.dendrite.process_time))
-                else:
-                    self.un_responsed_count[miner_uid] += 1
-                    
-            if not solutions:
-                bt.logging.warning(f"No valid solutions received")
-                return
-            bt.logging.info(f"Received {len(solutions)} solutions")
-
-            self.synthetic_history.append((task, solutions))
+            
+            return task, solutions
         except Exception as e:
-            bt.logging.error(f"Error in forward: {e}")
+            bt.logging.error(f"Error in query_one_task: {e}")
             raise e
 
-    def update_raw_scores(self, rewards: List[float], miner_uids: List[int]):
-        for i in range(len(miner_uids)):
-            self.neuron.raw_scores[miner_uids[i]] += rewards[i]
-        self.neuron.step += 1
+    async def query_miners(self):
+        try:
+            if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
+                return
 
-        if self.neuron.step % UPDATE_SCORE_STEPS == 0:
-            rewards_array = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-            rewards_array[:] = self.neuron.raw_scores[:] ** 3
+            if len(self.synthetic_tasks) < NUM_CONCURRENT_QUERIES:
+                return
+                
+            bt.logging.info("querying miners")
+
+            miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)
+            bt.logging.debug(f"Selected miner uids: {miner_uids}")
+
+            query_coroutines = [self.query_one_task(task, synapse, miner_uids) for task, synapse in self.synthetic_tasks]
+
+            self.synthetic_tasks = []
             
-            bt.logging.success(f"Blockchain rewards: {rewards_array}")
-            self.neuron.update_scores(rewards_array, range(self.neuron.metagraph.n))
-            self.neuron.raw_scores[:] = 0
+            results = await asyncio.gather(*query_coroutines, return_exceptions=True)
+            self.synthetic_history.append(results)
+        
+        except Exception as e:
+            bt.logging.error(f"Error in query_miners: {e}")
+            raise e
 
     async def score(self):
-        if len(self.synthetic_history) < MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE:
-            return 
-    
-        task, solutions = random.choice(self.synthetic_history)
-        task_generator = task.generator
-        miner_uids = [solution.miner_uid for solution in solutions]
-        
-        rewards = await task_generator.reward(task, solutions)
-        bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
-        self.update_raw_scores(rewards * len(self.synthetic_history), miner_uids)
-        self.synthetic_history = []
+        if not self.synthetic_history:
+            return
+
+        results = self.synthetic_history.pop(0)
+        raw_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        for result in results:
+            if isinstance(result, Exception):
+                continue
+
+            task, solutions = result
+            if not solutions:
+                continue
+
+            task_generator = task.generator
+            miner_uids = [solution.miner_uid for solution in solutions]
+            rewards = await task_generator.reward(task, solutions)
+            bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
+            
+            for i in range(len(miner_uids)):
+                raw_scores[miner_uids[i]] += rewards[i]
+
+        raw_scores[:] = raw_scores[:] ** 3
+        self.neuron.update_scores(raw_scores, range(self.neuron.metagraph.n))
+        self.neuron.step += 1
 
     async def synthensize_task(self):
         try:

@@ -10,14 +10,11 @@ TEXT_TASK_TIMEOUT = 100
 # max synthetic history size
 MAX_SYNTHETIC_HISTORY_SIZE = 30
 
-# min synthetic history size to score
-MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE = 3
-
-# update score interval
-UPDATE_SCORE_STEPS = 10
-
 # max synthensize task size
 MAX_SYNTHETIC_TASK_SIZE = 30
+
+# the number of concurrent queries
+NUM_CONCURRENT_QUERIES = 10
 
 # max debug image string length
 MAX_DEBUG_IMAGE_STRING_LENGTH = 20
