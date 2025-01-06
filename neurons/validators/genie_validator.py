@@ -10,14 +10,14 @@ from webgenie.constants import (
     MAX_COMPETETION_HISTORY_SIZE, 
     MAX_SYNTHETIC_TASK_SIZE, 
     MAX_DEBUG_IMAGE_STRING_LENGTH,
-    MIN_REWARD_THRESHOLD,
     WORK_DIR,
 )
 from webgenie.competitions import (
     ImageTaskAccuracyCompetition, 
     TextTaskAccuracyCompetition,
     ImageTaskQualityCompetition,
-    TextTaskQualityCompetition
+    TextTaskQualityCompetition,
+    RESERVED_WEIGHTS
 )
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
@@ -100,7 +100,7 @@ class GenieValidator:
         if best_miner == -1:
             return
     
-        self.neuron.update_scores([task.reserved_reward], [best_miner])
+        self.neuron.update_scores([RESERVED_WEIGHTS[competition.name]], [best_miner])
         self.neuron.step += 1
 
     async def synthensize_task(self):

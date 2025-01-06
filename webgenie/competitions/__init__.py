@@ -1,11 +1,11 @@
-from webgenie.competitions.text_task_competition import TextTaskCompetition, TextTaskAccuracyCompetition, TextTaskQualityCompetition
-from webgenie.competitions.image_task_competition import ImageTaskCompetition, ImageTaskAccuracyCompetition, ImageTaskQualityCompetition
+from webgenie.competitions.text_task_competition import TextTaskAccuracyCompetition, TextTaskQualityCompetition
+from webgenie.competitions.image_task_competition import ImageTaskAccuracyCompetition, ImageTaskQualityCompetition
 
 RESERVED_WEIGHTS = {
-    TextTaskAccuracyCompetition: 50,
-    TextTaskQualityCompetition: 20,
-    ImageTaskAccuracyCompetition: 90,
-    ImageTaskQualityCompetition: 10
+    TextTaskAccuracyCompetition.name: 50,
+    TextTaskQualityCompetition.name: 20,
+    ImageTaskAccuracyCompetition.name: 90,
+    ImageTaskQualityCompetition.name: 10
 }
 
 

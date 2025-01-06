@@ -4,17 +4,8 @@ API_HOTKEY = "5DXDCYTuPfLqQXbxfvvnarG31SdTDtaubqpQrzjrcMgoP9dp"
 # image task timeout
 IMAGE_TASK_TIMEOUT = 100
 
-# image task reward
-IMAGE_TASK_REWARD = 80
-
 # text task timeout
 TEXT_TASK_TIMEOUT = 100
-
-# text task reward
-TEXT_TASK_REWARD = 20
-
-# minimum reward threshold
-MIN_REWARD_THRESHOLD = 0.5
 
 # max competition history size
 MAX_COMPETETION_HISTORY_SIZE = 30

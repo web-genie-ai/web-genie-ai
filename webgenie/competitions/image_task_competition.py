@@ -15,6 +15,7 @@ from webgenie.datasets.synthetic_dataset import SyntheticDataset
 from webgenie.datasets.huggingface_dataset import HuggingfaceDataset
     
 class ImageTaskCompetition(Competition):
+    name = "ImageTaskCompetition"
     def __init__(self):
         super().__init__()
         
@@ -42,6 +43,7 @@ class ImageTaskCompetition(Competition):
         ), WebgenieImageSynapse(base64_image=base64_image)
 
 class ImageTaskAccuracyCompetition(ImageTaskCompetition):
+    name = "ImageTaskAccuracyCompetition"
     def __init__(self):
         super().__init__()
 
@@ -51,6 +53,7 @@ class ImageTaskAccuracyCompetition(ImageTaskCompetition):
         ]
 
 class ImageTaskQualityCompetition(ImageTaskCompetition):
+    name = "ImageTaskQualityCompetition"
     def __init__(self):
         super().__init__()
 

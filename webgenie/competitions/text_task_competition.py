@@ -13,6 +13,7 @@ from webgenie.tasks.task import Task, TextTask
 from webgenie.competitions.competition import Competition
 
 class TextTaskCompetition(Competition):
+    name = "TextTaskCompetition"
     def __init__(self):
         super().__init__()
     
@@ -31,6 +32,7 @@ class TextTaskCompetition(Competition):
         ), WebgenieTextSynapse(prompt=dataset_entry.prompt)
 
 class TextTaskAccuracyCompetition(TextTaskCompetition):
+    name = "TextTaskAccuracyCompetition"
     def __init__(self):
         super().__init__()
         self.rewards = [
@@ -39,6 +41,7 @@ class TextTaskAccuracyCompetition(TextTaskCompetition):
         ]
 
 class TextTaskQualityCompetition(TextTaskCompetition):
+    name = "TextTaskQualityCompetition"
     def __init__(self):
         super().__init__()
         self.rewards = [
