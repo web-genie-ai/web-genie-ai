@@ -11,7 +11,10 @@ TEXT_TASK_TIMEOUT = 100
 MAX_SYNTHETIC_HISTORY_SIZE = 30
 
 # min synthetic history size to score
-MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE = 5
+MIN_SYNTHETIC_HISTORY_SIZE_TO_SCORE = 3
+
+# update score interval
+UPDATE_SCORE_STEPS = 10
 
 # max synthensize task size
 MAX_SYNTHETIC_TASK_SIZE = 30

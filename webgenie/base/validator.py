@@ -51,17 +51,14 @@ class BaseValidatorNeuron(BaseNeuron):
     def __init__(self, config=None):
         super().__init__(config=config)        
         init_wandb(self)
-
-        # Save a copy of the hotkeys to local memory.
-        self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
-
+        
         # Dendrite lets us send messages to other nodes (axons) in the network.
         if self.config.mock:
             self.dendrite = MockDendrite(wallet=self.wallet)
         else:
             self.dendrite = bt.dendrite(wallet=self.wallet)
         bt.logging.info(f"Dendrite: {self.dendrite}")
-        
+
         bt.logging.info("load_state()")
         self.load_state()
         
@@ -143,10 +140,6 @@ class BaseValidatorNeuron(BaseNeuron):
 
     def resync_metagraph(self):
         """Resyncs the metagraph and updates the hotkeys and moving averages based on the new metagraph."""
-        #TODO: Implement this
-
-        #bt.logging.info("resync_metagraph()")
-
         # Copies state of metagraph before syncing.
         previous_metagraph = copy.deepcopy(self.metagraph)
 
@@ -164,15 +157,19 @@ class BaseValidatorNeuron(BaseNeuron):
         for uid, hotkey in enumerate(self.hotkeys):
             if hotkey != self.metagraph.hotkeys[uid]:
                 self.scores[uid] = 0  # hotkey has been replaced
+                self.raw_scores[uid] = 0
 
         # Check to see if the metagraph has changed size.
         # If so, we need to add new hotkeys and moving averages.
         if len(self.hotkeys) < len(self.metagraph.hotkeys):
-            # Update the size of the moving average scores.
             new_moving_average = np.zeros((self.metagraph.n))
             min_len = min(len(self.hotkeys), len(self.scores))
             new_moving_average[:min_len] = self.scores[:min_len]
             self.scores = new_moving_average
+
+            new_raw_scores = np.zeros(self.metagraph.n, dtype=np.float32)
+            new_raw_scores[:min_len] = self.raw_scores[:min_len]
+            self.raw_scores = new_raw_scores
 
         # Update the hotkeys.
         self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
@@ -183,7 +180,6 @@ class BaseValidatorNeuron(BaseNeuron):
         # Check if rewards contains NaN values.
         if np.isnan(rewards).any():
             bt.logging.warning(f"NaN values detected in rewards: {rewards}")
-            # Replace any NaN values in rewards with 0.
             rewards = np.nan_to_num(rewards, nan=0)
 
         # Ensure rewards is a numpy array.
@@ -229,6 +225,7 @@ class BaseValidatorNeuron(BaseNeuron):
         np.savez(
             self.config.neuron.full_path + "/state.npz",
             step=self.step,
+            raw_scores=self.raw_scores,
             scores=self.scores,
             hotkeys=self.hotkeys,
         )
@@ -238,14 +235,15 @@ class BaseValidatorNeuron(BaseNeuron):
         bt.logging.info("Loading validator state.")
 
         # Load the state of the validator from file.
-        state = np.load(self.config.neuron.full_path + "/state.npz")
-        if "step" in state:
+        try:
+            state = np.load(self.config.neuron.full_path + "/state.npz")
             self.step = state["step"]
             self.scores = state["scores"]
+            self.raw_scores = state["raw_scores"]
             self.hotkeys = state["hotkeys"]
-        else:
-            bt.logging.warning("No state found. Initializing with default values.")
+        except Exception as e:
             self.step = 0
+            self.raw_scores = np.zeros(self.metagraph.n, dtype=np.float32)
             self.scores = np.zeros(self.metagraph.n, dtype=np.float32)
             self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
 

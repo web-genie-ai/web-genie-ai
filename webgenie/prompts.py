@@ -44,9 +44,20 @@ The following is the given html code:
 PROMPT_QUALITY = """
 You are an HTML, CSS expert. I have an HTML code.
 I want you to evaluate the html code on the following criteria and give a score from 0 to 100.
-1. The html code is in the professional style.
-2. The html code is using SEO-friendly practices.
-3. The html code is not using redundant code.
+
+The following criteria:
+1. Semantic HTML: Use appropriate HTML tags to convey meaning. weight: 20
+2. Accessibility: Ensure content is usable for all, including those with disabilities. weight: 15
+3. Clean and Readable Code: Maintain consistent formatting and meaningful naming conventions. weight: 10
+4. Responsive Design: Implement designs that adapt to various screen sizes.  weight: 12
+5. Performance Optimization: Minimize file sizes and optimize selectors for faster loading. weight: 10
+6. Cross-Browser Compatibility: Ensure consistent rendering across different browsers. weight: 8
+7. Validation: Use W3C validators to check for errors and deprecated elements. weight: 7
+8. Maintainability: Structure code for easy updates and modifications.  weight: 8
+9. Use of Best Practices: Avoid anti-patterns like excessive specificity and inline styles. weight: 5
+10. Documentation: Provide clear documentation for styles and design choices. weight: 5
+
+If the html/css code is not following each criteria, reduce score by its weight.
 
 The following is the given html code:
 {html}
