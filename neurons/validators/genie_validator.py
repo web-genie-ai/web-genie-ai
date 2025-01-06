@@ -43,6 +43,9 @@ class GenieValidator:
         try:
             if len(self.competetions) > MAX_COMPETETION_HISTORY_SIZE:
                 return
+
+            if not self.synthetic_tasks:
+                return
                 
             bt.logging.info("querying miners")
 
