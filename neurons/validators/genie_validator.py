@@ -89,7 +89,7 @@ class GenieValidator:
             return
 
         results = self.synthetic_history.pop(0)
-        raw_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        tatal_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         for result in results:
             if isinstance(result, Exception):
                 continue
@@ -104,10 +104,10 @@ class GenieValidator:
             bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
             
             for i in range(len(miner_uids)):
-                raw_scores[miner_uids[i]] += rewards[i]
+                tatal_scores[miner_uids[i]] += rewards[i]
 
-        raw_scores[:] = raw_scores[:] ** 3
-        self.neuron.update_scores(raw_scores, range(self.neuron.metagraph.n))
+        tatal_scores[:] = tatal_scores[:] ** 3
+        self.neuron.update_scores(tatal_scores, range(self.neuron.metagraph.n))
         self.neuron.step += 1
 
     async def synthensize_task(self):
