@@ -24,7 +24,7 @@ class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
         self.config = neuron.config
-        self.synthetic_history = []
+        self.competetions = []
         self.synthetic_tasks = []
 
         self.task_generators = [
@@ -62,7 +62,7 @@ class GenieValidator:
 
     async def query_miners(self):
         try:
-            if len(self.synthetic_history) > MAX_SYNTHETIC_HISTORY_SIZE:
+            if len(self.competetions) > MAX_SYNTHETIC_HISTORY_SIZE:
                 return
 
             if len(self.synthetic_tasks) < NUM_CONCURRENT_QUERIES:
@@ -78,17 +78,17 @@ class GenieValidator:
             self.synthetic_tasks = []
             
             results = await asyncio.gather(*query_coroutines, return_exceptions=True)
-            self.synthetic_history.append(results)
+            self.competetions.append(results)
         
         except Exception as e:
             bt.logging.error(f"Error in query_miners: {e}")
             raise e
 
     async def score(self):
-        if not self.synthetic_history:
+        if not self.competetions:
             return
 
-        results = self.synthetic_history.pop(0)
+        results = self.competetions.pop(0)
         tatal_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         for result in results:
             if isinstance(result, Exception):
