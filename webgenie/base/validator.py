@@ -157,7 +157,6 @@ class BaseValidatorNeuron(BaseNeuron):
         for uid, hotkey in enumerate(self.hotkeys):
             if hotkey != self.metagraph.hotkeys[uid]:
                 self.scores[uid] = 0  # hotkey has been replaced
-                self.raw_scores[uid] = 0
 
         # Check to see if the metagraph has changed size.
         # If so, we need to add new hotkeys and moving averages.
@@ -166,10 +165,6 @@ class BaseValidatorNeuron(BaseNeuron):
             min_len = min(len(self.hotkeys), len(self.scores))
             new_moving_average[:min_len] = self.scores[:min_len]
             self.scores = new_moving_average
-
-            new_raw_scores = np.zeros(self.metagraph.n, dtype=np.float32)
-            new_raw_scores[:min_len] = self.raw_scores[:min_len]
-            self.raw_scores = new_raw_scores
 
         # Update the hotkeys.
         self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
@@ -225,7 +220,6 @@ class BaseValidatorNeuron(BaseNeuron):
         np.savez(
             self.config.neuron.full_path + "/state.npz",
             step=self.step,
-            raw_scores=self.raw_scores,
             scores=self.scores,
             hotkeys=self.hotkeys,
         )
@@ -239,11 +233,9 @@ class BaseValidatorNeuron(BaseNeuron):
             state = np.load(self.config.neuron.full_path + "/state.npz")
             self.step = state["step"]
             self.scores = state["scores"]
-            self.raw_scores = state["raw_scores"]
             self.hotkeys = state["hotkeys"]
         except Exception as e:
             self.step = 0
-            self.raw_scores = np.zeros(self.metagraph.n, dtype=np.float32)
             self.scores = np.zeros(self.metagraph.n, dtype=np.float32)
             self.hotkeys = copy.deepcopy(self.metagraph.hotkeys)
 
