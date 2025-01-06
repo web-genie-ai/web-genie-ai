@@ -47,6 +47,10 @@ def get_most_available_uid(self, exclude: List[int] = None) -> int:
     
     return candidate_uids[np.argmax(self.metagraph.S[candidate_uids])]
 
+def get_all_available_uids(
+    self, exclude: List[int] = None
+) -> np.ndarray:
+    return [uid for uid in range(self.metagraph.n.item()) if check_uid_availability(self.metagraph, uid, self.config.neuron.vpermit_tao_limit) and (exclude is None or uid not in exclude)]
 
 def get_random_uids(
     self, k: int, exclude: List[int] = None

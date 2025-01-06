@@ -7,18 +7,18 @@ from typing import Union, List
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import (
-    NUM_CONCURRENT_QUERIES,
     MAX_COMPETETION_HISTORY_SIZE, 
     MAX_SYNTHETIC_TASK_SIZE, 
-    MAX_DEBUG_IMAGE_STRING_LENGTH, 
-    WORK_DIR
+    MAX_DEBUG_IMAGE_STRING_LENGTH,
+    MIN_REWARD_THRESHOLD,
+    WORK_DIR,
 )
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks.solution import Solution
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.tasks.text_task_generator import TextTaskGenerator
-from webgenie.utils.uids import get_random_uids
+from webgenie.utils.uids import get_all_available_uids, get_most_available_uid
 
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
@@ -39,8 +39,16 @@ class GenieValidator:
             os.makedirs(WORK_DIR)
             bt.logging.info(f"Created work directory at {WORK_DIR}")
 
-    async def query_one_task(self, task, synapse, miner_uids):
-        try:    
+    async def query_miners(self):
+        try:
+            if len(self.competetions) > MAX_COMPETETION_HISTORY_SIZE:
+                return
+                
+            bt.logging.info("querying miners")
+
+            task, synapse = self.synthetic_tasks.pop(0)
+            miner_uids = get_all_available_uids(self.neuron)
+            
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 all_synapse_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
@@ -49,37 +57,12 @@ class GenieValidator:
                 )
 
             solutions = []
-
             for synapse, miner_uid in zip(all_synapse_results, miner_uids):
                 processed_synapse = await self.process_synapse(synapse)
                 if processed_synapse is not None:
                     solutions.append(Solution(html = processed_synapse.html, miner_uid = miner_uid, process_time = processed_synapse.dendrite.process_time))
             
-            return task, solutions
-        except Exception as e:
-            bt.logging.error(f"Error in query_one_task: {e}")
-            raise e
-
-    async def query_miners(self):
-        try:
-            if len(self.competetions) > MAX_COMPETETION_HISTORY_SIZE:
-                return
-
-            if len(self.synthetic_tasks) < NUM_CONCURRENT_QUERIES:
-                return
-                
-            bt.logging.info("querying miners")
-
-            miner_uids = get_random_uids(self.neuron, k=self.config.neuron.sample_size)
-            bt.logging.debug(f"Selected miner uids: {miner_uids}")
-
-            query_coroutines = [self.query_one_task(task, synapse, miner_uids) for task, synapse in self.synthetic_tasks]
-
-            self.synthetic_tasks = []
-            
-            results = await asyncio.gather(*query_coroutines, return_exceptions=True)
-            self.competetions.append(results)
-        
+            self.competetions.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in query_miners: {e}")
             raise e
@@ -88,26 +71,27 @@ class GenieValidator:
         if not self.competetions:
             return
 
-        results = self.competetions.pop(0)
-        tatal_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        for result in results:
-            if isinstance(result, Exception):
-                continue
+        task, solutions = self.competetions.pop(0)
+        if not solutions:
+            return
 
-            task, solutions = result
-            if not solutions:
-                continue
+        best_miner = -1
+        best_reward = MIN_REWARD_THRESHOLD
 
-            task_generator = task.generator
-            miner_uids = [solution.miner_uid for solution in solutions]
-            rewards = await task_generator.reward(task, solutions)
-            bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
-            
-            for i in range(len(miner_uids)):
-                tatal_scores[miner_uids[i]] += rewards[i]
+        task_generator = task.generator
+        miner_uids = [solution.miner_uid for solution in solutions]
+        rewards = await task_generator.reward(task, solutions)
+        bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
+        
+        for i in range(len(miner_uids)):
+            if rewards[i] > best_reward:
+                best_reward = rewards[i]
+                best_miner = miner_uids[i]
 
-        tatal_scores[:] = tatal_scores[:] ** 3
-        self.neuron.update_scores(tatal_scores, range(self.neuron.metagraph.n))
+        if best_miner == -1:
+            return
+    
+        self.neuron.update_scores([task.reserved_reward], [best_miner])
         self.neuron.step += 1
 
     async def synthensize_task(self):
@@ -133,7 +117,7 @@ class GenieValidator:
         else:
             bt.logging.debug(f"Organic image forward: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}...")
 
-        best_miner_uid = 3
+        best_miner_uid = get_most_available_uid(self.neuron)
         try:
             axon = self.neuron.metagraph.axons[best_miner_uid]
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:

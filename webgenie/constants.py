@@ -4,17 +4,23 @@ API_HOTKEY = "5DXDCYTuPfLqQXbxfvvnarG31SdTDtaubqpQrzjrcMgoP9dp"
 # image task timeout
 IMAGE_TASK_TIMEOUT = 100
 
+# image task reward
+IMAGE_TASK_REWARD = 80
+
 # text task timeout
 TEXT_TASK_TIMEOUT = 100
+
+# text task reward
+TEXT_TASK_REWARD = 20
+
+# minimum reward threshold
+MIN_REWARD_THRESHOLD = 0.5
 
 # max competition history size
 MAX_COMPETETION_HISTORY_SIZE = 30
 
-# max synthensize task size
+# max synthetic task size
 MAX_SYNTHETIC_TASK_SIZE = 30
-
-# the number of concurrent queries
-NUM_CONCURRENT_QUERIES = 10
 
 # max debug image string length
 MAX_DEBUG_IMAGE_STRING_LENGTH = 20
