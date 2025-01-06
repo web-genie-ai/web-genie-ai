@@ -22,6 +22,9 @@ def take_screenshot(url, output_file="screenshot.png", do_it_again=False):
             # Navigate to the URL
             page.goto(url, timeout=60000)
 
+            # Wait for 10 seconds to ensure page is fully loaded
+            page.wait_for_timeout(10000)
+
             # Take the screenshot
             page.screenshot(path=output_file, full_page=True, animations="disabled", timeout=60000)
 
