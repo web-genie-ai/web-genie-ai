@@ -19,7 +19,7 @@ from webgenie.competitions import (
     TextTaskQualityCompetition,
     RESERVED_WEIGHTS
 )
-from webgenie.helpers.htmls import preprocess_html
+from webgenie.helpers.htmls import preprocess_html, validate_resources
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks.solution import Solution
 from webgenie.utils.uids import get_all_available_uids, get_most_available_uid
@@ -148,8 +148,11 @@ class GenieValidator:
     
     async def process_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
-            synapse.html = preprocess_html(synapse.html)
-            if not synapse.html:
+            html = preprocess_html(synapse.html)
+            if not html:
                 return None
+            if not validate_resources(html):
+                return None
+            synapse.html = html
             return synapse
         return None

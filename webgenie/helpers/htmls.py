@@ -5,6 +5,7 @@ from lxml import etree
 import time
 import re
 import uuid
+
 from webgenie.constants import (
     SCREENSHOT_SCRIPT_PATH,
     WORK_DIR,
@@ -12,6 +13,32 @@ from webgenie.constants import (
     PYTHON_CMD
 )
 from webgenie.helpers.images import image_to_base64
+from bs4 import BeautifulSoup
+import re
+
+def validate_resources(html: str) -> bool:
+    # List of allowed patterns for CSS and JavaScript resources
+    allowed_patterns = [
+        r"https?://cdn.jsdelivr.net/npm/tailwindcss@[^/]+/dist/tailwind.min.css",
+        r"https?://stackpath.bootstrapcdn.com/bootstrap/[^/]+/css/bootstrap.min.css",
+        r"https?://code.jquery.com/jquery-[^/]+.min.js",
+        r"https?://stackpath.bootstrapcdn.com/bootstrap/[^/]+/js/bootstrap.bundle.min.js"
+    ]
+    
+    soup = BeautifulSoup(html, 'html.parser')
+    resources = soup.find_all(['link', 'script'])
+    
+    for resource in resources:
+        if resource.name == 'link' and resource.get('rel') == ['stylesheet']:
+            href = resource.get('href')
+            if href and not any(re.match(pattern, href) for pattern in allowed_patterns):
+                return False
+        elif resource.name == 'script':
+            src = resource.get('src')
+            if src and not any(re.match(pattern, src) for pattern in allowed_patterns):
+                return False
+
+    return True
 
 def is_valid_html(html: str):
     try:
@@ -58,9 +85,6 @@ def html_to_screenshot(html: str) -> str:
 def beautify_html(html: str) -> str:
     soup = BeautifulSoup(html, 'html.parser')
     return soup.prettify()
-
-import re
-from bs4 import BeautifulSoup
 
 def replace_image_sources(html_content, new_url=PLACE_HOLDER_IMAGE_URL):
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -112,11 +136,9 @@ def is_empty_html(html: str) -> bool:
     soup = BeautifulSoup(html, 'html.parser')
     body = soup.find('body')
     
-    # Return True if no body tag exists
     if not body:
         return True
         
-    # Return True if body has no content (whitespace is stripped)
     if not body.get_text(strip=True):
         return True
         
