@@ -13,11 +13,15 @@ from webgenie.constants import (
     MIN_REWARD_THRESHOLD,
     WORK_DIR,
 )
+from webgenie.competitions import (
+    ImageTaskAccuracyCompetition, 
+    TextTaskAccuracyCompetition,
+    ImageTaskQualityCompetition,
+    TextTaskQualityCompetition
+)
 from webgenie.helpers.htmls import preprocess_html
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks.solution import Solution
-from webgenie.tasks.image_task_generator import ImageTaskGenerator
-from webgenie.tasks.text_task_generator import TextTaskGenerator
 from webgenie.utils.uids import get_all_available_uids, get_most_available_uid
 
 class GenieValidator:
@@ -27,9 +31,11 @@ class GenieValidator:
         self.competitions = []
         self.synthetic_tasks = []
 
-        self.task_generators = [
-            (TextTaskGenerator(), 0.5),
-            (ImageTaskGenerator(), 0.5),
+        self.avail_competitions = [
+            (TextTaskAccuracyCompetition(), 0.5),
+            (TextTaskQualityCompetition(), 0.5),
+            (ImageTaskAccuracyCompetition(), 0.5),
+            (ImageTaskQualityCompetition(), 0.5),
         ]
 
         self.make_work_dir()
@@ -79,11 +85,11 @@ class GenieValidator:
             return
 
         best_miner = -1
-        best_reward = MIN_REWARD_THRESHOLD
+        best_reward = 0.0
 
-        task_generator = task.generator
+        competition = task.competition
         miner_uids = [solution.miner_uid for solution in solutions]
-        rewards = await task_generator.reward(task, solutions)
+        rewards = await competition.reward(task, solutions)
         bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
         
         for i in range(len(miner_uids)):
@@ -104,12 +110,12 @@ class GenieValidator:
 
             bt.logging.debug(f"Synthensize task")
             
-            task_generator, _ = random.choices(
-                self.task_generators,
-                weights=[weight for _, weight in self.task_generators]
+            competition, _ = random.choices(
+                self.avail_competitions,
+                weights=[weight for _, weight in self.avail_competitions]
             )[0]
             
-            task, synapse = await task_generator.generate_task()
+            task, synapse = await competition.generate_task()
             self.synthetic_tasks.append((task, synapse))
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")

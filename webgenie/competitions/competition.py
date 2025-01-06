@@ -6,12 +6,9 @@ from webgenie.rewards.incentive_rewards import get_incentive_rewards
 from webgenie.tasks import Task
 from webgenie.tasks.solution import Solution
 
-class TaskGenerator:
-    """
-    A singleton generator for tasks.
-    """
+class Competition:
     def __init__(self):
-        pass       
+        self.rewards = []
 
     async def generate_task(self) -> Tuple[Task, bt.Synapse]:
         pass
