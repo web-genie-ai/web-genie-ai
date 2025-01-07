@@ -4,6 +4,7 @@ import bittensor as bt
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
+
 LLM = ChatOpenAI(
     base_url=os.getenv("LLM_MODEL_URL"),
     model=os.getenv("LLM_MODEL_ID"),
