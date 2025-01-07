@@ -10,15 +10,12 @@ from webgenie.protocol import WebgenieTextSynapse
 from webgenie.rewards.quality_reward import QualityReward
 from webgenie.rewards.rtc_reward import RtcReward
 from webgenie.tasks.task import Task, TextTask
-from webgenie.tasks.task_generator import TaskGenerator
+from webgenie.competitions.competition import Competition
 
-class TextTaskGenerator(TaskGenerator):
-    def __init__(self, has_ground_truth_html: bool = True):
+class TextTaskCompetition(Competition):
+    name = "TextTaskCompetition"
+    def __init__(self):
         super().__init__()
-        self.rewards = [
-            (RtcReward(), 0.9),
-            (QualityReward(), 0.1)
-        ]
     
         self.datasets = [
             SyntheticDataset(has_ground_truth_html = True)
@@ -31,5 +28,23 @@ class TextTaskGenerator(TaskGenerator):
             prompt=dataset_entry.prompt, 
             ground_truth_html=dataset_entry.ground_truth_html,
             timeout=TEXT_TASK_TIMEOUT,
-            generator=self
+            competition=self
         ), WebgenieTextSynapse(prompt=dataset_entry.prompt)
+
+class TextTaskAccuracyCompetition(TextTaskCompetition):
+    name = "TextTaskAccuracyCompetition"
+    def __init__(self):
+        super().__init__()
+        self.rewards = [
+            (RtcReward(), 0.9),
+            (QualityReward(), 0.1)
+        ]
+
+class TextTaskQualityCompetition(TextTaskCompetition):
+    name = "TextTaskQualityCompetition"
+    def __init__(self):
+        super().__init__()
+        self.rewards = [
+            (RtcReward(), 0.5),
+            (QualityReward(), 0.5)
+        ]

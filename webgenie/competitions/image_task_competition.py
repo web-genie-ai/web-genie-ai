@@ -8,19 +8,17 @@ from webgenie.helpers.htmls import html_to_screenshot, preprocess_html, is_empty
 from webgenie.protocol import WebgenieImageSynapse
 from webgenie.tasks.solution import Solution
 from webgenie.tasks.task import Task, ImageTask
-from webgenie.tasks.task_generator import TaskGenerator
+from webgenie.competitions.competition import Competition
 from webgenie.rewards.quality_reward import QualityReward
 from webgenie.rewards.visual_reward import VisualReward
 from webgenie.datasets.synthetic_dataset import SyntheticDataset
 from webgenie.datasets.huggingface_dataset import HuggingfaceDataset
     
-class ImageTaskGenerator(TaskGenerator):
+class ImageTaskCompetition(Competition):
+    name = "ImageTaskCompetition"
     def __init__(self):
         super().__init__()
-        self.rewards = [
-            (VisualReward(), 0.9),
-            (QualityReward(), 0.1)
-        ]
+        
         self.datasets = [
             SyntheticDataset(),
             HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"),
@@ -41,7 +39,25 @@ class ImageTaskGenerator(TaskGenerator):
             base64_image=base64_image, 
             ground_truth_html=ground_truth_html,
             timeout=IMAGE_TASK_TIMEOUT,
-            generator=self,
+            competition=self,
         ), WebgenieImageSynapse(base64_image=base64_image)
 
+class ImageTaskAccuracyCompetition(ImageTaskCompetition):
+    name = "ImageTaskAccuracyCompetition"
+    def __init__(self):
+        super().__init__()
 
+        self.rewards = [
+            (VisualReward(), 0.9),
+            (QualityReward(), 0.1)
+        ]
+
+class ImageTaskQualityCompetition(ImageTaskCompetition):
+    name = "ImageTaskQualityCompetition"
+    def __init__(self):
+        super().__init__()
+
+        self.rewards = [
+            (VisualReward(), 0.5),
+            (QualityReward(), 0.5)
+        ]

@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 class Task(BaseModel):
     timeout: float = Field(default=50)
-    generator: Any = Field(default=None)
+    competition: Any = Field(default=None)
 
 class ImageTask(Task):
     base64_image: str = Field(default="", description="The base64 encoded image")

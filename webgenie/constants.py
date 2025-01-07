@@ -7,14 +7,11 @@ IMAGE_TASK_TIMEOUT = 100
 # text task timeout
 TEXT_TASK_TIMEOUT = 100
 
-# max synthetic history size
-MAX_SYNTHETIC_HISTORY_SIZE = 30
+# max competition history size
+MAX_COMPETETION_HISTORY_SIZE = 30
 
-# max synthensize task size
+# max synthetic task size
 MAX_SYNTHETIC_TASK_SIZE = 30
-
-# the number of concurrent queries
-NUM_CONCURRENT_QUERIES = 10
 
 # max debug image string length
 MAX_DEBUG_IMAGE_STRING_LENGTH = 20
