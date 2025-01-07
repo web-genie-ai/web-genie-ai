@@ -4,13 +4,14 @@ from bs4 import BeautifulSoup
 from collections import Counter
 from duckduckgo_search import DDGS
 import nltk
-from urllib.parse import urljoin
 from nltk.corpus import brown
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
+from urllib.parse import urljoin
 import random
 from typing import Optional
 
 from webgenie.datasets.dataset import Dataset, DatasetEntry
+
 
 class RandomWebsiteDataset(Dataset):
     def __init__(self , **kwargs):
@@ -35,16 +36,15 @@ class RandomWebsiteDataset(Dataset):
             print(f"Failed to get search results from DuckDuckGo: {ex}")
         return None
 
-    
     async def get_rendered_html(self, url):
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            page = browser.new_page()
-            page.goto(url)
+        async with async_playwright() as p:
+            browser = await p.chromium.launch()
+            page = await browser.new_page()
+            await page.goto(url)
             # Wait for 10 seconds to ensure content loads
-            page.wait_for_timeout(10000)
-            rendered_html = page.content()  # Get the rendered HTML
-            browser.close()
+            await page.wait_for_timeout(10000)
+            rendered_html = await page.content()  # Get the rendered HTML
+            await browser.close()
 
             # Parse the HTML with BeautifulSoup
             soup = BeautifulSoup(rendered_html, 'html.parser')
@@ -95,7 +95,7 @@ class RandomWebsiteDataset(Dataset):
                 topic="random_website",
                 ground_truth_html=html,
                 prompt="",
-                base64_image=""
+                base64_image="",
             )
         except Exception as e:
             bt.logging.error(f"Error in generate_context: {e}")

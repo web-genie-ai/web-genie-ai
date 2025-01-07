@@ -6,6 +6,7 @@ import webgenie
 
 wandb_on = False
 
+
 def init_wandb(self):
     try:
         global wandb_on
@@ -22,7 +23,7 @@ def init_wandb(self):
             entity=os.getenv("WANDB_ENTITY_NAME"), 
             name=run_name,
             config=self.config,
-            reinit=True
+            reinit=True,
         )
 
         signature = self.wallet.hotkey.sign(run.id.encode()).hex()
@@ -33,6 +34,8 @@ def init_wandb(self):
     except Exception as e:
         bt.logging.error(f"Error initializing wandb: {e}")
         raise e
+
+
 
 def log_wandb(data: dict):
     try:

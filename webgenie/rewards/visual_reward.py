@@ -11,6 +11,7 @@ from webgenie.rewards.metrics.visual_score import visual_eval_v3_multi
 from webgenie.tasks.task import Task, ImageTask
 from webgenie.tasks.solution import Solution
 
+
 class VisualReward(Reward):
     def __init__(self):
         pass

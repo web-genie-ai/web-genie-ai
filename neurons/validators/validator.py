@@ -8,12 +8,14 @@ import asyncio
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv(filename=".env.validator"))
     
-from typing import Tuple, Union
+from typing import Tuple
 
 from webgenie.base.validator import BaseValidatorNeuron
 from webgenie.constants import API_HOTKEY
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
+
 from neurons.validators.genie_validator import GenieValidator
+
 
 class Validator(BaseValidatorNeuron):
     """
@@ -61,10 +63,10 @@ class Validator(BaseValidatorNeuron):
             
             self.axon.attach(
                 forward_fn = self.organic_forward_text,
-                blacklist_fn = self.blacklist_text
+                blacklist_fn = self.blacklist_text,
             ).attach(
                 forward_fn = self.organic_forward_image,
-                blacklist_fn = self.blacklist_image
+                blacklist_fn = self.blacklist_image,
             )
 
             self.axon.serve(

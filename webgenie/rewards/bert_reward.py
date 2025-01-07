@@ -7,6 +7,7 @@ from webgenie.rewards import Reward
 from webgenie.tasks.task import Task
 from webgenie.tasks.solution import Solution
 
+
 class BertReward(Reward):
     def __init__(self):
         pass

@@ -21,6 +21,7 @@ from webgenie.tasks.solution import Solution
 class PromptResponse(BaseModel):
     prompt: str = Field(default="", description="The prompt that generates the given html code")
 
+
 class RtcReward(Reward):
     def __init__(self):
         self.prompt_response_parser = JsonOutputParser(pydantic_object=PromptResponse)
@@ -30,8 +31,12 @@ class RtcReward(Reward):
             template=[
                 ("system", PROMPT_RTC),
             ],
-            params={"html": task.ground_truth_html, "prompt": task.prompt, "instructions": self.prompt_response_parser.get_format_instructions()},
-            output_parser=self.prompt_response_parser
+            params={
+                "html": task.ground_truth_html,
+                "prompt": task.prompt, 
+                "instructions": self.prompt_response_parser.get_format_instructions(),
+            },
+            output_parser=self.prompt_response_parser,
         )
 
         return response["prompt"]

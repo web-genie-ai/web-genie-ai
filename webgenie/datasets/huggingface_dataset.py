@@ -1,12 +1,9 @@
 # https://huggingface.co/datasets/SALT-NLP/Design2Code_human_eval_pairwise
 
 import bittensor as bt
-import os
 import random
 from datasets import load_dataset
 
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
 
@@ -14,8 +11,10 @@ from webgenie.datasets.dataset import Dataset, DatasetEntry
 from webgenie.helpers.llms import call_llm
 from webgenie.prompts import PROMPT_MAKE_HTML_COMPLEX
 
+
 class HTMLResponse(BaseModel):
     complex_html: str = Field(description="the complex html code")
+
 
 class HuggingfaceDataset(Dataset):
     def __init__(self , **kwargs):

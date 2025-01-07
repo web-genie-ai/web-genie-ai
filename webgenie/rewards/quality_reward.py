@@ -2,8 +2,6 @@
 # (https://arxiv.org/pdf/2402.08699#page=11&zoom=100,384,458) is our inspiration for this reward.
 
 import bittensor as bt
-import bert_score
-import os
 import numpy as np
 from typing import List
 
@@ -16,8 +14,10 @@ from webgenie.rewards.reward import Reward
 from webgenie.tasks.task import Task
 from webgenie.tasks.solution import Solution
 
+
 class ScoreResponse(BaseModel):
     score: float = Field(default=0, description="The score of the html code")
+
 
 class QualityReward(Reward):
     def __init__(self):
@@ -28,8 +28,11 @@ class QualityReward(Reward):
             template=[
                 ("system", PROMPT_QUALITY),
             ],
-            params={"html": solution.html, "instructions": self.prompt_response_parser.get_format_instructions()},
-            output_parser=self.prompt_response_parser
+            params={
+                "html": solution.html, 
+                "instructions": self.prompt_response_parser.get_format_instructions(),
+            },
+            output_parser=self.prompt_response_parser,
         )
         return float(response["score"]) / 100
 
