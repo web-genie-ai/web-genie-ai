@@ -21,7 +21,7 @@ class TextTaskCompetition(Competition):
         super().__init__()
     
         self.datasets = [
-            SyntheticDataset(has_ground_truth_html = True),
+            SyntheticDataset(has_ground_truth_html = False),
         ]
     
     async def generate_task(self) -> Tuple[Task, bt.Synapse]:
