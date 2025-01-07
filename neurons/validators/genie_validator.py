@@ -7,7 +7,6 @@ from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import (
     MAX_COMPETETION_HISTORY_SIZE, 
     MAX_SYNTHETIC_TASK_SIZE, 
-    MAX_DEBUG_IMAGE_STRING_LENGTH,
     WORK_DIR,
 )
 from webgenie.competitions import (
@@ -18,6 +17,7 @@ from webgenie.competitions import (
     RESERVED_WEIGHTS,
 )
 from webgenie.helpers.htmls import preprocess_html, validate_resources
+from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks.solution import Solution
 from webgenie.utils.uids import get_all_available_uids, get_most_available_uid
@@ -129,7 +129,7 @@ class GenieValidator:
         if isinstance(synapse, WebgenieTextSynapse):
             bt.logging.debug(f"Organic text forward: {synapse.prompt}")
         else:
-            bt.logging.debug(f"Organic image forward: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}...")
+            bt.logging.debug(f"Organic image forward: {image_debug_str(synapse.base64_image)}...")
 
         best_miner_uid = get_most_available_uid(self.neuron)
         try:
