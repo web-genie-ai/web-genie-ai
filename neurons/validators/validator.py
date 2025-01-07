@@ -136,10 +136,12 @@ class Validator(BaseValidatorNeuron):
         self.is_running = False
         bt.logging.debug("Stopping validator in background thread")
 
+
 async def main():
     async with Validator() as validator:
         while validator.is_running and not validator.should_exit:
             await asyncio.sleep(15)    
+
     
 # The main function parses the configuration and runs the validator.
 if __name__ == "__main__":

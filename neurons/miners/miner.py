@@ -30,6 +30,7 @@ from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 
 from neurons.miners.openai_miner import OpenaiMiner
 
+
 class Miner(BaseMinerNeuron):
     """
     Your miner neuron class. You should use this class to define your miner's behavior. In particular, you should replace the forward function with your own logic. You may also want to override the blacklist and priority functions according to your needs.

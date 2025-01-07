@@ -1,18 +1,17 @@
 import bittensor as bt
-import os
 
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate
+from langchain.prompts import HumanMessagePromptTemplate, SystemMessagePromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.helpers.llms import call_llm
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
-from webgenie.tasks.solution import Solution
+
 
 class HTMLResponse(BaseModel):
     html: str = Field(default="", description="The HTML code for the webpage")
+
 
 class OpenaiMiner:
     def __init__(self, neuron: BaseNeuron):
@@ -35,8 +34,11 @@ class OpenaiMiner:
 
             html_response = await call_llm(
                 template=template,
-                params={"query": synapse.prompt, "instructions": self.html_response_parser.get_format_instructions()},
-                output_parser=self.html_response_parser
+                params={
+                    "query": synapse.prompt, 
+                    "instructions": self.html_response_parser.get_format_instructions(),
+                },
+                output_parser=self.html_response_parser,
             )
             
             synapse.html = html_response["html"]
@@ -64,13 +66,16 @@ class OpenaiMiner:
                     template=[
                         {"type": "image_url", "image_url": {"url": "{image_url}"}},
                     ]
-                )
+                ),
             ]
 
             html_response = await call_llm(
                 template=prompt_messages,
-                params={"instructions": self.html_response_parser.get_format_instructions(), "image_url": f"data:image/jpeg;base64,{synapse.base64_image}"},
-                output_parser=self.html_response_parser
+                params={
+                    "instructions": self.html_response_parser.get_format_instructions(), 
+                    "image_url": f"data:image/jpeg;base64,{synapse.base64_image}",
+                },
+                output_parser=self.html_response_parser,
             )
 
             synapse.html = html_response["html"]
