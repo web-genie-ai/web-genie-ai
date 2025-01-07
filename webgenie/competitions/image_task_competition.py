@@ -2,14 +2,20 @@ import bittensor as bt
 import random
 from typing import Tuple
 
+from webgenie.competitions.competition import Competition
 from webgenie.constants import IMAGE_TASK_TIMEOUT
-from webgenie.helpers.htmls import html_to_screenshot, preprocess_html, is_empty_html
+from webgenie.helpers.htmls import (
+    html_to_screenshot, 
+    preprocess_html, 
+    is_empty_html,
+)
 from webgenie.helpers.images import base64_to_image
 from webgenie.protocol import WebgenieImageSynapse
-from webgenie.tasks.task import Task, ImageTask
-from webgenie.competitions.competition import Competition
-from webgenie.rewards.quality_reward import QualityReward
-from webgenie.rewards.visual_reward import VisualReward
+from webgenie.tasks import Task, ImageTask
+from webgenie.rewards import (
+    QualityReward,
+    VisualReward,
+)
 from webgenie.datasets import (
     RandomWebsiteDataset,
     SyntheticDataset,

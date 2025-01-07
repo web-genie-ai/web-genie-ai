@@ -8,8 +8,7 @@ from typing import List
 from webgenie.constants import WORK_DIR
 from webgenie.rewards.reward import Reward
 from webgenie.rewards.metrics.visual_score import visual_eval_v3_multi
-from webgenie.tasks.task import Task, ImageTask
-from webgenie.tasks.solution import Solution
+from webgenie.tasks import Task, ImageTask, Solution
 
 
 class VisualReward(Reward):

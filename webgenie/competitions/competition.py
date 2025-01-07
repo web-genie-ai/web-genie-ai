@@ -2,8 +2,7 @@ import bittensor as bt
 import numpy as np
 from typing import List, Tuple
 
-from webgenie.tasks import Task
-from webgenie.tasks.solution import Solution
+from webgenie.tasks import Task, Solution
 
 class Competition:
     name = "Competition"

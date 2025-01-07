@@ -1,16 +1,18 @@
 import bittensor as bt
-import numpy as np
 import random
-from typing import List, Tuple
+from typing import Tuple
+
+from webgenie.competitions.competition import Competition
+from webgenie.constants import TEXT_TASK_TIMEOUT
 from webgenie.datasets import (
     SyntheticDataset,
 )
-from webgenie.constants import TEXT_TASK_TIMEOUT
 from webgenie.protocol import WebgenieTextSynapse
-from webgenie.rewards.quality_reward import QualityReward
-from webgenie.rewards.rtc_reward import RtcReward
-from webgenie.tasks.task import Task, TextTask
-from webgenie.competitions.competition import Competition
+from webgenie.rewards import (
+    QualityReward,
+    RtcReward,
+)
+from webgenie.tasks import Task, TextTask
 
 
 class TextTaskCompetition(Competition):

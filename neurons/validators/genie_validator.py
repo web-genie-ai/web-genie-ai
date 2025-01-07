@@ -19,7 +19,7 @@ from webgenie.competitions import (
 from webgenie.helpers.htmls import preprocess_html, validate_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
-from webgenie.tasks.solution import Solution
+from webgenie.tasks import Solution
 from webgenie.utils.uids import get_all_available_uids, get_most_available_uid
 
 

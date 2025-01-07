@@ -1,3 +1,4 @@
+from webgenie.competitions.competition import Competition
 from webgenie.competitions.text_task_competition import TextTaskAccuracyCompetition, TextTaskQualityCompetition
 from webgenie.competitions.image_task_competition import ImageTaskAccuracyCompetition, ImageTaskQualityCompetition
 

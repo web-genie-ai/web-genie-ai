@@ -11,8 +11,7 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from webgenie.helpers.llms import call_llm
 from webgenie.prompts import PROMPT_QUALITY
 from webgenie.rewards.reward import Reward
-from webgenie.tasks.task import Task
-from webgenie.tasks.solution import Solution
+from webgenie.tasks import Task, Solution
 
 
 class ScoreResponse(BaseModel):

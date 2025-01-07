@@ -14,8 +14,7 @@ from webgenie.helpers.llms import call_llm
 from webgenie.prompts import PROMPT_RTC
 from webgenie.rewards.reward import Reward
 from webgenie.rewards.metrics import s_bert
-from webgenie.tasks.task import Task
-from webgenie.tasks.solution import Solution
+from webgenie.tasks import Task, Solution
 
 
 class PromptResponse(BaseModel):
