@@ -11,17 +11,21 @@ from webgenie.tasks.task import Task, ImageTask
 from webgenie.competitions.competition import Competition
 from webgenie.rewards.quality_reward import QualityReward
 from webgenie.rewards.visual_reward import VisualReward
-from webgenie.datasets.synthetic_dataset import SyntheticDataset
-from webgenie.datasets.huggingface_dataset import HuggingfaceDataset
-    
+from webgenie.datasets import (
+    RandomWebsiteDataset,
+    SyntheticDataset,
+    HuggingfaceDataset,
+)
+
 class ImageTaskCompetition(Competition):
     name = "ImageTaskCompetition"
     def __init__(self):
         super().__init__()
         
         self.datasets = [
-            SyntheticDataset(),
-            HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"),
+            RandomWebsiteDataset(),
+            #SyntheticDataset(),
+            #HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"),
         ]
 
     async def generate_task(self) -> Tuple[Task, bt.Synapse]:
