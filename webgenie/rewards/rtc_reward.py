@@ -25,13 +25,13 @@ class RtcReward(Reward):
     def __init__(self):
         self.prompt_response_parser = JsonOutputParser(pydantic_object=PromptResponse)
         
-    async def _get_prompt(self, task: Task, solutions: List[Solution]) -> str:
+    async def _get_prompt(self, task: Task, solution: Solution) -> str:
         response = await call_llm(
             template=[
                 ("system", PROMPT_RTC),
             ],
             params={
-                "html": task.ground_truth_html,
+                "html": solution.html,
                 "prompt": task.prompt, 
                 "instructions": self.prompt_response_parser.get_format_instructions(),
             },
