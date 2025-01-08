@@ -91,7 +91,8 @@ class GenieValidator:
 
         best_miner = -1
         best_reward = 0.0
-
+        
+        solutions.sort(key=lambda solution: solution.process_time)
         competition = task.competition
         miner_uids = [solution.miner_uid for solution in solutions]
         rewards = await competition.reward(task, solutions)
