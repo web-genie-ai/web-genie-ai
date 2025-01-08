@@ -98,6 +98,7 @@ class GenieValidator:
         solutions.sort(key=lambda solution: solution.process_time)
         competition = task.competition
         miner_uids = [solution.miner_uid for solution in solutions]
+        
         final_scores, scores = await competition.calculate_final_scores(task, solutions)
         bt.logging.success(f"Final scores for {miner_uids}: {final_scores}")
         
