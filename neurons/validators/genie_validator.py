@@ -16,6 +16,7 @@ from webgenie.competitions import (
     TextTaskQualityCompetition,
     RESERVED_WEIGHTS,
 )
+from webgenie.helpers.dashboard import upload_competition_result
 from webgenie.helpers.htmls import preprocess_html, validate_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
@@ -99,6 +100,7 @@ class GenieValidator:
         bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
         
         for i in range(len(miner_uids)):
+            upload_competition_result(miner_uids[i], rewards[i])
             if rewards[i] > best_reward:
                 best_reward = rewards[i]
                 best_miner = miner_uids[i]
