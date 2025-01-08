@@ -1,8 +1,13 @@
 import bittensor as bt
+import numpy as np
 import random
-from typing import Tuple
+from typing import Tuple, List
 
-from webgenie.competitions.competition import Competition
+from webgenie.competitions.competition import (
+    Competition, 
+    ACCURACY_METRIC_NAME, 
+    QUALITY_METRIC_NAME,
+)
 from webgenie.constants import IMAGE_TASK_TIMEOUT
 from webgenie.helpers.htmls import (
     html_to_screenshot, 
@@ -11,7 +16,7 @@ from webgenie.helpers.htmls import (
 )
 from webgenie.helpers.images import base64_to_image
 from webgenie.protocol import WebgenieImageSynapse
-from webgenie.tasks import Task, ImageTask
+from webgenie.tasks import Task, ImageTask, Solution
 from webgenie.rewards import (
     QualityReward,
     VisualReward,
@@ -24,19 +29,28 @@ from webgenie.datasets import (
 
 
 class ImageTaskCompetition(Competition):
-    name = "ImageTaskCompetition"
+    COMPETITION_TYPE = "ImageTaskCompetition"
+    
     def __init__(self):
         super().__init__()
         
         self.datasets = [
-            RandomWebsiteDataset(),
-            #SyntheticDataset(),
-            #HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"),
+            (RandomWebsiteDataset(), 0.8),
+            (SyntheticDataset(), 0.1),
+            (HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"), 0.1),
         ]
+
+        self.metrics = {
+            ACCURACY_METRIC_NAME: VisualReward(),
+            QUALITY_METRIC_NAME: QualityReward(),
+        }
 
     async def generate_task(self) -> Tuple[Task, bt.Synapse]:
         bt.logging.info("Generating Image task")
-        dataset_entry = await random.choice(self.datasets).generate_context()
+        
+        dataset, _ = random.choices(self.datasets, weights=[weight for _, weight in self.datasets])[0]
+        dataset_entry = await dataset.generate_context()
+
         ground_truth_html = preprocess_html(dataset_entry.ground_truth_html)
         if not ground_truth_html :
             raise ValueError("Invalid ground truth html")
@@ -63,31 +77,32 @@ class ImageTaskCompetition(Competition):
         except Exception as e:
             bt.logging.error(f"Failed to save debug image: {e}")
         
-        return ImageTask(
-            base64_image=base64_image, 
-            ground_truth_html=ground_truth_html,
-            timeout=IMAGE_TASK_TIMEOUT,
-            competition=self,
-        ), WebgenieImageSynapse(base64_image=base64_image)
+        return (
+            ImageTask(
+                base64_image=base64_image, 
+                ground_truth_html=ground_truth_html,
+                timeout=IMAGE_TASK_TIMEOUT,
+                competition=self,
+            ), 
+            WebgenieImageSynapse(base64_image=base64_image),
+        )
 
 
 class ImageTaskAccuracyCompetition(ImageTaskCompetition):
-    name = "ImageTaskAccuracyCompetition"
-    def __init__(self):
-        super().__init__()
+    COMPETITION_TYPE = "ImageTaskAccuracyCompetition"
 
-        self.rewards = [
-            (VisualReward(), 0.9),
-            (QualityReward(), 0.1),
-        ]
+    async def calculate_final_scores(self, task: Task, solutions: List[Solution]) -> np.ndarray:
+        scores = await self.calculate_scores(task, solutions)
+        return scores[ACCURACY_METRIC_NAME] * 0.9 + scores[QUALITY_METRIC_NAME] * 0.1, scores
 
 
 class ImageTaskQualityCompetition(ImageTaskCompetition):
-    name = "ImageTaskQualityCompetition"
-    def __init__(self):
-        super().__init__()
+    COMPETITION_TYPE = "ImageTaskQualityCompetition"
+    
+    async def calculate_final_scores(self, task: Task, solutions: List[Solution]) -> np.ndarray:
+        scores = await self.calculate_scores(task, solutions)        
+        accuracy_scores = scores[ACCURACY_METRIC_NAME]
+        quality_scores = scores[QUALITY_METRIC_NAME]
+        final_scores = np.where(accuracy_scores > 0.7, quality_scores, 0)
+        return final_scores, scores
 
-        self.rewards = [
-            (VisualReward(), 0.5),
-            (QualityReward(), 0.5),
-        ]
