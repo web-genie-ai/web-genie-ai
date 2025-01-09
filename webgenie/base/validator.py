@@ -206,7 +206,7 @@ class BaseValidatorNeuron(BaseNeuron):
         bt.logging.debug(f"Scattered rewards: {scattered_rewards}")
 
         self.scores: np.ndarray = scattered_rewards + self.scores
-        bt.logging.debug(f"Updated moving avg scores: {self.scores}")
+        bt.logging.debug(f"Updated scores: {self.scores}")
 
     def save_state(self):
         """Saves the state of the validator to a file."""
