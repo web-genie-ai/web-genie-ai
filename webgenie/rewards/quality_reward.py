@@ -3,46 +3,31 @@
 
 import bittensor as bt
 import numpy as np
+from pydantic import BaseModel, Field
 from typing import List
 
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel, Field
-
-from webgenie.helpers.llms import call_llm
+from webgenie.helpers.llms import openai_call
 from webgenie.prompts import PROMPT_QUALITY
 from webgenie.rewards.reward import Reward
 from webgenie.tasks import Task, Solution
 
 
 class ScoreResponse(BaseModel):
-    score: float = Field(default=0, description="The score of the html code")
+    score: float = Field(description="The score of the html code")
 
 
 class QualityReward(Reward):
-    def __init__(self):
-        self.prompt_response_parser = JsonOutputParser(pydantic_object=ScoreResponse)
-        
+
     async def _get_score(self, solution: Solution) -> float:
-        response = await call_llm(
-            template=[
-                ("system", PROMPT_QUALITY),
+        response = await openai_call(
+            messages = [
+                {"role": "system", "content": PROMPT_QUALITY.format(html=solution.html)},
             ],
-            params={
-                "html": solution.html, 
-                "instructions": self.prompt_response_parser.get_format_instructions(),
-            },
-            output_parser=self.prompt_response_parser,
+            response_format = ScoreResponse,
         )
-        return float(response["score"]) / 100
+        return response.score / 100
 
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
         bt.logging.debug(f"Rewarding task in quality reward")
-        scores = []
-        for solution in solutions:
-            score = await self._get_score(solution)
-            scores.append(score)
+        scores = [await self._get_score(solution) for solution in solutions]
         return np.array(scores)
-
-
-
-        

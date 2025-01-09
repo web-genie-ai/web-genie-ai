@@ -16,8 +16,6 @@ dependencies = [
     "duckduckgo_search",
     "datasets",
     "einops",
-    "langchain",
-    "langchain-openai",
     "lxml==5.3.0",
     "matplotlib-inline==0.1.7",
     "nltk",

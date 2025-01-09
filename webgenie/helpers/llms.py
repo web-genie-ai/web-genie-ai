@@ -1,28 +1,30 @@
 import os
 import bittensor as bt
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+from openai import AsyncOpenAI
 
+model = os.getenv("LLM_MODEL_ID")
+api_key = os.getenv("LLM_API_KEY")
+base_url = os.getenv("LLM_MODEL_URL")
 
-LLM = ChatOpenAI(
-    base_url=os.getenv("LLM_MODEL_URL"),
-    model=os.getenv("LLM_MODEL_ID"),
-    api_key=os.getenv("LLM_API_KEY"),
-    temperature=0.7,
+if not api_key or not base_url or not model:
+    raise Exception("LLM_API_KEY, LLM_MODEL_URL, and LLM_MODEL_ID must be set")
+
+client = AsyncOpenAI(
+    api_key=api_key,
+    base_url=base_url,
 )
 
-
-async def call_llm(template, params, output_parser, retries=3):
-    if not os.getenv("LLM_API_KEY"):
-        raise Exception("LLM_API_KEY is not set")
-    
+async def openai_call(messages, response_format, retries=3):
     for _ in range(retries):
         try:
-            prompt = ChatPromptTemplate.from_messages(template)
-            chain = prompt | LLM | output_parser
-            return await chain.ainvoke(params)
+            completion = await client.beta.chat.completions.parse(
+                model=model,
+                messages= messages,
+                response_format=response_format,
+            )
+            return completion.choices[0].message.parsed
         except Exception as e:
-            bt.logging.error(f"Error calling LLM: {e}")
+            bt.logging.error(f"Error calling OpenAI: {e}")
             continue
-    raise Exception("Failed to call LLM")
+    raise Exception("Failed to call OpenAI")
