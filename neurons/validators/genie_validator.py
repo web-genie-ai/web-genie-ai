@@ -1,8 +1,10 @@
+from datetime import datetime
 import os
 import bittensor as bt
 import random
 from typing import Union
 
+from neurons.miners.miner import Miner
 from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import (
     MAX_COMPETETION_HISTORY_SIZE, 
@@ -22,6 +24,9 @@ from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks import Solution
 from webgenie.utils.uids import get_all_available_uids, get_most_available_uid
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from neurons.validators.models import Base
 
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
@@ -38,6 +43,11 @@ class GenieValidator:
         ]
 
         self.make_work_dir()
+        
+        # Create the database engine
+        self.engine = create_engine('sqlite:///webgenie.db')
+        self.db = sessionmaker(bind=self.engine)
+        Base.metadata.create_all(self.engine)
 
     def make_work_dir(self):
         if not os.path.exists(WORK_DIR):
@@ -97,16 +107,40 @@ class GenieValidator:
         rewards = await competition.reward(task, solutions)
         bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
         
-        for i in range(len(miner_uids)):
-            if rewards[i] > best_reward:
-                best_reward = rewards[i]
+        # Create a session
+        session = self.Session()
+        try:
+            # Store data for each miner
+            for i, miner_uid in enumerate(miner_uids):
+                miner = Miner(
+                    uid=miner_uid,
+                    reward=float(rewards[i]),
+                    competition_type=competition.name,
+                    timestamp=datetime.utcnow()
+                )
+                session.add(miner)
+            
+            # Commit the changes
+            session.commit()
+            bt.logging.debug(f"Stored miner data in database")
+            
+            for i in range(len(miner_uids)):
+                if rewards[i] > best_reward:
+                    best_reward = rewards[i]
                 best_miner = miner_uids[i]
 
-        if best_miner == -1:
-            return
+            if best_miner == -1:
+                session.close()
+                return
     
-        self.neuron.update_scores([RESERVED_WEIGHTS[competition.name]], [best_miner])
-        self.neuron.step += 1
+            self.neuron.update_scores([RESERVED_WEIGHTS[competition.name]], [best_miner])
+            self.neuron.step += 1
+
+        except Exception as e:
+            bt.logging.error(f"Database error: {e}")
+            session.rollback()
+        finally:
+            session.close()
 
     async def synthensize_task(self):
         try:
