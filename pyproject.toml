@@ -1,0 +1,41 @@
+[project]
+name = "web-genie-ai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "ansible-vault==2.1.0",
+    "beautifulsoup4==4.12.3",
+    "bert-score==0.3.13",
+    "bittensor==8.5.1",
+    "clip",
+    "colormath==3.0.0",
+    "datasets==3.2.0",
+    "ddt==1.6.0",
+    "duckduckgo_search",
+    "datasets",
+    "einops",
+    "langchain==0.3.11",
+    "langchain-openai==0.2.12",
+    "lxml==5.3.0",
+    "matplotlib-inline==0.1.7",
+    "nltk",
+    "opencv-python==4.10.0.84",
+    "peft",
+    "pip-chill==1.0.3",
+    "playwright==1.49.1",
+    "python-dotenv==1.0.1",
+    "scikit-learn==1.6.0",
+    "sentence-transformers",
+    "shtab==1.6.5",
+    "sqlalchemy",
+    "tinycss2==1.4.0",
+    "wandb==0.19.0"
+]
+
+[project.urls]
+repository = "https://github.com/web-genie-ai/web-genie-ai"
+
+[tool.uv.sources]
+clip = {git = "https://github.com/openai/CLIP.git"}
