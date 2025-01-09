@@ -4,11 +4,8 @@
 # to generate html, but now we are using openai models here. We are going to use that models on the mainnet
 
 import bittensor as bt
-import os
 from typing import List
 
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
 
@@ -16,11 +13,14 @@ from webgenie.datasets.dataset import Dataset, DatasetEntry
 from webgenie.helpers.llms import call_llm
 from webgenie.prompts import PROMPT_GEN_CONCEPT, PROMPT_GEN_HTML
 
+
 class ConceptResponse(BaseModel):
     concepts: List[str] = Field(description="The concept of the website")
 
+
 class HTMLResponse(BaseModel):
     html: str = Field(description="The html code of the website")
+
 
 class SyntheticDataset(Dataset):
     def __init__(self, has_ground_truth_html: bool = True):
@@ -36,7 +36,7 @@ class SyntheticDataset(Dataset):
                 ("system", PROMPT_GEN_CONCEPT),
             ],
             params={"instructions": self.concept_parser.get_format_instructions()},
-            output_parser=self.concept_parser
+            output_parser=self.concept_parser,
         )
         return response["concepts"]
 
@@ -46,8 +46,11 @@ class SyntheticDataset(Dataset):
             template=[
                 ("system", PROMPT_GEN_HTML),
             ],
-            params={"concept": concept, "instructions": self.html_parser.get_format_instructions()},
-            output_parser=self.html_parser
+            params={
+                "concept": concept, 
+                "instructions": self.html_parser.get_format_instructions(),
+            },
+            output_parser=self.html_parser,
         )
         return response["html"]
         

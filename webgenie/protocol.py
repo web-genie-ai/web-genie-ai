@@ -4,6 +4,7 @@
 import bittensor as bt
 import pydantic
 
+
 class WebgenieTextSynapse(bt.Synapse):
     """
     A protocol for the webgenie text task.
@@ -11,14 +12,15 @@ class WebgenieTextSynapse(bt.Synapse):
     prompt: str = pydantic.Field(
         "",
         title="Prompt",
-        description="The prompt to be sent to miners."
+        description="The prompt to be sent to miners.",
     )
 
     html: str = pydantic.Field(
         "",
         title="HTML",
-        description="The HTML received from miners."
+        description="The HTML received from miners.",
     )
+
 
 class WebgenieImageSynapse(bt.Synapse):
     """
@@ -27,11 +29,11 @@ class WebgenieImageSynapse(bt.Synapse):
     base64_image: str = pydantic.Field(
         "",
         title="Base64 Image",
-        description="The base64 image to be sent to miners."
+        description="The base64 image to be sent to miners.",
     )
 
     html: str = pydantic.Field(
         "",
         title="HTML",
-        description="The HTML received from miners."
+        description="The HTML received from miners.",
     )

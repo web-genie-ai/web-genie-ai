@@ -3,9 +3,12 @@ import bittensor as bt
 import numpy as np
 from typing import List
 
-from webgenie.rewards import Reward
-from webgenie.tasks.task import Task
-from webgenie.tasks.solution import Solution
+from webgenie.rewards.reward import Reward
+from webgenie.tasks import (
+    Task,
+    Solution,
+)
+
 
 class BertReward(Reward):
     def __init__(self):

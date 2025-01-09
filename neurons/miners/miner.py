@@ -24,11 +24,12 @@ import typing
 
 import bittensor as bt
 from webgenie.base.miner import BaseMinerNeuron
-from webgenie.constants import MAX_DEBUG_IMAGE_STRING_LENGTH
+from webgenie.helpers.images import image_debug_str
 from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 
 from neurons.miners.openai_miner import OpenaiMiner
+
 
 class Miner(BaseMinerNeuron):
     """
@@ -67,7 +68,7 @@ class Miner(BaseMinerNeuron):
     async def forward_image(
         self, synapse: WebgenieImageSynapse
     ) -> WebgenieImageSynapse:
-        bt.logging.debug(f"Miner image forward called with image: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}...")
+        bt.logging.debug(f"Miner image forward called with image: {image_debug_str(synapse.base64_image)}...")
         return await self.genie_miner.forward_image(synapse)
 
     async  def blacklist_text(self, synapse: WebgenieTextSynapse) -> typing.Tuple[bool, str]:

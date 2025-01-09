@@ -1,5 +1,4 @@
 import bittensor as bt
-import os
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
@@ -20,6 +19,7 @@ from neurons.miners.hf_models.websight_finetuned import generate_html_from_image
 
 if total_memory_mb > 1024 * 50:
     from neurons.miners.hf_models.falcon7b import generate_html_from_text
+
 
 class HfMiner:
     def __init__(self, neuron: BaseNeuron):

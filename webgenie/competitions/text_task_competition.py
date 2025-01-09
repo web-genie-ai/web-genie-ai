@@ -1,16 +1,19 @@
 import bittensor as bt
-import numpy as np
 import random
-from typing import List, Tuple
+from typing import Tuple
+
+from webgenie.competitions.competition import Competition
+from webgenie.constants import TEXT_TASK_TIMEOUT
 from webgenie.datasets import (
     SyntheticDataset,
 )
-from webgenie.constants import TEXT_TASK_TIMEOUT
 from webgenie.protocol import WebgenieTextSynapse
-from webgenie.rewards.quality_reward import QualityReward
-from webgenie.rewards.rtc_reward import RtcReward
-from webgenie.tasks.task import Task, TextTask
-from webgenie.competitions.competition import Competition
+from webgenie.rewards import (
+    QualityReward,
+    RtcReward,
+)
+from webgenie.tasks import Task, TextTask
+
 
 class TextTaskCompetition(Competition):
     name = "TextTaskCompetition"
@@ -18,7 +21,7 @@ class TextTaskCompetition(Competition):
         super().__init__()
     
         self.datasets = [
-            SyntheticDataset(has_ground_truth_html = True)
+            SyntheticDataset(has_ground_truth_html = False),
         ]
     
     async def generate_task(self) -> Tuple[Task, bt.Synapse]:
@@ -28,8 +31,9 @@ class TextTaskCompetition(Competition):
             prompt=dataset_entry.prompt, 
             ground_truth_html=dataset_entry.ground_truth_html,
             timeout=TEXT_TASK_TIMEOUT,
-            competition=self
+            competition=self,
         ), WebgenieTextSynapse(prompt=dataset_entry.prompt)
+
 
 class TextTaskAccuracyCompetition(TextTaskCompetition):
     name = "TextTaskAccuracyCompetition"
@@ -37,8 +41,9 @@ class TextTaskAccuracyCompetition(TextTaskCompetition):
         super().__init__()
         self.rewards = [
             (RtcReward(), 0.9),
-            (QualityReward(), 0.1)
+            (QualityReward(), 0.1),
         ]
+
 
 class TextTaskQualityCompetition(TextTaskCompetition):
     name = "TextTaskQualityCompetition"
@@ -46,5 +51,5 @@ class TextTaskQualityCompetition(TextTaskCompetition):
         super().__init__()
         self.rewards = [
             (RtcReward(), 0.5),
-            (QualityReward(), 0.5)
+            (QualityReward(), 0.5),
         ]

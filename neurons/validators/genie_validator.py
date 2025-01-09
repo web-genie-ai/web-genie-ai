@@ -1,15 +1,12 @@
 import os
 import bittensor as bt
-import asyncio
-import numpy as np
 import random
-from typing import Union, List
+from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import (
     MAX_COMPETETION_HISTORY_SIZE, 
     MAX_SYNTHETIC_TASK_SIZE, 
-    MAX_DEBUG_IMAGE_STRING_LENGTH,
     WORK_DIR,
 )
 from webgenie.competitions import (
@@ -17,12 +14,14 @@ from webgenie.competitions import (
     TextTaskAccuracyCompetition,
     ImageTaskQualityCompetition,
     TextTaskQualityCompetition,
-    RESERVED_WEIGHTS
+    RESERVED_WEIGHTS,
 )
 from webgenie.helpers.htmls import preprocess_html, validate_resources
+from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
-from webgenie.tasks.solution import Solution
+from webgenie.tasks import Solution
 from webgenie.utils.uids import get_all_available_uids, get_most_available_uid
+
 
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
@@ -62,14 +61,20 @@ class GenieValidator:
                 all_synapse_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                     synapse=synapse,
-                    timeout=task.timeout
+                    timeout=task.timeout,
                 )
 
             solutions = []
             for synapse, miner_uid in zip(all_synapse_results, miner_uids):
                 processed_synapse = await self.process_synapse(synapse)
                 if processed_synapse is not None:
-                    solutions.append(Solution(html = processed_synapse.html, miner_uid = miner_uid, process_time = processed_synapse.dendrite.process_time))
+                    solutions.append(
+                        Solution(
+                            html = processed_synapse.html, 
+                            miner_uid = miner_uid, 
+                            process_time = processed_synapse.dendrite.process_time,
+                        )
+                    )
             
             self.competitions.append((task, solutions))
         except Exception as e:
@@ -112,7 +117,7 @@ class GenieValidator:
             
             competition, _ = random.choices(
                 self.avail_competitions,
-                weights=[weight for _, weight in self.avail_competitions]
+                weights=[weight for _, weight in self.avail_competitions],
             )[0]
             
             task, synapse = await competition.generate_task()
@@ -124,7 +129,7 @@ class GenieValidator:
         if isinstance(synapse, WebgenieTextSynapse):
             bt.logging.debug(f"Organic text forward: {synapse.prompt}")
         else:
-            bt.logging.debug(f"Organic image forward: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}...")
+            bt.logging.debug(f"Organic image forward: {image_debug_str(synapse.base64_image)}...")
 
         best_miner_uid = get_most_available_uid(self.neuron)
         try:

@@ -14,12 +14,12 @@ from webgenie.helpers.llms import call_llm
 from webgenie.prompts import PROMPT_RTC
 from webgenie.rewards.reward import Reward
 from webgenie.rewards.metrics import s_bert
-from webgenie.tasks.task import Task
-from webgenie.tasks.solution import Solution
+from webgenie.tasks import Task, Solution
 
 
 class PromptResponse(BaseModel):
     prompt: str = Field(default="", description="The prompt that generates the given html code")
+
 
 class RtcReward(Reward):
     def __init__(self):
@@ -30,8 +30,12 @@ class RtcReward(Reward):
             template=[
                 ("system", PROMPT_RTC),
             ],
-            params={"html": task.ground_truth_html, "prompt": task.prompt, "instructions": self.prompt_response_parser.get_format_instructions()},
-            output_parser=self.prompt_response_parser
+            params={
+                "html": task.ground_truth_html,
+                "prompt": task.prompt, 
+                "instructions": self.prompt_response_parser.get_format_instructions(),
+            },
+            output_parser=self.prompt_response_parser,
         )
 
         return response["prompt"]

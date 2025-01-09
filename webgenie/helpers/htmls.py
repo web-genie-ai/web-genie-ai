@@ -10,11 +10,10 @@ from webgenie.constants import (
     SCREENSHOT_SCRIPT_PATH,
     WORK_DIR,
     PLACE_HOLDER_IMAGE_URL,
-    PYTHON_CMD
+    PYTHON_CMD,
 )
 from webgenie.helpers.images import image_to_base64
-from bs4 import BeautifulSoup
-import re
+
 
 def validate_resources(html: str) -> bool:
     # List of allowed patterns for CSS and JavaScript resources
@@ -22,7 +21,7 @@ def validate_resources(html: str) -> bool:
         r"https?://cdn.jsdelivr.net/npm/tailwindcss@[^/]+/dist/tailwind.min.css",
         r"https?://stackpath.bootstrapcdn.com/bootstrap/[^/]+/css/bootstrap.min.css",
         r"https?://code.jquery.com/jquery-[^/]+.min.js",
-        r"https?://stackpath.bootstrapcdn.com/bootstrap/[^/]+/js/bootstrap.bundle.min.js"
+        r"https?://stackpath.bootstrapcdn.com/bootstrap/[^/]+/js/bootstrap.bundle.min.js",
     ]
     
     soup = BeautifulSoup(html, 'html.parser')
@@ -40,6 +39,7 @@ def validate_resources(html: str) -> bool:
 
     return True
 
+
 def is_valid_html(html: str):
     try:
         soup = BeautifulSoup(html, 'html.parser')
@@ -47,6 +47,7 @@ def is_valid_html(html: str):
     except Exception as e:
         bt.logging.debug(f"Error during HTML parsing: {e}")
         return False
+
 
 def seperate_html_css(html_content: str): 
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -67,6 +68,7 @@ def seperate_html_css(html_content: str):
     cleaned_html = str(soup)
     return cleaned_html, css
 
+
 def html_to_screenshot(html: str) -> str:
     html_path = f"{WORK_DIR}/screenshot_{uuid.uuid4()}.html"
     with open(html_path, "w") as f:
@@ -82,9 +84,11 @@ def html_to_screenshot(html: str) -> str:
     os.remove(png_path)
     return base64_image
 
+
 def beautify_html(html: str) -> str:
     soup = BeautifulSoup(html, 'html.parser')
     return soup.prettify()
+
 
 def replace_image_sources(html_content, new_url=PLACE_HOLDER_IMAGE_URL):
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -117,12 +121,14 @@ def replace_image_sources(html_content, new_url=PLACE_HOLDER_IMAGE_URL):
     
     return str(soup)
 
+
 def preprocess_html(html: str) -> str:
     if not is_valid_html(html):
         return ""
     html = beautify_html(html)
     html = replace_image_sources(html)
     return html
+
 
 def is_empty_html(html: str) -> bool:
     """Check if HTML body is empty or missing.
@@ -143,6 +149,7 @@ def is_empty_html(html: str) -> bool:
         return True
         
     return False
+
 
 if __name__ == "__main__":
     html = """

@@ -1,4 +1,3 @@
-# prompt to make rounded trip correctness
 PROMPT_RTC = """
 You are an HTML, CSS expert. And you are well versed in the AI, ML.
 I have a model that converts the prompt to html.
@@ -11,6 +10,7 @@ The following is the example of prompt:
 {instructions}
 """
 
+
 PROMPT_GEN_CONCEPT = """
 Generate diverse website layout ideas for different companies, each with a unique design element.
 Examples include: a car company site with a left column, a webpage footer with a centered logo.
@@ -18,6 +18,7 @@ Explore variations in colors, positions, and company fields. Don’t give any ex
 each.
 {instructions}
 """
+
 
 PROMPT_GEN_HTML = """
 Code a complete website with a good design in HTML and Tailwind CSS about this: {concept}
@@ -32,6 +33,7 @@ by the desired width and height, and ‘?keyword‘ by a keyword describing the 
 {instructions}
 """
 
+
 PROMPT_MAKE_HTML_COMPLEX = """
 You are an HTML, CSS expert. I have an HTML code.
 I want you to make the html code more complex.
@@ -40,6 +42,7 @@ The following is the given html code:
 
 {instructions}
 """
+
 
 PROMPT_QUALITY = """
 You are an HTML, CSS expert. I have an HTML code.

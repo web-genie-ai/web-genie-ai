@@ -8,12 +8,14 @@ import asyncio
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv(filename=".env.validator"))
     
-from typing import Tuple, Union
+from typing import Tuple
 
 from webgenie.base.validator import BaseValidatorNeuron
 from webgenie.constants import API_HOTKEY
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
+
 from neurons.validators.genie_validator import GenieValidator
+
 
 class Validator(BaseValidatorNeuron):
     """
@@ -61,10 +63,10 @@ class Validator(BaseValidatorNeuron):
             
             self.axon.attach(
                 forward_fn = self.organic_forward_text,
-                blacklist_fn = self.blacklist_text
+                blacklist_fn = self.blacklist_text,
             ).attach(
                 forward_fn = self.organic_forward_image,
-                blacklist_fn = self.blacklist_image
+                blacklist_fn = self.blacklist_image,
             )
 
             self.axon.serve(
@@ -134,10 +136,12 @@ class Validator(BaseValidatorNeuron):
         self.is_running = False
         bt.logging.debug("Stopping validator in background thread")
 
+
 async def main():
     async with Validator() as validator:
         while validator.is_running and not validator.should_exit:
             await asyncio.sleep(15)    
+
     
 # The main function parses the configuration and runs the validator.
 if __name__ == "__main__":
