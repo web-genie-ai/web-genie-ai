@@ -32,9 +32,7 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
                 self.end_headers()
                 self.wfile.write(b'User-agent: *\nDisallow: /')  # Example content
             elif self.path.startswith('/lighthouse_score'):
-                print(f"Serving HTML {self.path}")
                 html_index = int(self.path.split('/')[-1])
-                print(f"HTML index: {html_index}")
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 self.wfile.write(htmls[html_index].encode('utf-8'))
