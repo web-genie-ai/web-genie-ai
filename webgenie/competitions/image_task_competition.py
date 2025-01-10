@@ -7,6 +7,7 @@ from webgenie.competitions.competition import (
     Competition, 
     ACCURACY_METRIC_NAME, 
     QUALITY_METRIC_NAME,
+    SEO_METRIC_NAME,
 )
 from webgenie.constants import IMAGE_TASK_TIMEOUT
 from webgenie.helpers.htmls import (
@@ -20,6 +21,7 @@ from webgenie.tasks import Task, ImageTask, Solution
 from webgenie.rewards import (
     QualityReward,
     VisualReward,
+    LighthouseReward,
 )
 from webgenie.datasets import (
     RandomWebsiteDataset,
@@ -42,6 +44,7 @@ class ImageTaskCompetition(Competition):
 
         self.metrics = {
             ACCURACY_METRIC_NAME: VisualReward(),
+            SEO_METRIC_NAME: LighthouseReward(),
             QUALITY_METRIC_NAME: QualityReward(),
         }
 
@@ -106,3 +109,12 @@ class ImageTaskQualityCompetition(ImageTaskCompetition):
         final_scores = np.where(accuracy_scores > 0.7, quality_scores, 0)
         return final_scores, scores
 
+class ImageTaskSeoCompetition(ImageTaskCompetition):
+    COMPETITION_TYPE = "ImageTaskSeoCompetition"
+
+    async def calculate_final_scores(self, task: Task, solutions: List[Solution]) -> np.ndarray:
+        scores = await self.calculate_scores(task, solutions)
+        accuracy_scores = scores[ACCURACY_METRIC_NAME]
+        seo_scores = scores[SEO_METRIC_NAME]
+        final_scores = np.where(accuracy_scores > 0.7, seo_scores, 0)
+        return final_scores, scores

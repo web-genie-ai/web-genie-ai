@@ -15,7 +15,7 @@ class LighthouseReward(Reward):
         htmls = [solution.html for solution in solutions]
         scores_dict = get_lighthouse_score(htmls)
         scores = []
-        weights = [0.25, 0.25, 0.25, 0.25]
+        weights = [0, 0.25, 0.25, 0.5]
         for score_dict in scores_dict:
             score = (
                 score_dict['performance'] * weights[0] + 

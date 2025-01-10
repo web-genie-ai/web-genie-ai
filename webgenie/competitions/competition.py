@@ -7,6 +7,7 @@ from webgenie.tasks import Task, Solution
 
 
 ACCURACY_METRIC_NAME = "Accuracy"
+SEO_METRIC_NAME = "Seo"
 QUALITY_METRIC_NAME = "Quality"
 
 
