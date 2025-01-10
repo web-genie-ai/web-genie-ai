@@ -61,13 +61,18 @@ class GenieValidator:
 
             task, synapse = self.synthetic_tasks.pop(0)
             miner_uids = get_all_available_uids(self.neuron)
+            if not miner_uids:
+                bt.logging.warning("No miners available")
+                return
             
+            bt.logging.debug(f"Querying {len(miner_uids)} miners")
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 all_synapse_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                     synapse=synapse,
                     timeout=task.timeout,
                 )
+            bt.logging.debug(f"Received {len(all_synapse_results)} synapse results")
 
             solutions = []
             for synapse, miner_uid in zip(all_synapse_results, miner_uids):
@@ -80,7 +85,7 @@ class GenieValidator:
                             process_time = processed_synapse.dendrite.process_time,
                         )
                     )
-            
+            bt.logging.info(f"Received {len(solutions)} solutions")
             self.competitions.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in query_miners: {e}")
@@ -155,6 +160,9 @@ class GenieValidator:
         best_miner_uid = get_most_available_uid(self.neuron)
         all_miner_uids = get_all_available_uids(self.neuron)
         try:
+            if not all_miner_uids:
+                raise Exception("No miners available")
+            
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 responses = await dendrite(
                     axons=[self.neuron.metagraph.axons[uid] for uid in all_miner_uids],
@@ -162,7 +170,7 @@ class GenieValidator:
                     timeout=synapse.timeout,
                 )
 
-            processed_synapse = await self.process_synapse(responses[best_miner_uid])
+            processed_synapse = await self.process_synapse(responses[all_miner_uids.index(best_miner_uid)])
             if processed_synapse is None:
                 raise Exception(f"No valid solution received")
  
@@ -173,6 +181,7 @@ class GenieValidator:
             return synapse
     
     async def process_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
+        bt.logging.debug(f"Processing synapse: {synapse.dendrite.status_code}")
         if synapse.dendrite.status_code == 200:
             html = preprocess_html(synapse.html)
             if not html:
