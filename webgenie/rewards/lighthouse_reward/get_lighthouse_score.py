@@ -93,7 +93,7 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
     
     server_thread.join(timeout=10)
     if server_thread.is_alive():
-        bt.logging.info("Server did not shut down properly.")
+        bt.logging.error("Server did not shut down properly.")
     else:
         bt.logging.info("Server stopped successfully.")
     

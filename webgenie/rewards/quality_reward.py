@@ -29,7 +29,7 @@ class QualityReward(Reward):
         return response.score / 100
 
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
-        bt.logging.debug(f"Rewarding task in quality reward")
+        bt.logging.info(f"Rewarding task in quality reward")
         get_score_tasks = [self._get_score(solution) for solution in solutions]
         scores = await asyncio.gather(*get_score_tasks)
         return np.array(scores)

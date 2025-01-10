@@ -134,7 +134,7 @@ class GenieValidator:
             if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
                 return
 
-            bt.logging.debug(f"Synthensize task")
+            bt.logging.info(f"Synthensize task")
             
             competition, _ = random.choices(
                 self.avail_competitions,

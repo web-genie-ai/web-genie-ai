@@ -20,7 +20,7 @@ class VisualReward(Reward):
         if not isinstance(task, ImageTask):
             raise ValueError(f"Task is not a ImageTask: {type(task)}")
         
-        bt.logging.debug(f"Rewarding image task in visual reward")
+        bt.logging.info(f"Rewarding image task in visual reward")
         
         original_html_path = f"{WORK_DIR}/original_{uuid.uuid4()}.html"
         with open(original_html_path, "w") as f:

@@ -344,7 +344,7 @@ wheels = [
 
 [[package]]
 name = "bittensor"
-version = "8.5.1"
+version = "8.5.1rc5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -376,14 +376,14 @@ dependencies = [
     { name = "websockets" },
     { name = "wheel" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/72/b2/09ec0664822d32fcf2f708742c69249f8a70a09fb941cef3a1f4ab8eca02/bittensor-8.5.1.tar.gz", hash = "sha256:f1bb033ba1e2641881d37f9d8cfebdcb7145ae20975861863710bdd17941cce4", size = 210235 }
+sdist = { url = "https://files.pythonhosted.org/packages/df/03/b86759459b09456a2eb6a5e84713cf0bd0db10558c0f724ce6ca7940c346/bittensor-8.5.1rc5.tar.gz", hash = "sha256:b4f26b237b45964666fde21d77b5d71fe26270ce9f9450e724b58b8d8bf705e9", size = 217653 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/59/34/29f5b570d734b8474b21071756db41b4717c8cbebc3fa5716f0c499a12e8/bittensor-8.5.1-py3-none-any.whl", hash = "sha256:8dbf9c389d10fd043dab5da163377a43ec2ae1b1715e819a3602e07d36304f94", size = 257860 },
+    { url = "https://files.pythonhosted.org/packages/01/11/e1b42d98cb955a090df195d004759e4f2a6563513b6d5e1f7dffcd9e2b4e/bittensor-8.5.1rc5-py3-none-any.whl", hash = "sha256:60904f4e8a296ab1a45bfbbba5b39cc62812709562a82f6b4ee16cb38b873a46", size = 265253 },
 ]
 
 [[package]]
 name = "bittensor-cli"
-version = "8.4.2"
+version = "8.2.0rc8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -407,9 +407,9 @@ dependencies = [
     { name = "websockets" },
     { name = "wheel" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7c/77/a4250b215d7a5dabef2090c8b300843aa962a135a85b8af0ca499b15a23e/bittensor-cli-8.4.2.tar.gz", hash = "sha256:43efc081ed2ecf4357bf5c5322ccd6f7d1a5110eb842cf138c75adb3f21686fd", size = 161405 }
+sdist = { url = "https://files.pythonhosted.org/packages/c2/98/bf296a271d460f2912eaad1914197dde5709b88c44ae92784a38e0932b2c/bittensor-cli-8.2.0rc8.tar.gz", hash = "sha256:df7da6ac6344c67a5f4273157c42810ca28dc0564eb7db58160e7d6f754edd01", size = 188330 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a4/7b/3f43e1e453697aba95734f94a44aeb96d72139a2ca83837ecaf170a58de2/bittensor_cli-8.4.2-py3-none-any.whl", hash = "sha256:e7fc5ff510f039fa0cb9c0c701a56c4eb2b644befb019b1cd0fac29546bfb764", size = 171700 },
+    { url = "https://files.pythonhosted.org/packages/55/95/7d77a3a471e759741d19cb3d94b580942c0b2cd586b89a8ea677ba2015c6/bittensor_cli-8.2.0rc8-py3-none-any.whl", hash = "sha256:2108b4158c8719571f1f990f65333a1d7746b1b3dbfefa8b89da11d8cf7ab305", size = 198315 },
 ]
 
 [[package]]
@@ -3973,13 +3973,14 @@ wheels = [
 
 [[package]]
 name = "web-genie-ai"
-version = "0.1.0"
+version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "ansible-vault" },
     { name = "beautifulsoup4" },
     { name = "bert-score" },
     { name = "bittensor" },
+    { name = "bittensor-cli" },
     { name = "clip" },
     { name = "colormath" },
     { name = "datasets" },
@@ -4009,7 +4010,8 @@ requires-dist = [
     { name = "ansible-vault", specifier = "==2.1.0" },
     { name = "beautifulsoup4", specifier = "==4.12.3" },
     { name = "bert-score", specifier = "==0.3.13" },
-    { name = "bittensor", specifier = "==8.5.1" },
+    { name = "bittensor", specifier = "==8.5.1rc5" },
+    { name = "bittensor-cli", specifier = "==8.2.0rc8" },
     { name = "clip", git = "https://github.com/openai/CLIP.git" },
     { name = "colormath", specifier = "==3.0.0" },
     { name = "datasets" },

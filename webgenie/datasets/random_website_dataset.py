@@ -88,7 +88,7 @@ class RandomWebsiteDataset(Dataset):
             website_url = await self.get_random_website_url()
             if website_url is None:
                 raise Exception("Failed to get a valid website URL")
-            bt.logging.info(f"Generated website URL: {website_url}")
+            bt.logging.debug(f"Generated website URL: {website_url}")
             html = await self.get_rendered_html(website_url)
             return DatasetEntry(
                 src="random_website",
