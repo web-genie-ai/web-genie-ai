@@ -16,6 +16,7 @@ from webgenie.competitions import (
     RESERVED_WEIGHTS,
     ACCURACY_METRIC_NAME,
     QUALITY_METRIC_NAME,
+    SEO_METRIC_NAME,
 )
 from webgenie.storage import (
     upload_competition,
@@ -114,6 +115,7 @@ class GenieValidator:
                 "final_score": final_scores[i],
                 "accuracy": scores[ACCURACY_METRIC_NAME][i],
                 "quality": scores[QUALITY_METRIC_NAME][i],
+                "seo": scores[SEO_METRIC_NAME][i],
                 "html": solutions[i].html,
             })
             

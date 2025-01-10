@@ -2,6 +2,7 @@ from webgenie.competitions.competition import (
     Competition, 
     ACCURACY_METRIC_NAME, 
     QUALITY_METRIC_NAME,
+    SEO_METRIC_NAME,
 )
 from webgenie.competitions.text_task_competition import (
     TextTaskCompetition,
