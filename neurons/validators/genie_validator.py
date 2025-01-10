@@ -18,7 +18,10 @@ from webgenie.competitions import (
     ACCURACY_METRIC_NAME,
     QUALITY_METRIC_NAME,
 )
-from webgenie.helpers.dashboard import upload_competition_result
+from webgenie.storage import (
+    upload_competition,
+    upload_competition_result,
+)
 from webgenie.helpers.htmls import preprocess_html, validate_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
@@ -97,6 +100,11 @@ class GenieValidator:
         
         solutions.sort(key=lambda solution: solution.process_time)
         competition = task.competition
+        upload_competition({
+            "competition_type": competition.COMPETITION_TYPE,
+            "task": task,
+        })
+
         miner_uids = [solution.miner_uid for solution in solutions]
         
         final_scores, scores = await competition.calculate_final_scores(task, solutions)

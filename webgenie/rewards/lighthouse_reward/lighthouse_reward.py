@@ -6,6 +6,7 @@ from typing import List
 
 from webgenie.rewards.reward import Reward
 from webgenie.tasks import Task, Solution
+
 from .get_lighthouse_score import get_lighthouse_score
 
 

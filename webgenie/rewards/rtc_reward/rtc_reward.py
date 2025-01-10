@@ -12,7 +12,7 @@ from typing import List
 from webgenie.helpers.llms import openai_call
 from webgenie.prompts import PROMPT_RTC
 from webgenie.rewards.reward import Reward
-from webgenie.rewards.metrics import s_bert
+from webgenie.rewards.rtc_reward import s_bert
 from webgenie.tasks import Task, Solution
 
 
