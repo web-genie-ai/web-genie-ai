@@ -8,7 +8,7 @@ import uuid
 
 from webgenie.constants import WORK_DIR
 from webgenie.rewards.reward import Reward
-from webgenie.rewards.metrics.visual_score import visual_eval_v3_multi
+from webgenie.rewards.visual_reward.metrics.visual_score import visual_eval_v3_multi
 from webgenie.tasks import Task, ImageTask, Solution
 
 

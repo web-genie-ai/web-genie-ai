@@ -26,7 +26,7 @@ PLACE_HOLDER_IMAGE_URL = "https://picsum.photos/seed/picsum/800/600"
 PYTHON_CMD = "python"
 
 # screenshot script path
-SCREENSHOT_SCRIPT_PATH = "webgenie/rewards/metrics/screenshot_single.py"
+SCREENSHOT_SCRIPT_PATH = "webgenie/rewards/visual_reward/metrics/screenshot_single.py"
 
 # work dir
 WORK_DIR = "work"
