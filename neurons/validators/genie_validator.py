@@ -11,9 +11,8 @@ from webgenie.constants import (
 )
 from webgenie.competitions import (
     ImageTaskAccuracyCompetition, 
-    TextTaskAccuracyCompetition,
     ImageTaskQualityCompetition,
-    TextTaskQualityCompetition,
+    ImageTaskSeoCompetition,
     RESERVED_WEIGHTS,
     ACCURACY_METRIC_NAME,
     QUALITY_METRIC_NAME,
@@ -37,10 +36,9 @@ class GenieValidator:
         self.synthetic_tasks = []
 
         self.avail_competitions = [
-            (TextTaskAccuracyCompetition(), 0.5),
-            (TextTaskQualityCompetition(), 0.5),
-            (ImageTaskAccuracyCompetition(), 0.5),
-            (ImageTaskQualityCompetition(), 0.5),
+            (ImageTaskAccuracyCompetition(), 0.4),
+            (ImageTaskSeoCompetition(), 0.3),
+            (ImageTaskQualityCompetition(), 0.3),
         ]
 
         self.make_work_dir()

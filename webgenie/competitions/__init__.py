@@ -12,13 +12,13 @@ from webgenie.competitions.image_task_competition import (
     ImageTaskCompetition,
     ImageTaskAccuracyCompetition, 
     ImageTaskQualityCompetition,
+    ImageTaskSeoCompetition,
 )
 
 
 RESERVED_WEIGHTS = {
-    TextTaskAccuracyCompetition.COMPETITION_TYPE: 50,
-    TextTaskQualityCompetition.COMPETITION_TYPE: 20,
     ImageTaskAccuracyCompetition.COMPETITION_TYPE: 90,
-    ImageTaskQualityCompetition.COMPETITION_TYPE: 10
+    ImageTaskQualityCompetition.COMPETITION_TYPE: 10,
+    ImageTaskSeoCompetition.COMPETITION_TYPE: 20,
 }
 
