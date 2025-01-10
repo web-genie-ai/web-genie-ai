@@ -46,7 +46,7 @@ def get_most_available_uid(self, exclude: List[int] = None) -> int:
             if uid_is_not_excluded:
                 candidate_uids.append(uid)
     
-    return candidate_uids[np.argmax(self.metagraph.S[candidate_uids])]
+    return candidate_uids[np.argmax(self.metagraph.I[candidate_uids])]
 
 def get_all_available_uids(
     self, exclude: List[int] = None

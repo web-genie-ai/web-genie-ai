@@ -1,5 +1,6 @@
 import os
 import bittensor as bt
+import numpy as np
 import random
 from typing import Union
 
@@ -157,7 +158,6 @@ class GenieValidator:
         else:
             bt.logging.debug(f"Organic image forward: {image_debug_str(synapse.base64_image)}...")
 
-        best_miner_uid = get_most_available_uid(self.neuron)
         all_miner_uids = get_all_available_uids(self.neuron)
         try:
             if not all_miner_uids:
@@ -169,12 +169,17 @@ class GenieValidator:
                     synapse=synapse,
                     timeout=synapse.timeout,
                 )
-
-            processed_synapse = await self.process_synapse(responses[all_miner_uids.index(best_miner_uid)])
-            if processed_synapse is None:
-                raise Exception(f"No valid solution received")
- 
-            return processed_synapse
+            # Sort miner UIDs and responses by incentive scores
+            incentives = self.neuron.metagraph.I[all_miner_uids]
+            sorted_indices = np.argsort(-incentives)  # Negative for descending order
+            all_miner_uids = [all_miner_uids[i] for i in sorted_indices]
+            responses = [responses[i] for i in sorted_indices]
+            for response in responses:
+                processed_synapse = await self.process_synapse(response)
+                if processed_synapse is None:
+                    continue
+                return processed_synapse
+            raise Exception(f"No valid solution received")
         except Exception as e:
             bt.logging.error(f"[forward_organic_synapse] Error querying dendrite: {e}")
             synapse.html = f"Error: {e}"
