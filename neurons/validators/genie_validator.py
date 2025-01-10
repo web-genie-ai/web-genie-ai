@@ -153,16 +153,16 @@ class GenieValidator:
             bt.logging.debug(f"Organic image forward: {image_debug_str(synapse.base64_image)}...")
 
         best_miner_uid = get_most_available_uid(self.neuron)
+        all_miner_uids = get_all_available_uids(self.neuron)
         try:
-            axon = self.neuron.metagraph.axons[best_miner_uid]
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 responses = await dendrite(
-                    axons=[axon],
+                    axons=[self.neuron.metagraph.axons[uid] for uid in all_miner_uids],
                     synapse=synapse,
                     timeout=synapse.timeout,
                 )
 
-            processed_synapse = await self.process_synapse(responses[0])
+            processed_synapse = await self.process_synapse(responses[best_miner_uid])
             if processed_synapse is None:
                 raise Exception(f"No valid solution received")
  
