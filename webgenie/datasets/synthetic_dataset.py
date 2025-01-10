@@ -39,8 +39,7 @@ class SyntheticDataset(Dataset):
         bt.logging.info("Generating HTML from concept")
         response = await openai_call(
             messages = [
-                {"role": "system", "content": PROMPT_GEN_HTML},
-                {"role": "user", "content": concept},
+                {"role": "system", "content": PROMPT_GEN_HTML.format(concept=concept)},
             ],
             response_format = HTMLResponse,
         )

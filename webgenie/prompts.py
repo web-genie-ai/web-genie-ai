@@ -14,7 +14,6 @@ Generate diverse website layout ideas for different companies, each with a uniqu
 Examples include: a car company site with a left column, a webpage footer with a centered logo.
 Explore variations in colors, positions, and company fields. Don’t give any explanations or recognition that you have understood the request, just give the list of 10 ideas, with a line break between
 each.
-{instructions}
 """
 
 
@@ -27,8 +26,6 @@ You don’t have to include images, but if you do, use only this source
 by the desired width and height, and ‘?keyword‘ by a keyword describing the picture, for example
 "https://source.unsplash.com/random/300x200/?gym" for an image about gym of size 300x200, or
 "https://source.unsplash.com/random/100x200/?cake" for an image of a cake of size 100x200.
-
-{instructions}
 """
 
 
@@ -59,5 +56,4 @@ If the html/css code is not following each criteria, reduce score by its weight.
 The following is the given html code:
 {html}
 
-{instructions}
 """
