@@ -7,6 +7,9 @@ IMAGE_TASK_TIMEOUT = 100
 # text task timeout
 TEXT_TASK_TIMEOUT = 100
 
+# lighthouse server port
+LIGHTHOUSE_SERVER_PORT = 8001
+
 # max competition history size
 MAX_COMPETETION_HISTORY_SIZE = 30
 
