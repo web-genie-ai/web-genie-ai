@@ -69,12 +69,12 @@ def seperate_html_css(html_content: str):
     return cleaned_html, css
 
 
-def html_to_screenshot(html: str) -> str:
+def html_to_screenshot(html: str, page_load_time: int = 1000) -> str:
     html_path = f"{WORK_DIR}/screenshot_{uuid.uuid4()}.html"
     with open(html_path, "w") as f:
         f.write(html)
     png_path = f"{WORK_DIR}/screenshot_{uuid.uuid4()}.png"
-    os.system(f"{PYTHON_CMD} {SCREENSHOT_SCRIPT_PATH} --html {html_path} --png {png_path}")
+    os.system(f"{PYTHON_CMD} {SCREENSHOT_SCRIPT_PATH} --html {html_path} --png {png_path} --page_load_time {page_load_time}")
     
     time.sleep(0.1)
     base64_image = image_to_base64(png_path)

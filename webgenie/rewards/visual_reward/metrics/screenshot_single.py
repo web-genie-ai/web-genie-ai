@@ -1,10 +1,10 @@
 import os
-from playwright.sync_api import sync_playwright
 import argparse
+from playwright.sync_api import sync_playwright
 from PIL import Image
 
 
-def take_screenshot(url, output_file="screenshot.png", do_it_again=False):
+def take_screenshot(url, output_file="screenshot.png", page_load_time = 1000, do_it_again=False):
     # Convert local path to file:// URL if it's a file
     if os.path.exists(url):
         url = "file://" + os.path.abspath(url)
@@ -23,7 +23,7 @@ def take_screenshot(url, output_file="screenshot.png", do_it_again=False):
             page.goto(url, timeout=60000)
 
             # Wait for 10 seconds to ensure page is fully loaded
-            page.wait_for_timeout(10000)
+            page.wait_for_timeout(page_load_time)
 
             # Take the screenshot
             page.screenshot(path=output_file, full_page=True, animations="disabled", timeout=60000)
@@ -44,8 +44,9 @@ if __name__ == "__main__":
     # Define the arguments
     parser.add_argument('--html', type=str)
     parser.add_argument('--png', type=str)
+    parser.add_argument('--page_load_time', type=int, default=1000)
 
     # Parse the arguments
     args = parser.parse_args()
 
-    take_screenshot(args.html, args.png, do_it_again=True)
+    take_screenshot(args.html, args.png, args.page_load_time, do_it_again=True)

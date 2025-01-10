@@ -5,6 +5,7 @@ import os
 from bs4 import BeautifulSoup, NavigableString, Tag, Comment
 from pathlib import Path
 
+from webgenie.constants import PYTHON_CMD
 
 def rgb_to_hex(rgb):
     """Convert an RGB tuple to hexadecimal format."""
@@ -232,13 +233,13 @@ def get_blocks_from_image_diff_pixels(image_path, html_text_color_tree, differen
 def get_itermediate_names(name):
     return name.replace(".png", ".html"), name.replace(".png", "_p.html"), name.replace(".png", "_p_1.html"), name.replace(".png", "_p.png"), name.replace(".png", "_p_1.png")
 
-def get_blocks_ocr_free(image_path):
+def get_blocks_ocr_free(image_path, page_load_time):
     html, p_html, p_html_1, p_png, p_png_1 = get_itermediate_names(image_path)
     process_html(html, p_html)
     process_html(html, p_html_1, offset=50)
 
-    os.system(f"python3 {Path(__file__).parent}/screenshot_single.py --html {p_html} --png {p_png}")
-    os.system(f"python3 {Path(__file__).parent}/screenshot_single.py --html {p_html_1} --png {p_png_1}")
+    os.system(f"{PYTHON_CMD} {Path(__file__).parent}/screenshot_single.py --html {p_html} --png {p_png} --page_load_time {page_load_time}")
+    os.system(f"{PYTHON_CMD} {Path(__file__).parent}/screenshot_single.py --html {p_html_1} --png {p_png_1} --page_load_time {page_load_time}")
 
     different_pixels = find_different_pixels(p_png, p_png_1)
 

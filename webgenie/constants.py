@@ -28,6 +28,12 @@ PYTHON_CMD = "python"
 # screenshot script path
 SCREENSHOT_SCRIPT_PATH = "webgenie/rewards/visual_reward/metrics/screenshot_single.py"
 
+# max page load time
+GROUND_TRUTH_HTML_LOAD_TIME = 20000
+
+# miner html load time
+MINER_HTML_LOAD_TIME = 2000
+
 # work dir
 WORK_DIR = "work"
 
