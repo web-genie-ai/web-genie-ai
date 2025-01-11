@@ -30,9 +30,15 @@ metrics = {
 
 async def calculate_scores(task: Task, solutions: List[Solution]) -> dict[str, np.ndarray]:
     scores: dict[str, np.ndarray] = {}
+
     for metric_name, reward_model in metrics.items():
+        print(metric_name)
+        start_time = time.time()
         reward_scores = await reward_model.reward(task, solutions)
+        execution_time = time.time() - start_time
+        print(f"Execution time: {execution_time:.2f} seconds")
         scores[metric_name] = reward_scores
+        print(scores[metric_name])
     return scores
 
 

@@ -445,7 +445,7 @@ def visual_eval_v3_multi(input_list, debug=False):
     predict_img_list = [html.replace(".html", ".png") for html in predict_html_list]
     # try:
     predict_blocks_list = []
-    for predict_html in predict_html_list:
+    for predict_html in tqdm(predict_html_list, desc="Screenshot HTML files and get OCR blocks"):
         predict_img = predict_html.replace(".html", ".png")
         # This will help fix some html syntax error
         pre_process(predict_html)
@@ -463,7 +463,7 @@ def visual_eval_v3_multi(input_list, debug=False):
 
     return_score_list = []
 
-    for k, predict_blocks in enumerate(predict_blocks_list):
+    for k, predict_blocks in tqdm(enumerate(predict_blocks_list), desc="Processing HTML files"):
         if len(predict_blocks) == 0:
             print("[Warning] No detected blocks in: ", predict_img_list[k])
             final_clip_score = calculate_clip_similarity_with_blocks(predict_img_list[k], original_img, predict_blocks, original_blocks)

@@ -4,6 +4,7 @@ import subprocess
 import threading
 import time
 
+from tqdm import tqdm
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from typing import List, Dict
 
@@ -89,7 +90,7 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
 
     time.sleep(1)  # Give the server time to start
     scores = []
-    for i in range(len(htmls)):
+    for i in tqdm(range(len(htmls)), desc="Getting lighthouse scores"):
         url = f"http://localhost:{port}/lighthouse_score/{i}"
         scores.append(get_lighthouse_score_from_subprocess(url))
 
