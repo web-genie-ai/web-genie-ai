@@ -9,6 +9,7 @@ from typing import List, Dict
 
 from webgenie.constants import LIGHTHOUSE_SERVER_PORT
 
+httpd = None
 
 def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
     class CustomHandler(SimpleHTTPRequestHandler):
@@ -50,6 +51,7 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
             self.end_headers()
 
     def run_server(port=8000):
+        global httpd
         server_address = ('', port)
         httpd = HTTPServer(server_address, CustomHandler)
         bt.logging.info(f"Starting server on port {port}...")
@@ -90,8 +92,11 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
     for i in range(len(htmls)):
         url = f"http://localhost:{port}/lighthouse_score/{i}"
         scores.append(get_lighthouse_score_from_subprocess(url))
-    
+
+    if httpd:
+        httpd.shutdown()
     server_thread.join(timeout=10)
+
     if server_thread.is_alive():
         bt.logging.error("Server did not shut down properly.")
     else:

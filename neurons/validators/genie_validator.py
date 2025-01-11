@@ -62,7 +62,7 @@ class GenieValidator:
 
             task, synapse = self.synthetic_tasks.pop(0)
             miner_uids = get_all_available_uids(self.neuron)
-            if not miner_uids:
+            if len(miner_uids) == 0:
                 bt.logging.warning("No miners available")
                 return
             
