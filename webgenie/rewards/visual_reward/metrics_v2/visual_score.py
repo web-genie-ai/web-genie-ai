@@ -31,8 +31,9 @@ from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 
-from ocr_free_utils import get_blocks_ocr_free
+from ocr_free_utils import get_blocks_ocr_free, get_files_to_screenshot
 from dedup_post_gen import check_repetitive_content
+from screenshot_multiple import take_screenshots
 from webgenie.constants import (
     PYTHON_CMD, 
     GROUND_TRUTH_HTML_LOAD_TIME,
@@ -443,19 +444,32 @@ def pre_process(html_file):
 def visual_eval_v3_multi(input_list, debug=False):
     predict_html_list, original_html = input_list[0], input_list[1]
     predict_img_list = [html.replace(".html", ".png") for html in predict_html_list]
-    # try:
+
     predict_blocks_list = []
-    for predict_html in tqdm(predict_html_list, desc="Screenshot HTML files and get OCR blocks"):
+
+    to_screenshot_html_list, to_screenshot_img_list = [], []
+    for predict_html in tqdm(predict_html_list, desc="Pre-screenshot HTML files"):
         predict_img = predict_html.replace(".html", ".png")
         # This will help fix some html syntax error
         pre_process(predict_html)
-        os.system(f"{PYTHON_CMD} {Path(__file__).parent}/screenshot_single.py --html {predict_html} --png {predict_img} --page_load_time {MINER_HTML_LOAD_TIME}")
-        predict_blocks = get_blocks_ocr_free(predict_img, page_load_time=MINER_HTML_LOAD_TIME)
+        to_screenshot_html_list.append(predict_html)
+        to_screenshot_img_list.append(predict_img)
+        
+        pre_screenshoted_html_list, pre_screenshoted_img_list = get_files_to_screenshot(predict_img)
+        to_screenshot_html_list.extend(pre_screenshoted_html_list)
+        to_screenshot_img_list.extend(pre_screenshoted_img_list)
+
+    take_screenshots(to_screenshot_html_list, to_screenshot_img_list)
+
+    for predict_html in tqdm(predict_html_list, desc="Screenshot HTML files and get OCR blocks"):
+        predict_img = predict_html.replace(".html", ".png")
+        # This will help fix some html syntax error
+        predict_blocks = get_blocks_ocr_free(predict_img, page_load_time=MINER_HTML_LOAD_TIME, pre_screenshoted=True)
         predict_blocks_list.append(predict_blocks)
 
     original_img = original_html.replace(".html", ".png")
     os.system(f"{PYTHON_CMD} {Path(__file__).parent}/screenshot_single.py --html {original_html} --png {original_img} --page_load_time {GROUND_TRUTH_HTML_LOAD_TIME}")
-    original_blocks = get_blocks_ocr_free(original_img, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)
+    original_blocks = get_blocks_ocr_free(original_img, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME, pre_screenshoted=False)
     original_blocks = merge_blocks_by_bbox(original_blocks)
 
     # Consider context similarity for block matching
@@ -464,16 +478,16 @@ def visual_eval_v3_multi(input_list, debug=False):
     return_score_list = []
 
     for k, predict_blocks in tqdm(enumerate(predict_blocks_list), desc="Processing HTML files"):
-        # if len(predict_blocks) == 0:
-        #     print("[Warning] No detected blocks in: ", predict_img_list[k])
-        #     final_clip_score = calculate_clip_similarity_with_blocks(predict_img_list[k], original_img, predict_blocks, original_blocks)
-        #     return_score_list.append([0.0, 0.2 * final_clip_score, (0.0, 0.0, 0.0, 0.0, final_clip_score)])
-        #     continue
-        # elif len(original_blocks) == 0:
-        #     print("[Warning] No detected blocks in: ", original_img)
-        #     final_clip_score = calculate_clip_similarity_with_blocks(predict_img_list[k], original_img, predict_blocks, original_blocks)
-        #     return_score_list.append([0.0, 0.2 * final_clip_score, (0.0, 0.0, 0.0, 0.0, final_clip_score)])
-        #     continue
+        if len(predict_blocks) == 0:
+            print("[Warning] No detected blocks in: ", predict_img_list[k])
+            final_clip_score = calculate_clip_similarity_with_blocks(predict_img_list[k], original_img, predict_blocks, original_blocks)
+            return_score_list.append([0.0, 0.2 * final_clip_score, (0.0, 0.0, 0.0, 0.0, final_clip_score)])
+            continue
+        elif len(original_blocks) == 0:
+            print("[Warning] No detected blocks in: ", original_img)
+            final_clip_score = calculate_clip_similarity_with_blocks(predict_img_list[k], original_img, predict_blocks, original_blocks)
+            return_score_list.append([0.0, 0.2 * final_clip_score, (0.0, 0.0, 0.0, 0.0, final_clip_score)])
+            continue
 
         if debug:
             print(predict_blocks)
