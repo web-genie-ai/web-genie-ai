@@ -34,10 +34,16 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
                 self.end_headers()
                 self.wfile.write(b'User-agent: *\nDisallow: /')  # Example content
             elif self.path.startswith('/lighthouse_score'):
-                html_index = int(self.path.split('/')[-1])
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
-                self.wfile.write(htmls[html_index].encode('utf-8'))
+                try:
+                    html_index = int(self.path.split('/')[-1])
+                    self.send_header('Content-type', 'text/html')
+                    self.end_headers()
+                    self.wfile.write(htmls[html_index].encode('utf-8'))
+                except Exception as e:
+                    bt.logging.error(f"Error getting lighthouse score: {e}")
+                    self.send_response(404)
+                    self.end_headers()
+                    self.wfile.write(b"Not Found")
             else:
                 self.send_response(404)
                 self.end_headers()

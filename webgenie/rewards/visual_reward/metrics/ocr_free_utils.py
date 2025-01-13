@@ -135,6 +135,7 @@ def extract_text_with_color(html_file):
             return list(children_texts)
 
     with open(html_file, 'r', encoding='utf-8') as file:
+        
         soup = BeautifulSoup(file, 'html.parser')
         body = soup.body
         return extract_text_recursive(body) if body else []

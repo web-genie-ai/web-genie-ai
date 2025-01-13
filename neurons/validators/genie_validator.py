@@ -92,6 +92,11 @@ class GenieValidator:
             bt.logging.error(f"Error in query_miners: {e}")
             raise e
 
+    async def foward(self):
+        await self.synthensize_task()
+        await self.query_miners()
+        await self.score()
+
     async def score(self):
         if not self.competitions:
             return

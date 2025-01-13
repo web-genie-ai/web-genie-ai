@@ -15,9 +15,11 @@ setattr(np, "asscalar", patch_asscalar)
 import matplotlib.pyplot as plt
 from scipy.optimize import linear_sum_assignment
 import random
+import time
 from sklearn.metrics.pairwise import cosine_similarity
 from difflib import SequenceMatcher
 from tqdm import tqdm 
+
 from pathlib import Path
 from PIL import Image, ImageDraw
 import torch
@@ -474,14 +476,18 @@ def visual_eval_v3_multi(input_list, debug=False):
         #     final_clip_score = calculate_clip_similarity_with_blocks(predict_img_list[k], original_img, predict_blocks, original_blocks)
         #     return_score_list.append([0.0, 0.2 * final_clip_score, (0.0, 0.0, 0.0, 0.0, final_clip_score)])
         #     continue
-
+        print(len(predict_blocks))
         if debug:
             print(predict_blocks)
             print(original_blocks)
-    
+        print("Merging blocks")
+        start_time = time.time()
         predict_blocks = merge_blocks_by_bbox(predict_blocks)
         predict_blocks_m, original_blocks_m, matching = find_possible_merge(predict_blocks, deepcopy(original_blocks), consecutive_bonus, window_size, debug=debug)
+        print(f"Merging blocks time: {time.time() - start_time:.2f} seconds")
         
+        print("Filtering matching")
+        start_time = time.time()
         filtered_matching = []
         for i, j in matching:
             text_similarity = SequenceMatcher(None, predict_blocks_m[i]['text'], original_blocks_m[j]['text']).ratio()
@@ -490,6 +496,7 @@ def visual_eval_v3_multi(input_list, debug=False):
                 continue
             filtered_matching.append([i, j, text_similarity])
         matching = filtered_matching
+        print(f"Filtering matching time: {time.time() - start_time:.2f} seconds")
 
         indices1 = [item[0] for item in matching]
         indices2 = [item[1] for item in matching]
@@ -510,7 +517,9 @@ def visual_eval_v3_multi(input_list, debug=False):
             if j not in indices2:
                 unmatched_area_2 += original_blocks_m[j]['bbox'][2] * original_blocks_m[j]['bbox'][3]
         sum_areas.append(unmatched_area_1 + unmatched_area_2)
-    
+
+        print("Calculating scores")
+        start_time = time.time()
         for i, j, text_similarity in matching:
             sum_block_area = predict_blocks_m[i]['bbox'][2] * predict_blocks_m[i]['bbox'][3] + original_blocks_m[j]['bbox'][2] * original_blocks_m[j]['bbox'][3]
 
@@ -520,6 +529,7 @@ def visual_eval_v3_multi(input_list, debug=False):
                                                     original_blocks_m[j]['bbox'][0] + original_blocks_m[j]['bbox'][2] / 2, \
                                                     original_blocks_m[j]['bbox'][1] + original_blocks_m[j]['bbox'][3] / 2)
             # Normalized ciede2000 formula
+            
             text_color_similarity = color_similarity_ciede2000(predict_blocks_m[i]['color'], original_blocks_m[j]['color'])
             matched_list.append([predict_blocks_m[i]['bbox'], original_blocks_m[j]['bbox']])
     
@@ -542,6 +552,7 @@ def visual_eval_v3_multi(input_list, debug=False):
                 print("color score", text_color_similarity)
                 print("----------------------------------")
                 pass
+        print(f"Calculating scores time: {time.time() - start_time:.2f} seconds")
         """
         if debug:
             img1 = cv2.imread(predict_img_list[k])
