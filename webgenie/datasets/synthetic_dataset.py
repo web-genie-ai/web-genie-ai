@@ -5,12 +5,10 @@
 
 import bittensor as bt
 from typing import List
-
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 from webgenie.datasets.dataset import Dataset, DatasetEntry
-from webgenie.helpers.llms import call_llm
+from webgenie.helpers.llms import openai_call
 from webgenie.prompts import PROMPT_GEN_CONCEPT, PROMPT_GEN_HTML
 
 
@@ -25,34 +23,28 @@ class HTMLResponse(BaseModel):
 class SyntheticDataset(Dataset):
     def __init__(self, has_ground_truth_html: bool = True):
         self.has_ground_truth_html = has_ground_truth_html
-        self.concept_parser = JsonOutputParser(pydantic_object=ConceptResponse)
-        self.html_parser = JsonOutputParser(pydantic_object=HTMLResponse)
         self.concepts = []
 
     async def _generate_concepts(self):
         bt.logging.info("Generating concepts")
-        response = await call_llm(
-            template=[
-                ("system", PROMPT_GEN_CONCEPT),
+        response = await openai_call(
+            messages = [
+                {"role": "system", "content": PROMPT_GEN_CONCEPT},
             ],
-            params={"instructions": self.concept_parser.get_format_instructions()},
-            output_parser=self.concept_parser,
+            response_format = ConceptResponse,
         )
-        return response["concepts"]
+        return response.concepts
 
     async def _generate_html(self, concept: str):
         bt.logging.info("Generating HTML from concept")
-        response = await call_llm(
-            template=[
-                ("system", PROMPT_GEN_HTML),
+        response = await openai_call(
+            messages = [
+                {"role": "system", "content": PROMPT_GEN_HTML},
+                {"role": "user", "content": concept},
             ],
-            params={
-                "concept": concept, 
-                "instructions": self.html_parser.get_format_instructions(),
-            },
-            output_parser=self.html_parser,
+            response_format = HTMLResponse,
         )
-        return response["html"]
+        return response.html
         
     async def generate_context(self)->DatasetEntry:
         bt.logging.info("Generating Synthetic context")

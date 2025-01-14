@@ -15,7 +15,10 @@ from webgenie.competitions import (
     ImageTaskQualityCompetition,
     TextTaskQualityCompetition,
     RESERVED_WEIGHTS,
+    ACCURACY_METRIC_NAME,
+    QUALITY_METRIC_NAME,
 )
+from webgenie.helpers.dashboard import upload_competition_result
 from webgenie.helpers.htmls import preprocess_html, validate_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
@@ -90,22 +93,32 @@ class GenieValidator:
             return
 
         best_miner = -1
-        best_reward = 0.0
-
+        best_final_score = 0.0
+        
+        solutions.sort(key=lambda solution: solution.process_time)
         competition = task.competition
         miner_uids = [solution.miner_uid for solution in solutions]
-        rewards = await competition.reward(task, solutions)
-        bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
+        
+        final_scores, scores = await competition.calculate_final_scores(task, solutions)
+        bt.logging.success(f"Final scores for {miner_uids}: {final_scores}")
         
         for i in range(len(miner_uids)):
-            if rewards[i] > best_reward:
-                best_reward = rewards[i]
+            upload_competition_result({
+                "miner_uid": miner_uids[i],
+                "final_score": final_scores[i],
+                "accuracy": scores[ACCURACY_METRIC_NAME][i],
+                "quality": scores[QUALITY_METRIC_NAME][i],
+                "html": solutions[i].html,
+            })
+            
+            if final_scores[i] > best_final_score:
+                best_final_score = final_scores[i]
                 best_miner = miner_uids[i]
 
         if best_miner == -1:
             return
     
-        self.neuron.update_scores([RESERVED_WEIGHTS[competition.name]], [best_miner])
+        self.neuron.update_scores([RESERVED_WEIGHTS[competition.COMPETITION_TYPE]], [best_miner])
         self.neuron.step += 1
 
     async def synthensize_task(self):

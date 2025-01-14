@@ -5,12 +5,11 @@ import bittensor as bt
 import bert_score
 import os
 import numpy as np
+from pydantic import BaseModel, Field
 from typing import List
 
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel, Field
 
-from webgenie.helpers.llms import call_llm
+from webgenie.helpers.llms import openai_call
 from webgenie.prompts import PROMPT_RTC
 from webgenie.rewards.reward import Reward
 from webgenie.rewards.metrics import s_bert
@@ -22,20 +21,13 @@ class PromptResponse(BaseModel):
 
 
 class RtcReward(Reward):
-    def __init__(self):
-        self.prompt_response_parser = JsonOutputParser(pydantic_object=PromptResponse)
-        
-    async def _get_prompt(self, task: Task, solutions: List[Solution]) -> str:
-        response = await call_llm(
-            template=[
-                ("system", PROMPT_RTC),
+
+    async def _get_prompt(self, task: Task, solution: Solution) -> str:
+        response = await openai_call(
+            messages = [
+                {"role": "system", "content": PROMPT_RTC.format(html=solution.html, prompt=task.prompt)},
             ],
-            params={
-                "html": task.ground_truth_html,
-                "prompt": task.prompt, 
-                "instructions": self.prompt_response_parser.get_format_instructions(),
-            },
-            output_parser=self.prompt_response_parser,
+            response_format = PromptResponse,
         )
 
         return response["prompt"]
@@ -48,8 +40,3 @@ class RtcReward(Reward):
         #P, R, F1 = bert_score.score(original_prompts, miner_prompts, lang='en')
         scores = s_bert.score(original_prompts, miner_prompts)
         return np.array(scores)
-
-
-
-
-        

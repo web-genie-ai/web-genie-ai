@@ -4,6 +4,7 @@
 import bittensor as bt
 import numpy as np
 from typing import List
+import uuid
 
 from webgenie.constants import WORK_DIR
 from webgenie.rewards.reward import Reward
@@ -21,17 +22,18 @@ class VisualReward(Reward):
         
         bt.logging.debug(f"Rewarding image task in visual reward")
         
-        original_html_path = f"{WORK_DIR}/original.html"
+        original_html_path = f"{WORK_DIR}/original_{uuid.uuid4()}.html"
         with open(original_html_path, "w") as f:
             f.write(task.ground_truth_html)
 
         miner_html_paths = []
         for solution in solutions:
-            path = f"{WORK_DIR}/miner{solution.miner_uid}.html"
+            path = f"{WORK_DIR}/miner{solution.miner_uid}_{uuid.uuid4()}.html"
             with open(path, "w") as f:
                 f.write(solution.html)
             miner_html_paths.append(path)
 
         visual_scores = visual_eval_v3_multi([miner_html_paths, original_html_path])
         bt.logging.debug(f"Visual scores: {visual_scores}")
+        
         return np.array([score[1] for score in visual_scores])
