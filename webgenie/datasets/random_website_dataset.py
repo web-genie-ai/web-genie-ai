@@ -2,7 +2,7 @@ import bittensor as bt
 import nltk
 import random
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag, NavigableString
 from collections import Counter
 from duckduckgo_search import DDGS
 from nltk.corpus import brown
@@ -81,6 +81,34 @@ class RandomWebsiteDataset(Dataset):
 
             # Return the modified HTML as a string
             return str(soup)
+        
+    async def shorten_html(self, html: str, max_children: int = 20, max_text_length: int = 400)->str:
+        soup = BeautifulSoup(html, "html.parser")
+        def traverse(node):
+            # If it’s a tag, we might need to limit its children
+            if isinstance(node, Tag):
+                # If node has too many children, remove the extras
+                if len(node.contents) > max_children:
+                    # Keep only the first max_children
+                    node.contents = node.contents[:max_children]
+                
+                # Recurse on each child
+                for child in node.contents:
+                    traverse(child)
+
+            # If it’s a text node, shorten if needed
+            elif isinstance(node, NavigableString):
+                text_str = str(node)
+                if len(text_str) > max_text_length:
+                    shortened = text_str[:max_text_length] + "..."
+                    node.replace_with(shortened)
+
+        # Start traversal from the root soup element (html, body, etc.)
+        traverse(soup)
+
+        return str(soup)
+
+
 
     async def generate_context(self)->DatasetEntry:
         try:
@@ -90,6 +118,7 @@ class RandomWebsiteDataset(Dataset):
                 raise Exception("Failed to get a valid website URL")
             bt.logging.debug(f"Generated website URL: {website_url}")
             html = await self.get_rendered_html(website_url)
+            html = await self.shorten_html(html)
             return DatasetEntry(
                 src="random_website",
                 topic="random_website",
