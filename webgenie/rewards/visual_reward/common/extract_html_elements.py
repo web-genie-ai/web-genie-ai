@@ -34,7 +34,6 @@ def parse_rgb_string(rgb_str: str) -> tuple[int, int, int]:
 async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
     if os.path.exists(file_path):
         url = f"file:///{os.path.abspath(file_path)}"
-    print(url)
     text_elements = []
     button_elements = []
     input_elements = []
@@ -50,8 +49,8 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
         with open(screenshot_path, "rb") as f:
             screenshot = Image.open(f)
             W, H = screenshot.size
-
-        async def traverse(node):
+        
+        async def add_element(node, has_children):
             text = await node.inner_text()
             bounding_box = await node.bounding_box()
             rendered_style = await node.evaluate(
@@ -62,6 +61,11 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
             )
             tag_name = await node.evaluate("(node) => node.tagName.toLowerCase()")
             
+            if bounding_box is None:
+                return
+            if bounding_box["width"] == 0 or bounding_box["height"] == 0:
+                return
+
             scaled_bounding_box = {
                 "x": bounding_box["x"] / W,
                 "y": bounding_box["y"] / H,
@@ -100,12 +104,7 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
                     )
                 )
 
-            has_children = await node.evaluate("(node) => node.children.length > 0")
-            if has_children:
-                children = await node.query_selector_all(':scope > *')
-                for child in children:
-                    await traverse(child)
-            else:
+            if not has_children:
                 text_elements.append(
                     HTMLElement(
                         text=text, 
@@ -115,11 +114,20 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
                         rendered_style=rendered_style,
                     )
                 )
+        
+        async def traverse(node):
+            children = await node.query_selector_all(':scope > *')
+            has_children = False
+            for child in children:
+                await traverse(child)
+                has_children = True
+            
+            await add_element(node, has_children)
+            
         await traverse(await page.query_selector('body'))
         await page.close()
     except Exception as e:
         print(e)
-    
     preprocess_html_elements(file_path, button_elements)
     preprocess_html_elements(file_path, input_elements)
     preprocess_html_elements(file_path, anchor_elements)
