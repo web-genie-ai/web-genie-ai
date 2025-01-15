@@ -4,6 +4,21 @@ import numpy as np
 from typing import List
 
 
+def is_validator(metagraph: "bt.metagraph.Metagraph", uid: int, vpermit_tao_limit: int) -> bool:
+    return metagraph.S[uid] >= vpermit_tao_limit
+
+
+def get_validator_index(self, uid: int) -> int:
+    validator_uids = []
+    for uid in range(self.metagraph.n.item()):
+        if is_validator(self.metagraph, uid, self.config.neuron.vpermit_tao_limit):
+            validator_uids.append(uid)  
+    try:
+        return validator_uids.index(uid)
+    except ValueError:
+        return -1
+
+
 def check_uid_availability(
     metagraph: "bt.metagraph.Metagraph", uid: int, vpermit_tao_limit: int
 ) -> bool:
