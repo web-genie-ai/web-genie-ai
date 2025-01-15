@@ -4,6 +4,7 @@ from PIL import Image
 from webgenie.constants import DEFAULT_LOAD_TIME
 from webgenie.rewards.visual_reward.common.browser import web_player
 
+
 async def take_screenshot(url, output_file_path, load_time = DEFAULT_LOAD_TIME, overwrite = False):
     if os.path.exists(url):
         url = f"file:///{os.path.abspath(url)}"

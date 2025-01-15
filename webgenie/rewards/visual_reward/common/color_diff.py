@@ -3,6 +3,7 @@ from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 import numpy as np
 
+
 def delta_e_cie2000(lab1, lab2):
     # Extract components of Lab1 and Lab2
     L1, a1, b1 = lab1.lab_l, lab1.lab_a, lab1.lab_b
@@ -60,7 +61,6 @@ def rgb_to_lab(rgb):
     lab_color = convert_color(rgb_color, LabColor)
     
     return lab_color
-
 
 
 def color_similarity_ciede2000(rgb1, rgb2):

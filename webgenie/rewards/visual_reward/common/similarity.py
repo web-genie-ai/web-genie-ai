@@ -11,11 +11,13 @@ from webgenie.rewards.visual_reward.common.sift import match_sift_features
 from webgenie.rewards.visual_reward.common.color_diff import color_similarity_ciede2000
 # similarity is 1 if they are the same, 0 if they are completely different
 
+
 def calculate_color_similarity(
         original_element: HTMLElement, 
         predicted_element: HTMLElement,
     ):
     return color_similarity_ciede2000(original_element.color, predicted_element.color)
+
 
 def calculate_text_similarity(
         original_element: HTMLElement, 
@@ -28,6 +30,7 @@ def calculate_text_similarity(
         return 0
     
     return SequenceMatcher(None, original_element.text, predicted_element.text).ratio()
+
 
 def calculate_block_similarity(
         original_element: HTMLElement, 
@@ -42,6 +45,7 @@ def calculate_block_similarity(
                    - original_element.scaled_bounding_box["y"] - original_element.scaled_bounding_box["height"])
 
     return 1 - (x_shift + y_shift + xx_shift + yy_shift) / 4
+
 
 def calculate_visual_similarity(
         predicted_element: HTMLElement, 

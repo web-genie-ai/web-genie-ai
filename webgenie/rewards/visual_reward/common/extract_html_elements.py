@@ -24,6 +24,7 @@ class HTMLElement(BaseModel):
     descriptors: Any = Field(default=None)
     avg_color: tuple[int, int, int] = Field(default=(0, 0, 0))
 
+
 def parse_rgb_string(rgb_str: str) -> tuple[int, int, int]:
     """Convert RGB color string like 'rgb(23, 34, 45)' to (23, 34, 45) tuple."""
     # Extract numbers from rgb(r,g,b) format using string manipulation
@@ -63,7 +64,7 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
             
             if bounding_box is None:
                 return
-            if bounding_box["width"] == 0 or bounding_box["height"] == 0:
+            if bounding_box["width"] <= 0 or bounding_box["height"] <= 0:
                 return
 
             scaled_bounding_box = {
@@ -132,6 +133,7 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
     preprocess_html_elements(file_path, input_elements)
     preprocess_html_elements(file_path, anchor_elements)
     return text_elements, button_elements, input_elements, anchor_elements
+
 
 def preprocess_html_elements(html_path, html_elements):
     image_path = html_path.replace(".html", ".png")

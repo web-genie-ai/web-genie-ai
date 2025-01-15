@@ -4,6 +4,7 @@ from PIL import Image
 from webgenie.rewards.visual_reward.common.take_screenshot import take_screenshot
 from webgenie.constants import HTML_EXTENSION, IMAGE_EXTENSION
 
+
 def compute_grayscale_histogram(image_path, bins=256):
     """
     Load the image, convert to grayscale, compute histogram.
@@ -20,6 +21,7 @@ def compute_grayscale_histogram(image_path, bins=256):
     hist /= hist.sum()
 
     return hist
+
 
 def compare_histograms(hist1, hist2):
     """

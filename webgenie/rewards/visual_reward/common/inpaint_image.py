@@ -29,6 +29,7 @@ def erase_texts(input_file_path, output_file_path):
     with open(output_file_path, 'w') as file:
         file.write(str(soup))
 
+
 async def inpaint_image(url, output_file_path, load_time = DEFAULT_LOAD_TIME):
     erased_html_path = f'{url.replace(HTML_EXTENSION, "_erased.html")}'
     erase_texts(url, erased_html_path)

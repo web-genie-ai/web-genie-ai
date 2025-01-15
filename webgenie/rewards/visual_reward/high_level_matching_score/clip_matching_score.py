@@ -5,9 +5,6 @@ from PIL import Image
 from webgenie.constants import HTML_EXTENSION, IMAGE_EXTENSION
 from webgenie.rewards.visual_reward.common.inpaint_image import inpaint_image
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip.load("ViT-B/32", device=device)
-
 
 def rescale(image_path):
     # Load the image
@@ -28,7 +25,7 @@ def rescale(image_path):
         return img_resized
 
 
-def calculate_clip_similarity(image_path1, image_path2):
+def calculate_clip_similarity(image_path1, image_path2, model, preprocess, device):
     # Load and preprocess images
     image1 = preprocess(rescale(image_path1)).unsqueeze(0).to(device)
     image2 = preprocess(rescale(image_path2)).unsqueeze(0).to(device)
@@ -47,23 +44,27 @@ def calculate_clip_similarity(image_path1, image_path2):
 
     return similarity
 
-def calculate_embedding_vector(image_path):
+
+def calculate_embedding_vector(image_path, model, preprocess, device):
     image = preprocess(rescale(image_path)).unsqueeze(0).to(device)
     with torch.no_grad():
         image_features = model.encode_image(image)
     image_features /= image_features.norm(dim=-1, keepdim=True)
     return image_features
     
+
 async def calculate_clip_score(predict_html_path_list, original_html_path):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model, preprocess = clip.load("ViT-B/32", device=device)
     original_img_path = original_html_path.replace(HTML_EXTENSION, f"_inpainted{IMAGE_EXTENSION}")
     await inpaint_image(original_html_path, original_img_path)
-    original_embedding_vector = calculate_embedding_vector(original_img_path)
+    original_embedding_vector = calculate_embedding_vector(original_img_path, model, preprocess, device)
     
     results = []
     for predict_html_path in predict_html_path_list:
         predict_img_path = predict_html_path.replace(HTML_EXTENSION, f"_inpainted{IMAGE_EXTENSION}")
         await inpaint_image(predict_html_path, predict_img_path)
-        predict_embedding_vector = calculate_embedding_vector(predict_img_path)
+        predict_embedding_vector = calculate_embedding_vector(predict_img_path, model, preprocess, device)
 
         score = (original_embedding_vector @ predict_embedding_vector.T).item()
         results.append(score)

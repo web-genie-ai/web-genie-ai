@@ -4,6 +4,7 @@ from skimage.feature import SIFT
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
 
+
 def extract_sift_from_roi(gray_image, roi):
     # ROI: (x, y, w, h)
     x, y, w, h = roi
@@ -19,6 +20,7 @@ def extract_sift_from_roi(gray_image, roi):
     descriptors = sift.descriptors
 
     return keypoints, descriptors
+
 
 def match_sift_features(kp1, desc1, kp2, desc2, distance_metric="euclidean", threshold=0.75):
     if (desc1 is None or len(desc1) == 0) and (desc2 is None or len(desc2) == 0):

@@ -12,7 +12,7 @@ from webgenie.constants import LIGHTHOUSE_SERVER_PORT
 
 httpd = None
 
-def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
+def get_lighthouse_score(htmls: List[str], port: int = LIGHTHOUSE_SERVER_PORT) -> List[Dict[str, float]]:
     class CustomHandler(SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -63,8 +63,7 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
         httpd = HTTPServer(server_address, CustomHandler)
         bt.logging.info(f"Starting server on port {port}...")
         httpd.serve_forever()
-
-    port = LIGHTHOUSE_SERVER_PORT
+    
     server_thread = threading.Thread(target=run_server, args=(port,), daemon=True)
     server_thread.start()
     

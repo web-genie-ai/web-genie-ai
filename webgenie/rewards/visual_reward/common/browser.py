@@ -1,9 +1,11 @@
 from playwright.async_api import async_playwright
 
+
 web_player = {
     "web_driver": None,
     "browser": None,
 }
+
 
 async def start_browser():
     global web_player
@@ -11,6 +13,7 @@ async def start_browser():
     browser = await web_driver.chromium.launch(headless=True)
     web_player["web_driver"] = web_driver
     web_player["browser"] = browser
+
 
 async def stop_browser():
     global web_player

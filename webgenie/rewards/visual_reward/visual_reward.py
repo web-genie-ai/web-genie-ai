@@ -3,9 +3,12 @@
 
 import bittensor as bt
 import os
+import asyncio
+import multiprocessing
 import numpy as np
-from typing import List
 import uuid
+from datetime import datetime
+from typing import List
 
 from webgenie.constants import WORK_DIR
 from webgenie.rewards.reward import Reward
@@ -19,13 +22,7 @@ class VisualReward(Reward):
     def __init__(self):
         pass
 
-    async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
-        if not isinstance(task, ImageTask):
-            raise ValueError(f"Task is not a ImageTask: {type(task)}")
-
-        current_work_dir = f"{WORK_DIR}/{task.task_id}"
-        os.makedirs(current_work_dir, exist_ok=True)
-
+    async def reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:
         await start_browser()
         bt.logging.info(f"Rewarding image task in visual reward")
         
@@ -48,4 +45,34 @@ class VisualReward(Reward):
 
         scores = high_level_scores * 0.3 + low_level_scores * 0.7
         await stop_browser()
+        return scores
+    def sync_reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:
+        return asyncio.run(self.reward_worker(task, solutions, current_work_dir))
+
+    async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
+        if not isinstance(task, ImageTask):
+            raise ValueError(f"Task is not a ImageTask: {type(task)}")
+
+        timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
+        current_work_dir = f"{WORK_DIR}/task_{timestamp}_{task.task_id}"
+        os.makedirs(current_work_dir, exist_ok=True)
+
+        # Use ProcessPoolExecutor for parallel processing
+        with multiprocessing.Pool(processes=os.cpu_count()) as pool:
+            # Convert solutions into chunks for parallel processing
+            chunk_size = max(1, len(solutions) // os.cpu_count())
+            solution_chunks = [solutions[i:i + chunk_size] for i in range(0, len(solutions), chunk_size)]
+            
+            # Create partial tasks for each chunk
+            futures = []
+            for chunk in solution_chunks:
+                future = pool.apply_async(self.sync_reward_worker, args=(task, chunk, current_work_dir))
+                futures.append(future)
+            
+            # Gather all results
+            chunk_scores = []
+            for future in futures:
+                chunk_scores.extend(future.get())
+                
+            scores = np.array(chunk_scores)
         return scores

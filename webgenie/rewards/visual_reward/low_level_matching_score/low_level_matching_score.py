@@ -6,6 +6,7 @@ from webgenie.rewards.visual_reward.low_level_matching_score.input_matching_scor
 
 from webgenie.rewards.visual_reward.common.extract_html_elements import extract_html_elements
 
+
 async def low_level_matching_score(predict_html_path_list, original_html_path):
     
     (
