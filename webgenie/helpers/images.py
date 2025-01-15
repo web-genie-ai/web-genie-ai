@@ -4,6 +4,7 @@ import base64
 
 from webgenie.constants import MAX_DEBUG_IMAGE_STRING_LENGTH
 
+
 def pil_image_to_base64(img: Image.Image) -> str:
     buffered = io.BytesIO()
     img.save(buffered, format="jpeg")    
