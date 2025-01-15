@@ -43,7 +43,7 @@ async def calculate_scores(task: Task, solutions: List[Solution]) -> dict[str, n
 
 
 async def main():
-    ground_truth_html_path = "work/original_f7e98ea8-cc04-44ea-8f40-432914b0f0ea.html"
+    ground_truth_html_path = "tests/work/original.html"
     with open(ground_truth_html_path, "r") as f:
         ground_truth_html = f.read()
     
