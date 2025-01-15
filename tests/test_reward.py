@@ -23,8 +23,8 @@ from webgenie.helpers.htmls import html_to_screenshot
 from neurons.miners.openai_miner import OpenaiMiner
 
 metrics = {
-    ACCURACY_METRIC_NAME: VisualReward(),
-    SEO_METRIC_NAME: LighthouseReward(),
+ #   ACCURACY_METRIC_NAME: VisualReward(),
+#    SEO_METRIC_NAME: LighthouseReward(),
     QUALITY_METRIC_NAME: QualityReward(),
 }
 

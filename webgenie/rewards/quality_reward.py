@@ -25,6 +25,7 @@ class QualityReward(Reward):
                 {"role": "system", "content": PROMPT_QUALITY.format(html=solution.html)},
             ],
             response_format = ScoreResponse,
+            deterministic=True,
         )
         return response.score / 100
 

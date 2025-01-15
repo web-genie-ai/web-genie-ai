@@ -15,14 +15,23 @@ client = AsyncOpenAI(
     base_url=base_url,
 )
 
-async def openai_call(messages, response_format, retries=3):
+async def openai_call(messages, response_format, deterministic=False, retries=3):
     for _ in range(retries):
         try:
-            completion = await client.beta.chat.completions.parse(
-                model=model,
-                messages= messages,
-                response_format=response_format,
-            )
+            if deterministic:
+                completion = await client.beta.chat.completions.parse(
+                    model=model,
+                    messages= messages,
+                    response_format=response_format,
+                    temperature=0,
+                )
+            else:
+                completion = await client.beta.chat.completions.parse(
+                    model=model,
+                    messages= messages,
+                    response_format=response_format,
+                    temperature=0.7,
+                )
             return completion.choices[0].message.parsed
         except Exception as e:
             bt.logging.error(f"Error calling OpenAI: {e}")
