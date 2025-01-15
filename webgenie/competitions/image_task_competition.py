@@ -61,25 +61,7 @@ class ImageTaskCompetition(Competition):
         if is_empty_html(ground_truth_html):
             raise ValueError("Empty ground truth html")
         
-        base64_image = await html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)
-        
-        # Save base64_image for debugging purposes
-        import os
-        import base64
-        from datetime import datetime
-
-        debug_dir = "debug_images"
-        os.makedirs(debug_dir, exist_ok=True)
-        
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = os.path.join(debug_dir, f"image_{timestamp}.png")
-        
-        try:
-            image = base64_to_image(base64_image)
-            image.save(filename)
-        except Exception as e:
-            bt.logging.error(f"Failed to save debug image: {e}")
-        
+        base64_image = await html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)    
         return (
             ImageTask(
                 base64_image=base64_image, 
