@@ -1,7 +1,10 @@
 import bittensor as bt
+import asyncio
 import os
+from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 from lxml import etree
+from PIL import Image
 import time
 import re
 import uuid
@@ -69,17 +72,36 @@ def seperate_html_css(html_content: str):
     return cleaned_html, css
 
 
-def html_to_screenshot(html: str, page_load_time: int = 1000) -> str:
+async def html_to_screenshot(html: str, page_load_time: int = 1000) -> str:
     html_path = f"{WORK_DIR}/screenshot_{uuid.uuid4()}.html"
     with open(html_path, "w") as f:
         f.write(html)
     png_path = f"{WORK_DIR}/screenshot_{uuid.uuid4()}.png"
-    os.system(f"{PYTHON_CMD} {SCREENSHOT_SCRIPT_PATH} --html {html_path} --png {png_path} --page_load_time {page_load_time}")
+    url = f"file://{os.path.abspath(html_path)}"
     
-    time.sleep(0.1)
-    base64_image = image_to_base64(png_path)
+    try:
+        async with async_playwright() as p:
+            # Choose a browser, e.g., Chromium, Firefox, or WebKit
+            browser = await p.chromium.launch()
+            page = await browser.new_page()
 
-    time.sleep(0.1)
+            # Navigate to the URL
+            await page.goto(url, timeout=60000)
+            await page.wait_for_timeout(page_load_time)
+            # Take the screenshot
+            await page.screenshot(path=png_path, full_page=True, animations="disabled", timeout=60000)
+
+            await browser.close()
+    except Exception as e: 
+        print(f"Failed to take screenshot due to: {e}. Generating a blank image.")
+        # Generate a blank image 
+        img = Image.new('RGB', (1280, 960), color = 'white')
+        img.save(png_path)
+
+    await asyncio.sleep(0.1)
+    
+    base64_image = image_to_base64(png_path)
+    await asyncio.sleep(0.1)
     os.remove(html_path)
     os.remove(png_path)
     return base64_image

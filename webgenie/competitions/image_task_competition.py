@@ -61,7 +61,7 @@ class ImageTaskCompetition(Competition):
         if is_empty_html(ground_truth_html):
             raise ValueError("Empty ground truth html")
         
-        base64_image = html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)
+        base64_image = await html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)
         
         # Save base64_image for debugging purposes
         import os

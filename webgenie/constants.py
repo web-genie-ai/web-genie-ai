@@ -1,6 +1,9 @@
 # backend api hotkey
 API_HOTKEY = "5DXDCYTuPfLqQXbxfvvnarG31SdTDtaubqpQrzjrcMgoP9dp"
 
+# default load time
+DEFAULT_LOAD_TIME = 1000
+
 # image task timeout
 IMAGE_TASK_TIMEOUT = 100
 
@@ -39,4 +42,7 @@ MAX_MINER_HTML_LEN = 1000000
 
 # work dir
 WORK_DIR = "work"
+
+HTML_EXTENSION = ".html"
+IMAGE_EXTENSION = ".png"
 
