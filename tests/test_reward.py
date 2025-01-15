@@ -68,7 +68,7 @@ async def main():
     print(synapse.html)
     execution_time = time.time() - start_time
     print(f"Execution time: {execution_time:.2f} seconds")
-    solutions = [Solution(html=synapse.html) for _ in range(1)]
+    solutions = [Solution(html=synapse.html) for _ in range(60)]
 
     print("Calculate scores")
     start_time = time.time()

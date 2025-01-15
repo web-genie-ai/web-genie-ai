@@ -2,6 +2,7 @@
 # (https://arxiv.org/pdf/2403.03163) is our inspiration for this reward.
 
 import bittensor as bt
+import os
 import numpy as np
 from typing import List
 import uuid
@@ -21,16 +22,20 @@ class VisualReward(Reward):
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
         if not isinstance(task, ImageTask):
             raise ValueError(f"Task is not a ImageTask: {type(task)}")
+
+        current_work_dir = f"{WORK_DIR}/{task.task_id}"
+        os.makedirs(current_work_dir, exist_ok=True)
+
         await start_browser()
         bt.logging.info(f"Rewarding image task in visual reward")
         
-        original_html_path = f"{WORK_DIR}/original_{uuid.uuid4()}.html"
+        original_html_path = f"{current_work_dir}/original_{uuid.uuid4()}.html"
         with open(original_html_path, "w") as f:
             f.write(task.ground_truth_html)
 
         miner_html_paths = []
         for solution in solutions:
-            path = f"{WORK_DIR}/miner{solution.miner_uid}_{uuid.uuid4()}.html"
+            path = f"{current_work_dir}/miner{solution.miner_uid}_{uuid.uuid4()}.html"
             with open(path, "w") as f:
                 f.write(solution.html)
             miner_html_paths.append(path)
