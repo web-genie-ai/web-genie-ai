@@ -40,6 +40,10 @@ class Validator(BaseValidatorNeuron):
 
     This class provides reasonable default behavior for a validator such as keeping a moving average of the scores of the miners and using them to set weights at the end of each epoch. Additionally, the scores are reset for new hotkeys at the end of each epoch.
     """
+    
+    @property
+    def session_number(self):
+        return self.block // COMPETITION_PERIOD_BLOCKS
 
     def __init__(self, config=None):
         super(Validator, self).__init__(config=config)
@@ -171,8 +175,7 @@ class Validator(BaseValidatorNeuron):
                     time.sleep(sleep_time)
                     continue
 
-                session_number = self.block // COMPETITION_PERIOD_BLOCKS
-                self.query_miners_event_loop.run_until_complete(self.genie_validator.query_miners(session_number))
+                self.query_miners_event_loop.run_until_complete(self.genie_validator.query_miners())
             except KeyboardInterrupt:
                 bt.logging.info("Keyboard interrupt detected, stopping query miners loop")
                 break
@@ -187,8 +190,7 @@ class Validator(BaseValidatorNeuron):
         while True:
             try:
                 self.sync()
-                session_number = self.block // COMPETITION_PERIOD_BLOCKS
-                self.score_event_loop.run_until_complete(self.genie_validator.score(session_number))
+                self.score_event_loop.run_until_complete(self.genie_validator.score())
             except KeyboardInterrupt:
                 bt.logging.info("Keyboard interrupt detected, stopping scoring loop")
                 break
@@ -239,7 +241,7 @@ class Validator(BaseValidatorNeuron):
                 if (current_block >= set_weights_start_block and 
                     current_block < set_weights_end_block):
                     bt.logging.info(f"Setting weights at block {current_block}")
-                    self.set_weights_event_loop.run_until_complete(self.genie_validator.set_weights())
+                    self.set_weights_event_loop.run_until_complete(self.score_manager.set_weights())
                 else:
                     # Sleep until next weight setting window
                     sleep_blocks = set_weights_start_block - current_block

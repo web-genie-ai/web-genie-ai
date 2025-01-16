@@ -14,7 +14,7 @@ from webgenie.base.neuron import BaseNeuron
 class ScoreManager:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
-        self.session_number = 0
+        self.scoring_session_number = 0
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
         self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         self.tempo_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
@@ -25,13 +25,13 @@ class ScoreManager:
         try:
             self.scores = state["scores"]
             self.hotkeys = state["hotkeys"]
-            self.session_number = state["session_number"]
+            self.scoring_session_number = state["scoring_session_number"]
             self.tempo_accumulated_scores = state["tempo_accumulated_scores"]
         except Exception as e:
             bt.logging.error(f"Error loading scores: {e}")
             self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
-            self.session_number = 0
+            self.scoring_session_number = 0
             self.tempo_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
 
     def save_scores(self):
@@ -40,7 +40,7 @@ class ScoreManager:
             self.neuron.config.neuron.full_path + "/state.npz",
             scores=self.scores,
             hotkeys=self.hotkeys,
-            session_number=self.session_number,
+            scoring_session_number=self.scoring_session_number,
             tempo_accumulated_scores=self.tempo_accumulated_scores,
         )
     

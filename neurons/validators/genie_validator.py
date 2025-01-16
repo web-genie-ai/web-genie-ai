@@ -46,7 +46,7 @@ class GenieValidator:
             os.makedirs(WORK_DIR)
             bt.logging.info(f"Created work directory at {WORK_DIR}")
 
-    async def query_miners(self, session_number: int):
+    async def query_miners(self):
         try:
             with self.lock:
                 if len(self.miner_results) > MAX_COMPETETION_HISTORY_SIZE:
@@ -68,8 +68,8 @@ class GenieValidator:
                 QualityChallenge, 
                 SeoChallenge,
             ]
-            challenge_class = available_challenges_classes[session_number % len(available_challenges_classes)]
-            challenge = challenge_class(task=task, session_number=session_number)
+            challenge_class = available_challenges_classes[self.neuron.session_number % len(available_challenges_classes)]
+            challenge = challenge_class(task=task, session_number=self.neuron.session_number)
             synapse.competition_type = challenge.competition_type
 
             bt.logging.debug(f"Querying {len(miner_uids)} miners")
@@ -101,7 +101,7 @@ class GenieValidator:
             bt.logging.error(f"Error in query_miners: {e}")
             raise e
 
-    async def score(self, session_number: int):
+    async def score(self):
         with self.lock:
             if not self.miner_results:
                 return
@@ -111,7 +111,7 @@ class GenieValidator:
         if not challenge.solutions:
             return
         
-        if challenge.session_number != session_number:
+        if challenge.session_number != self.neuron.session_number:
             return
 
         solutions = challenge.solutions
@@ -140,9 +140,6 @@ class GenieValidator:
         
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
-    
-    async def set_weights(self):
-        self.neuron.score_manager.set_weights()
 
     async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
         if isinstance(synapse, WebgenieTextSynapse):
