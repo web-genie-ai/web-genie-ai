@@ -28,3 +28,5 @@ SCREENSHOT_SCRIPT_PATH = "webgenie/rewards/metrics/screenshot_single.py"
 # work dir
 WORK_DIR = "work"
 
+
+
