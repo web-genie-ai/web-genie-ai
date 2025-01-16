@@ -13,6 +13,7 @@ def get_validator_index(self, uid: int) -> int:
     for uid in range(self.metagraph.n.item()):
         if is_validator(self.metagraph, uid, self.config.neuron.vpermit_tao_limit):
             validator_uids.append(uid)  
+    validator_uids.sort(key=lambda uid: self.metagraph.S[uid], reverse=True)
     try:
         return validator_uids.index(uid)
     except ValueError:
