@@ -144,11 +144,26 @@ class Validator(BaseValidatorNeuron):
                 break
     
     def set_weights_loop(self):
+        """
+        Every three tempos, set the weights.
+        """
         bt.logging.info(f"Set weights loop starting")
+        
+        BLOCK_IN_SECONDS = 12
+        TEMPO_BLOCK_NUMBER = 60
+        THREE_TEMPO_BLOCK_NUMBER = TEMPO_BLOCK_NUMBER * 3
+        
         self.sync()
         while True:
             try:
-                self.set_weights()
+                current_block = self.block
+                set_weights_end_block = (current_block + THREE_TEMPO_BLOCK_NUMBER - 1) // THREE_TEMPO_BLOCK_NUMBER * THREE_TEMPO_BLOCK_NUMBER
+                set_weights_start_block = set_weights_end_block - 5
+                if current_block >= set_weights_start_block and current_block < set_weights_end_block:
+                    bt.logging.info(f"Setting weights at block {current_block}")
+                    self.set_weights()
+                else:
+                    time.sleep((set_weights_start_block - current_block) * BLOCK_IN_SECONDS)
                 self.sync()
             except KeyboardInterrupt:
                 bt.logging.info("Keyboard interrupt detected, stopping set weights loop")
