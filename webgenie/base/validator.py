@@ -65,15 +65,6 @@ class BaseValidatorNeuron(BaseNeuron):
         # Init sync with the network. Updates the metagraph.
         self.sync()
 
-        # Create asyncio event loop to manage async tasks.
-        self.loop = asyncio.get_event_loop()
-
-        # Instantiate runners
-        self.should_exit: bool = False
-        self.is_running: bool = False
-        self.thread: Union[threading.Thread, None] = None
-        self.lock = asyncio.Lock()
-
     def set_weights(self):
         """
         Sets the validator weights to the metagraph hotkeys based on the scores it has received from the miners. The weights determine the trust and incentive level the validator assigns to miner nodes on the network.

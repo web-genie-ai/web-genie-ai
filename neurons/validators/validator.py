@@ -4,11 +4,13 @@
 
 import bittensor as bt
 import asyncio
+import threading
+import time
 
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv(filename=".env.validator"))
     
-from typing import Tuple
+from typing import Tuple, Union
 
 from webgenie.base.validator import BaseValidatorNeuron
 from webgenie.constants import API_HOTKEY
@@ -30,8 +32,25 @@ class Validator(BaseValidatorNeuron):
         super(Validator, self).__init__(config=config)
         if not self.config.axon_off:
             self.serve_axon()
+
+        
+        # Create asyncio event loop to manage async tasks.
+        self.synthensize_task_event_loop = asyncio.new_event_loop()
+        self.query_miners_event_loop = asyncio.new_event_loop()
+        self.score_event_loop = asyncio.new_event_loop()
+        self.set_weights_event_loop = asyncio.new_event_loop()
+
+        # Instantiate runners
+        self.should_exit: bool = False
+        self.is_running: bool = False
+        self.synthensize_task_thread: Union[threading.Thread, None] = None
+        self.query_miners_thread: Union[threading.Thread, None] = None
+        self.score_thread: Union[threading.Thread, None] = None
+        self.set_weights_thread: Union[threading.Thread, None] = None
+        self.lock = asyncio.Lock()
         
         self.genie_validator = GenieValidator(neuron=self)
+
 
     async def blacklist_text(self, synapse: WebgenieTextSynapse) -> Tuple[bool, str]:
         """
@@ -77,72 +96,84 @@ class Validator(BaseValidatorNeuron):
             bt.logging.info(f"Validator running in organic mode on port {self.config.neuron.axon_port}")
         except Exception as e:
             bt.logging.error(f"Failed to serve Axon with exception: {e}")
-            pass
 
-    async def query_miners(self):
-        return await self.genie_validator.query_miners()
-
-    async def concurrent_query(self):
-        coroutines = [
-            self.query_miners()
-            for _ in range(self.config.neuron.num_concurrent_forwards)
-        ]
-        await asyncio.gather(*coroutines)
-
-    async def query_miners_loop(self):
+    def query_miners_loop(self):
         bt.logging.info(f"Validator starting at block: {self.block}")
         self.sync()
         while True:
             try:
-                self.loop.run_until_complete(self.concurrent_query())
+                self.query_miners_event_loop.run_until_complete(self.genie_validator.query_miners())
                 self.sync()
             except Exception as e:
                 bt.logging.error(f"Error during forward loop: {str(e)}")
-            await asyncio.sleep(1)
+            if self.should_exit:
+                break
+            time.sleep(1)
 
-    async def score_loop(self):
+    def score_loop(self):
         bt.logging.info(f"Scoring loop starting")
+        self.sync()
         while True:
             try:
-                await self.genie_validator.score()
+                self.score_event_loop.run_until_complete(self.genie_validator.score())
                 self.sync()
+            except KeyboardInterrupt:
+                bt.logging.info("Keyboard interrupt detected, stopping scoring loop")
+                break
             except Exception as e:
                 bt.logging.error(f"Error during scoring: {str(e)}")
-            await asyncio.sleep(1)
+            if self.should_exit:
+                break
+            time.sleep(1)
 
-    async def synthensize_task_loop(self):
+    def synthensize_task_loop(self):
         bt.logging.info(f"Synthensize task loop starting")
+        self.sync()
         while True:
             try:
-                await self.genie_validator.synthensize_task()
+                self.synthensize_task_event_loop.run_until_complete(self.genie_validator.synthensize_task())
+                self.sync()
+            except KeyboardInterrupt:
+                bt.logging.info("Keyboard interrupt detected, stopping synthensize task loop")
+                break
             except Exception as e:
                 bt.logging.error(f"Error during synthensize task: {str(e)}")
-            await asyncio.sleep(1)
+            if self.should_exit:
+                break
 
-    async def __aenter__(self):
-        self.loop.create_task(self.synthensize_task_loop())
-        self.loop.create_task(self.query_miners_loop())
-        self.loop.create_task(self.score_loop())
-        self.is_running = True
-
-        bt.logging.debug("Starting validator in background thread")
-        return self
-
-    async def __aexit__(self, exc_type, exc_value, traceback):
+    def run_background_threads(self):
         if not self.is_running:
-            return
-        
-        self.should_exit = True
-        self.is_running = False
-        bt.logging.debug("Stopping validator in background thread")
-
-
-async def main():
-    async with Validator() as validator:
-        while validator.is_running and not validator.should_exit:
-            await asyncio.sleep(15)    
-
+            bt.logging.info("Starting validator in background thread")
+            self.is_running = True
+            self.should_exit = False
+            self.synthensize_task_thread = threading.Thread(target=self.synthensize_task_loop)
+            self.query_miners_thread = threading.Thread(target=self.query_miners_loop)
+            self.score_thread = threading.Thread(target=self.score_loop)
+            self.set_weights_thread = threading.Thread(target=self.set_weights_loop)
+            bt.logging.info("Started background threads")
     
+    def stop_background_threads(self):
+        if self.is_running:
+            bt.logging.info("Stopping background threads")
+            self.should_exit = True
+            self.is_running = False
+            self.synthensize_task_thread.join(5)
+            self.query_miners_thread.join(5)
+            self.score_thread.join(5)
+            self.set_weights_thread.join(5)
+            bt.logging.info("Stopped background threads")
+
+    def __enter__(self):
+        self.run_background_threads()
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.stop_background_threads()
+        
+
 # The main function parses the configuration and runs the validator.
 if __name__ == "__main__":
-    asyncio.run(main())
+    with Validator() as validator:
+        while True:
+            bt.logging.info("Validator is running ... {time.time()}")
+            time.sleep(5)
