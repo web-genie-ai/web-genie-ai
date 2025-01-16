@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 class Task(BaseModel):
     task_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     timeout: float = Field(default=50)
-    competition: Any = Field(default=None)
+    generator: Any = Field(default=None)
 
 
 class ImageTask(Task):

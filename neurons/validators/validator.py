@@ -4,6 +4,8 @@
 
 import bittensor as bt
 import asyncio
+import copy
+import numpy as np
 import threading
 import time
 
@@ -18,7 +20,7 @@ from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.utils.uids import get_validator_index
 
 from neurons.validators.genie_validator import GenieValidator
-
+from neurons.validators.score_manager import ScoreManager
 
 # Constants for block timing
 BLOCK_IN_SECONDS = 12
@@ -27,7 +29,7 @@ MAX_VALIDATORS = 12
 VALIDATOR_QUERY_PERIOD_BLOCKS = 10
 ALL_VALIDATOR_QUERY_PERIOD_BLOCKS = MAX_VALIDATORS * VALIDATOR_QUERY_PERIOD_BLOCKS
 COMPETITION_PERIOD_BLOCKS = TEMPO_BLOCKS * 3
-SET_WEIGHTS_PERIOD_BLOCKS = 5
+SET_WEIGHTS_PERIOD_BLOCKS = 50 # 50 blocks = 10 minutes 
 
 
 class Validator(BaseValidatorNeuron):
@@ -41,9 +43,9 @@ class Validator(BaseValidatorNeuron):
 
     def __init__(self, config=None):
         super(Validator, self).__init__(config=config)
-        if not self.config.axon_off:
-            self.serve_axon()
 
+        bt.logging.info("load_state()")
+        self.load_state()
         
         # Create asyncio event loop to manage async tasks.
         self.synthensize_task_event_loop = asyncio.new_event_loop()
@@ -61,8 +63,40 @@ class Validator(BaseValidatorNeuron):
         self.lock = asyncio.Lock()
         
         self.genie_validator = GenieValidator(neuron=self)
+        self.score_manager = ScoreManager(neuron=self)
 
+        self.sync()
 
+        if not self.config.axon_off:
+            self.serve_axon()
+
+    def resync_metagraph(self):
+        """Resyncs the metagraph and updates the hotkeys and moving averages based on the new metagraph."""
+        # Copies state of metagraph before syncing.
+        previous_metagraph = copy.deepcopy(self.metagraph)
+
+        # Sync the metagraph.
+        self.metagraph.sync(subtensor=self.subtensor)
+
+        # Check if the metagraph axon info has changed.
+        if previous_metagraph.axons == self.metagraph.axons:
+            return
+
+        bt.logging.info(
+            "Metagraph updated, re-syncing hotkeys, dendrite pool and moving averages"
+        )
+
+        self.score_manager.set_new_hotkeys(self.metagraph.hotkeys)
+
+    def save_state(self):
+        """Saves the state of the validator to a file."""
+        self.score_manager.save_scores()
+        
+    def load_state(self):
+        """Loads the state of the validator from a file."""
+        bt.logging.info("Loading validator state.")
+        self.score_manager.load_scores()        
+    
     async def blacklist_text(self, synapse: WebgenieTextSynapse) -> Tuple[bool, str]:
         """
         Only allow the backend owner to send synapse to the validator.
@@ -136,13 +170,14 @@ class Validator(BaseValidatorNeuron):
                     sleep_time = (start_period_block - current_block + ALL_VALIDATOR_QUERY_PERIOD_BLOCKS) * BLOCK_IN_SECONDS
                     time.sleep(sleep_time)
                     continue
-                
-                self.query_miners_event_loop.run_until_complete(self.genie_validator.query_miners())
+
+                session_number = self.block // COMPETITION_PERIOD_BLOCKS
+                self.query_miners_event_loop.run_until_complete(self.genie_validator.query_miners(session_number))
             except KeyboardInterrupt:
                 bt.logging.info("Keyboard interrupt detected, stopping query miners loop")
                 break
             except Exception as e:
-                bt.logging.error(f"Error during forward loop: {str(e)}")
+                bt.logging.error(f"Error during query miners loop: {str(e)}")
             if self.should_exit:
                 break
             time.sleep(1)
@@ -152,7 +187,8 @@ class Validator(BaseValidatorNeuron):
         while True:
             try:
                 self.sync()
-                self.score_event_loop.run_until_complete(self.genie_validator.score())
+                session_number = self.block // COMPETITION_PERIOD_BLOCKS
+                self.score_event_loop.run_until_complete(self.genie_validator.score(session_number))
             except KeyboardInterrupt:
                 bt.logging.info("Keyboard interrupt detected, stopping scoring loop")
                 break
@@ -196,8 +232,8 @@ class Validator(BaseValidatorNeuron):
                     * COMPETITION_PERIOD_BLOCKS
                 )
 
-                # Start setting weights 5 blocks before the end
-                set_weights_start_block = set_weights_end_block - 5
+                # Start setting weights 50 blocks before the end
+                set_weights_start_block = set_weights_end_block - SET_WEIGHTS_PERIOD_BLOCKS
 
                 # Check if we're in the weight setting window
                 if (current_block >= set_weights_start_block and 

@@ -3,12 +3,12 @@ import numpy as np
 import random
 from typing import Tuple, List
 
-from webgenie.competitions.competition import (
-    Competition, 
+from webgenie.tasks.metric_types import (
     ACCURACY_METRIC_NAME, 
     QUALITY_METRIC_NAME,
     SEO_METRIC_NAME,
 )
+from webgenie.tasks.task_generator import TaskGenerator
 from webgenie.constants import IMAGE_TASK_TIMEOUT, GROUND_TRUTH_HTML_LOAD_TIME
 from webgenie.helpers.htmls import (
     html_to_screenshot, 
@@ -17,7 +17,8 @@ from webgenie.helpers.htmls import (
 )
 from webgenie.helpers.images import base64_to_image
 from webgenie.protocol import WebgenieImageSynapse
-from webgenie.tasks import Task, ImageTask, Solution
+from webgenie.tasks.solution import Solution
+from webgenie.tasks.task import Task, ImageTask
 from webgenie.rewards import (
     QualityReward,
     VisualReward,
@@ -30,9 +31,7 @@ from webgenie.datasets import (
 )
 
 
-class ImageTaskCompetition(Competition):
-    COMPETITION_TYPE = "ImageTaskCompetition"
-    
+class ImageTaskGenerator(TaskGenerator):    
     def __init__(self):
         super().__init__()
         
@@ -67,36 +66,7 @@ class ImageTaskCompetition(Competition):
                 base64_image=base64_image, 
                 ground_truth_html=ground_truth_html,
                 timeout=IMAGE_TASK_TIMEOUT,
-                competition=self,
+                generator=self,
             ), 
             WebgenieImageSynapse(base64_image=base64_image),
         )
-
-
-class ImageTaskAccuracyCompetition(ImageTaskCompetition):
-    COMPETITION_TYPE = "ImageTaskAccuracyCompetition"
-
-    async def calculate_final_scores(self, task: Task, solutions: List[Solution]) -> np.ndarray:
-        scores = await self.calculate_scores(task, solutions)
-        return scores[ACCURACY_METRIC_NAME] * 0.9 + scores[QUALITY_METRIC_NAME] * 0.1, scores
-
-
-class ImageTaskQualityCompetition(ImageTaskCompetition):
-    COMPETITION_TYPE = "ImageTaskQualityCompetition"
-    
-    async def calculate_final_scores(self, task: Task, solutions: List[Solution]) -> np.ndarray:
-        scores = await self.calculate_scores(task, solutions)        
-        accuracy_scores = scores[ACCURACY_METRIC_NAME]
-        quality_scores = scores[QUALITY_METRIC_NAME]
-        final_scores = np.where(accuracy_scores > 0.7, quality_scores, 0)
-        return final_scores, scores
-
-class ImageTaskSeoCompetition(ImageTaskCompetition):
-    COMPETITION_TYPE = "ImageTaskSeoCompetition"
-
-    async def calculate_final_scores(self, task: Task, solutions: List[Solution]) -> np.ndarray:
-        scores = await self.calculate_scores(task, solutions)
-        accuracy_scores = scores[ACCURACY_METRIC_NAME]
-        seo_scores = scores[SEO_METRIC_NAME]
-        final_scores = np.where(accuracy_scores > 0.7, seo_scores, 0)
-        return final_scores, scores

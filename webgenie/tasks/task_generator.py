@@ -3,17 +3,11 @@ import numpy as np
 from typing import List, Tuple
 
 from webgenie.rewards import Reward
-from webgenie.tasks import Task, Solution
+from webgenie.tasks.solution import Solution
+from webgenie.tasks.task import Task
 
 
-ACCURACY_METRIC_NAME = "Accuracy"
-SEO_METRIC_NAME = "Seo"
-QUALITY_METRIC_NAME = "Quality"
-
-
-class Competition:
-    COMPETITION_TYPE = "UnknownCompetition"
-    
+class TaskGenerator:
     def __init__(self):
         self.metrics: dict[str, Reward] = {}
 
@@ -26,7 +20,3 @@ class Competition:
             reward_scores = await reward_model.reward(task, solutions)
             scores[metric_name] = reward_scores
         return scores
-
-    async def calculate_final_scores(self, task: Task, solutions: List[Solution]) -> Tuple[np.ndarray, dict[str, np.ndarray]]:
-        pass
-

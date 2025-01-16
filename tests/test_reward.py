@@ -13,7 +13,7 @@ from webgenie.rewards import (
 )
 
 from webgenie.protocol import WebgenieImageSynapse
-from webgenie.competitions.competition import (
+from webgenie.tasks.competition import (
     ACCURACY_METRIC_NAME,
     SEO_METRIC_NAME,
     QUALITY_METRIC_NAME,
