@@ -15,8 +15,19 @@ from typing import Tuple, Union
 from webgenie.base.validator import BaseValidatorNeuron
 from webgenie.constants import API_HOTKEY
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
+from webgenie.utils.uids import get_validator_index
 
 from neurons.validators.genie_validator import GenieValidator
+
+
+# Constants for block timing
+BLOCK_IN_SECONDS = 12
+TEMPO_BLOCKS = 60
+MAX_VALIDATORS = 12
+VALIDATOR_QUERY_PERIOD_BLOCKS = 10
+ALL_VALIDATOR_QUERY_PERIOD_BLOCKS = MAX_VALIDATORS * VALIDATOR_QUERY_PERIOD_BLOCKS
+COMPETITION_PERIOD_BLOCKS = TEMPO_BLOCKS * 3
+SET_WEIGHTS_PERIOD_BLOCKS = 5
 
 
 class Validator(BaseValidatorNeuron):
@@ -38,6 +49,7 @@ class Validator(BaseValidatorNeuron):
         self.synthensize_task_event_loop = asyncio.new_event_loop()
         self.query_miners_event_loop = asyncio.new_event_loop()
         self.score_event_loop = asyncio.new_event_loop()
+        self.set_weights_event_loop = asyncio.new_event_loop()
 
         # Instantiate runners
         self.should_exit: bool = False
@@ -96,13 +108,36 @@ class Validator(BaseValidatorNeuron):
         except Exception as e:
             bt.logging.error(f"Failed to serve Axon with exception: {e}")
 
-    def query_miners_loop(self):
+    def query_miners_loop(self):    
         bt.logging.info(f"Validator starting at block: {self.block}")
-        self.sync()
         while True:
             try:
-                self.query_miners_event_loop.run_until_complete(self.genie_validator.query_miners())
                 self.sync()
+                validator_index = get_validator_index(self.neuron.metagraph, self.neuron.uid)
+                if validator_index == -1:
+                    continue
+
+                # Only allow first N validators to query miners
+                if validator_index > MAX_VALIDATORS:
+                    continue
+
+                # Calculate query period blocks
+                current_block = self.neuron.block
+                start_period_block = (
+                    (current_block // ALL_VALIDATOR_QUERY_PERIOD_BLOCKS) * ALL_VALIDATOR_QUERY_PERIOD_BLOCKS + 
+                    validator_index * VALIDATOR_QUERY_PERIOD_BLOCKS
+                )
+                end_period_block = start_period_block + ALL_VALIDATOR_QUERY_PERIOD_BLOCKS / 2
+
+                # Sleep if outside query window
+                if current_block < start_period_block:
+                    time.sleep((start_period_block - current_block) * BLOCK_IN_SECONDS)
+                elif current_block >= end_period_block:
+                    sleep_time = (start_period_block - current_block + ALL_VALIDATOR_QUERY_PERIOD_BLOCKS) * BLOCK_IN_SECONDS
+                    time.sleep(sleep_time)
+                    continue
+                
+                self.query_miners_event_loop.run_until_complete(self.genie_validator.query_miners())
             except KeyboardInterrupt:
                 bt.logging.info("Keyboard interrupt detected, stopping query miners loop")
                 break
@@ -114,11 +149,10 @@ class Validator(BaseValidatorNeuron):
 
     def score_loop(self):
         bt.logging.info(f"Scoring loop starting")
-        self.sync()
         while True:
             try:
-                self.score_event_loop.run_until_complete(self.genie_validator.score())
                 self.sync()
+                self.score_event_loop.run_until_complete(self.genie_validator.score())
             except KeyboardInterrupt:
                 bt.logging.info("Keyboard interrupt detected, stopping scoring loop")
                 break
@@ -130,11 +164,10 @@ class Validator(BaseValidatorNeuron):
 
     def synthensize_task_loop(self):
         bt.logging.info(f"Synthensize task loop starting")
-        self.sync()
         while True:
             try:
-                self.synthensize_task_event_loop.run_until_complete(self.genie_validator.synthensize_task())
                 self.sync()
+                self.synthensize_task_event_loop.run_until_complete(self.genie_validator.synthensize_task())
             except KeyboardInterrupt:
                 bt.logging.info("Keyboard interrupt detected, stopping synthensize task loop")
                 break
@@ -149,22 +182,18 @@ class Validator(BaseValidatorNeuron):
         """
         bt.logging.info(f"Set weights loop starting")
         
-        BLOCK_IN_SECONDS = 12
-        TEMPO_BLOCK_NUMBER = 60
-        THREE_TEMPO_BLOCK_NUMBER = TEMPO_BLOCK_NUMBER * 3
-        
-        self.sync()
         while True:
             try:
+                self.sync()
                 # Get current block number
                 current_block = self.block
 
                 # Calculate the end block number for the next weight setting period
                 # This aligns with 3 tempo boundaries
                 set_weights_end_block = (
-                    (current_block + THREE_TEMPO_BLOCK_NUMBER - 1) 
-                    // THREE_TEMPO_BLOCK_NUMBER 
-                    * THREE_TEMPO_BLOCK_NUMBER
+                    (current_block + COMPETITION_PERIOD_BLOCKS - 1) 
+                    // COMPETITION_PERIOD_BLOCKS 
+                    * COMPETITION_PERIOD_BLOCKS
                 )
 
                 # Start setting weights 5 blocks before the end
@@ -174,13 +203,12 @@ class Validator(BaseValidatorNeuron):
                 if (current_block >= set_weights_start_block and 
                     current_block < set_weights_end_block):
                     bt.logging.info(f"Setting weights at block {current_block}")
-                    self.set_weights()
+                    self.set_weights_event_loop.run_until_complete(self.genie_validator.set_weights())
                 else:
                     # Sleep until next weight setting window
                     sleep_blocks = set_weights_start_block - current_block
                     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
 
-                self.sync()
             except KeyboardInterrupt:
                 bt.logging.info("Keyboard interrupt detected, stopping set weights loop")
                 break

@@ -28,7 +28,7 @@ from webgenie.helpers.htmls import preprocess_html, validate_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks import Solution
-from webgenie.utils.uids import get_all_available_uids, get_most_available_uid
+from webgenie.utils.uids import get_all_available_uids
 
 
 class GenieValidator:
@@ -62,7 +62,7 @@ class GenieValidator:
                     return
 
                 task, synapse = self.synthetic_tasks.pop(0)
-                     
+
             bt.logging.info("querying miners")
             miner_uids = get_all_available_uids(self.neuron)
             if len(miner_uids) == 0:
@@ -159,6 +159,9 @@ class GenieValidator:
         
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
+    
+    async def set_weights(self):
+        self.neuron.set_weights()
 
     async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
         if isinstance(synapse, WebgenieTextSynapse):
