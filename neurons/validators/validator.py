@@ -156,14 +156,30 @@ class Validator(BaseValidatorNeuron):
         self.sync()
         while True:
             try:
+                # Get current block number
                 current_block = self.block
-                set_weights_end_block = (current_block + THREE_TEMPO_BLOCK_NUMBER - 1) // THREE_TEMPO_BLOCK_NUMBER * THREE_TEMPO_BLOCK_NUMBER
+
+                # Calculate the end block number for the next weight setting period
+                # This aligns with 3 tempo boundaries
+                set_weights_end_block = (
+                    (current_block + THREE_TEMPO_BLOCK_NUMBER - 1) 
+                    // THREE_TEMPO_BLOCK_NUMBER 
+                    * THREE_TEMPO_BLOCK_NUMBER
+                )
+
+                # Start setting weights 5 blocks before the end
                 set_weights_start_block = set_weights_end_block - 5
-                if current_block >= set_weights_start_block and current_block < set_weights_end_block:
+
+                # Check if we're in the weight setting window
+                if (current_block >= set_weights_start_block and 
+                    current_block < set_weights_end_block):
                     bt.logging.info(f"Setting weights at block {current_block}")
                     self.set_weights()
                 else:
-                    time.sleep((set_weights_start_block - current_block) * BLOCK_IN_SECONDS)
+                    # Sleep until next weight setting window
+                    sleep_blocks = set_weights_start_block - current_block
+                    time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
+
                 self.sync()
             except KeyboardInterrupt:
                 bt.logging.info("Keyboard interrupt detected, stopping set weights loop")
