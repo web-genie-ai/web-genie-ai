@@ -38,7 +38,6 @@ class Validator(BaseValidatorNeuron):
         self.synthensize_task_event_loop = asyncio.new_event_loop()
         self.query_miners_event_loop = asyncio.new_event_loop()
         self.score_event_loop = asyncio.new_event_loop()
-        self.set_weights_event_loop = asyncio.new_event_loop()
 
         # Instantiate runners
         self.should_exit: bool = False
@@ -104,6 +103,9 @@ class Validator(BaseValidatorNeuron):
             try:
                 self.query_miners_event_loop.run_until_complete(self.genie_validator.query_miners())
                 self.sync()
+            except KeyboardInterrupt:
+                bt.logging.info("Keyboard interrupt detected, stopping query miners loop")
+                break
             except Exception as e:
                 bt.logging.error(f"Error during forward loop: {str(e)}")
             if self.should_exit:
@@ -138,6 +140,21 @@ class Validator(BaseValidatorNeuron):
                 break
             except Exception as e:
                 bt.logging.error(f"Error during synthensize task: {str(e)}")
+            if self.should_exit:
+                break
+    
+    def set_weights_loop(self):
+        bt.logging.info(f"Set weights loop starting")
+        self.sync()
+        while True:
+            try:
+                self.set_weights()
+                self.sync()
+            except KeyboardInterrupt:
+                bt.logging.info("Keyboard interrupt detected, stopping set weights loop")
+                break
+            except Exception as e:
+                bt.logging.error(f"Error during set weights: {str(e)}")
             if self.should_exit:
                 break
 
