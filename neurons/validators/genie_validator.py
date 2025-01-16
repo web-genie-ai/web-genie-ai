@@ -2,6 +2,7 @@ import os
 import bittensor as bt
 import numpy as np
 import random
+import threading
 from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
@@ -42,7 +43,8 @@ class GenieValidator:
             (ImageTaskSeoCompetition(), 0.3),
             (ImageTaskQualityCompetition(), 0.3),
         ]
-
+        
+        self.lock = threading.Lock()
         self.make_work_dir()
 
     def make_work_dir(self):
@@ -52,15 +54,16 @@ class GenieValidator:
 
     async def query_miners(self):
         try:
-            if len(self.competitions) > MAX_COMPETETION_HISTORY_SIZE:
-                return
-
-            if not self.synthetic_tasks:
-                return
+            with self.lock:
+                if len(self.competitions) > MAX_COMPETETION_HISTORY_SIZE:
+                    return
                 
-            bt.logging.info("querying miners")
+                if not self.synthetic_tasks:
+                    return
 
-            task, synapse = self.synthetic_tasks.pop(0)
+                task, synapse = self.synthetic_tasks.pop(0)
+                     
+            bt.logging.info("querying miners")
             miner_uids = get_all_available_uids(self.neuron)
             if len(miner_uids) == 0:
                 bt.logging.warning("No miners available")
@@ -87,18 +90,20 @@ class GenieValidator:
                         )
                     )
             bt.logging.info(f"Received {len(solutions)} solutions")
-            self.competitions.append((task, solutions))
+            with self.lock:
+                self.competitions.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in query_miners: {e}")
             raise e
 
     async def score(self):
-        if not self.competitions:
-            return
+        with self.lock:
+            if not self.competitions:
+                return
 
-        task, solutions = self.competitions.pop(0)
-        if not solutions:
-            return
+            task, solutions = self.competitions.pop(0)
+            if not solutions:
+                return
 
         best_miner = -1
         best_final_score = 0.0
@@ -137,8 +142,9 @@ class GenieValidator:
 
     async def synthensize_task(self):
         try:
-            if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
-                return
+            with self.lock:
+                if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
+                    return
 
             bt.logging.info(f"Synthensize task")
             
@@ -148,7 +154,9 @@ class GenieValidator:
             )[0]
             
             task, synapse = await competition.generate_task()
-            self.synthetic_tasks.append((task, synapse))
+            with self.lock:
+                self.synthetic_tasks.append((task, synapse))
+        
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
 
