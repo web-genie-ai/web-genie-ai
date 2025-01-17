@@ -88,34 +88,43 @@ class RandomWebsiteDataset(Dataset):
             bt.logging.error(f"Error in get_rendered_html: {e}")
             raise Exception(f"Error in get_rendered_html: {e}")
         
-    async def shorten_html(self, html: str, max_children: int = 20, max_text_length: int = 400)->str:
+        
+    async def shorten_html(self, html_content, max_p_count = 10, max_text_length = 200):
+        """
+        Removes excess <p> tags and trims text inside <p> tags if the text length exceeds the max limit.
+
+        :param html_content: The HTML content as a string.
+        :param max_p_count: The maximum number of <p> tags allowed in any parent tag.
+        :param max_text_length: The maximum length of text allowed inside <p> tags.
+        :return: Modified HTML content with excess <p> tags removed and text inside <p> tags shortened.
+        """
         try:
-            soup = BeautifulSoup(html, "html.parser")
-            def traverse(node):
-                    # If it’s a tag, we might need to limit its children
-                if isinstance(node, Tag):
-                    # If node has too many children, remove the extras
-                    if len(node.contents) > max_children:
-                        # Keep only the first max_children
-                        node.contents = node.contents[:max_children]
-                    
-                    # Recurse on each child
-                    for child in node.contents:
-                        traverse(child)
+            soup = BeautifulSoup(html_content, 'html.parser')
+            
+            # Find all tags that contain <p> as direct children
+            for tag in soup.find_all(True):  # True will find all tags
+                # Find only <p> tags as direct children (not nested <p> tags)
+                p_tags = [child for child in tag.find_all('p', recursive=False)]
+                
+                if len(p_tags) > max_p_count:
+                    # Remove excess <p> tags
+                    excess_p_tags = p_tags[max_p_count:]
+                    for p_tag in excess_p_tags:
+                        p_tag.decompose()  # Remove the excess <p> tag
+            
+            # Traverse through all <p> tags and handle text nodes inside them
+            for p_tag in soup.find_all('p'):  # Find all <p> tags
+                for child in p_tag.contents:
+                    if isinstance(child, NavigableString):
+                        text_str = str(child)
+                        if len(text_str) > max_text_length:
+                            shortened = text_str[:max_text_length] + "..."  # Shorten the text
+                            child.replace_with(shortened)  # Replace the original text with the shortened version
 
-                # If it’s a text node, shorten if needed
-                elif isinstance(node, NavigableString):
-                    text_str = str(node)
-                    if len(text_str) > max_text_length:
-                        shortened = text_str[:max_text_length] + "..."
-                        node.replace_with(shortened)
-
-            # Start traversal from the root soup element (html, body, etc.)
-            traverse(soup)
             return str(soup)
         except Exception as e:
             bt.logging.error(f"Error in shorten_html: {e}")
-            raise Exception(f"Error in shorten_html: {e}")
+            raise e
 
     async def generate_context(self)->DatasetEntry:
         try:
