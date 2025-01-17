@@ -1,24 +1,26 @@
 import bittensor as bt
 import asyncio
 import os
-from playwright.async_api import async_playwright
-from bs4 import BeautifulSoup
-from lxml import etree
-from PIL import Image
-import time
 import re
 import uuid
 
+from bs4 import BeautifulSoup
+from lxml import etree
+from lxml.etree import XMLSyntaxError
+from PIL import Image
+from playwright.async_api import async_playwright
+
 from webgenie.constants import (
-    SCREENSHOT_SCRIPT_PATH,
     WORK_DIR,
     PLACE_HOLDER_IMAGE_URL,
-    PYTHON_CMD,
 )
 from webgenie.helpers.images import image_to_base64
+    
 
-
-def validate_resources(html: str) -> bool:
+def is_valid_resources(html_content: str) -> bool:
+    """
+    Check if the resources in the HTML content are valid.
+    """
     # List of allowed patterns for CSS and JavaScript resources
     allowed_patterns = [
         r"https?://cdn.jsdelivr.net/npm/tailwindcss@[^/]+/dist/tailwind.min.css",
@@ -27,7 +29,7 @@ def validate_resources(html: str) -> bool:
         r"https?://stackpath.bootstrapcdn.com/bootstrap/[^/]+/js/bootstrap.bundle.min.js",
     ]
     
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html_content, 'html.parser')
     resources = soup.find_all(['link', 'script'])
     
     for resource in resources:
@@ -43,16 +45,27 @@ def validate_resources(html: str) -> bool:
     return True
 
 
-def is_valid_html(html: str):
+def is_valid_html(html_content: str) -> bool:
+    """
+    Check if the HTML is valid.
+    """
     try:
-        soup = BeautifulSoup(html, 'html.parser')
-        return True
+        # Use XML parser to enforce strict validation
+        # Force the document to follow XML standards, which requires properly closed tags
+        etree.XML(html_content)  # Strict XML parser to catch malformed tags
+        return True  # If parsing succeeds, the HTML is valid.
+
+    except XMLSyntaxError:
+        return False  # If parsing fails, the HTML is invalid due to malformed tags.
     except Exception as e:
-        bt.logging.debug(f"Error during HTML parsing: {e}")
-        return False
+        print(f"An error occurred: {e}")
+        return False  # Any other error, return False.
 
 
-def seperate_html_css(html_content: str): 
+def seperate_html_css(html_content: str) -> tuple[str, str]: 
+    """
+    Seperate the HTML and CSS from the HTML content.
+    """
     soup = BeautifulSoup(html_content, 'html.parser')
 
     css = ''
@@ -72,10 +85,13 @@ def seperate_html_css(html_content: str):
     return cleaned_html, css
 
 
-async def html_to_screenshot(html: str, page_load_time: int = 1000) -> str:
+async def html_to_screenshot(html_content: str, page_load_time: int = 1000) -> str:
+    """
+    Take a screenshot of the HTML content.
+    """
     html_path = f"{WORK_DIR}/screenshot_{uuid.uuid4()}.html"
     with open(html_path, "w") as f:
-        f.write(html)
+        f.write(html_content)
     png_path = f"{WORK_DIR}/screenshot_{uuid.uuid4()}.png"
     url = f"file://{os.path.abspath(html_path)}"
     
@@ -99,20 +115,26 @@ async def html_to_screenshot(html: str, page_load_time: int = 1000) -> str:
         img.save(png_path)
 
     await asyncio.sleep(0.1)
-    
     base64_image = image_to_base64(png_path)
+    
     await asyncio.sleep(0.1)
     os.remove(html_path)
     os.remove(png_path)
     return base64_image
 
 
-def beautify_html(html: str) -> str:
-    soup = BeautifulSoup(html, 'html.parser')
+def format_html(html_content: str) -> str:
+    """
+    Format the HTML content.
+    """
+    soup = BeautifulSoup(html_content, 'html.parser')
     return soup.prettify()
 
 
-def replace_image_sources(html_content, new_url=PLACE_HOLDER_IMAGE_URL):
+def replace_image_sources(html_content: str, new_url: str = PLACE_HOLDER_IMAGE_URL) -> str:
+    """
+    Replace the image sources in the HTML content.
+    """
     soup = BeautifulSoup(html_content, 'html.parser')
     
     # Replace 'src' attribute in <img> tags
@@ -144,15 +166,18 @@ def replace_image_sources(html_content, new_url=PLACE_HOLDER_IMAGE_URL):
     return str(soup)
 
 
-def preprocess_html(html: str) -> str:
-    if not is_valid_html(html):
+def preprocess_html(html_content: str) -> str:
+    """
+    Preprocess the HTML content.
+    """
+    if not is_valid_html(html_content):
         return ""
-    html = beautify_html(html)
-    html = replace_image_sources(html)
-    return html
+    html_content = format_html(html_content)
+    html_content = replace_image_sources(html_content)
+    return html_content
 
 
-def is_empty_html(html: str) -> bool:
+def is_empty_html(html_content: str) -> bool:
     """Check if HTML body is empty or missing.
     
     Args:
@@ -161,7 +186,7 @@ def is_empty_html(html: str) -> bool:
     Returns:
         bool: True if body is empty or missing, False otherwise
     """
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html_content, 'html.parser')
     body = soup.find('body')
     
     if not body:
@@ -171,15 +196,3 @@ def is_empty_html(html: str) -> bool:
         return True
         
     return False
-
-
-if __name__ == "__main__":
-    html = """
-    <html>
-        <body>
-            <h1>Hello, World!</h1>
-        </body>
-    </html>
-    """
-
-    print(preprocess_html(html))

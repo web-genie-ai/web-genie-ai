@@ -20,7 +20,7 @@ from webgenie.storage import (
     upload_competition,
     upload_competition_result,
 )
-from webgenie.helpers.htmls import preprocess_html, validate_resources
+from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.tasks import Solution, ImageTaskGenerator
@@ -184,7 +184,7 @@ class GenieValidator:
             html = preprocess_html(synapse.html)
             if not html:
                 return None
-            if not validate_resources(html):
+            if not is_valid_resources(html):
                 return None
             synapse.html = html
             return synapse
