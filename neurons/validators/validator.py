@@ -22,14 +22,15 @@ from webgenie.utils.uids import get_validator_index
 from neurons.validators.genie_validator import GenieValidator
 from neurons.validators.score_manager import ScoreManager
 
-# Constants for block timing
+
+MAX_COUNT_VALIDATORS = 1
+
 BLOCK_IN_SECONDS = 12
-TEMPO_BLOCKS = 60
-MAX_VALIDATORS = 1
-VALIDATOR_QUERY_PERIOD_BLOCKS = 10
-ALL_VALIDATOR_QUERY_PERIOD_BLOCKS = MAX_VALIDATORS * VALIDATOR_QUERY_PERIOD_BLOCKS
-COMPETITION_PERIOD_BLOCKS = TEMPO_BLOCKS * 3
-SET_WEIGHTS_PERIOD_BLOCKS = 50 # 50 blocks = 10 minutes 
+TEMPO_BLOCKS = 360
+SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 3
+
+QUERING_WINDOW_BLOCKS = 10
+WEIGHT_SETTING_WINDOW_BLOCKS = 50 # 50 blocks = 10 minutes 
 
 
 class Validator(BaseValidatorNeuron):
@@ -43,7 +44,7 @@ class Validator(BaseValidatorNeuron):
     
     @property
     def session_number(self):
-        return self.block // COMPETITION_PERIOD_BLOCKS
+        return self.block // SESSION_WINDOW_BLOCKS
 
     def __init__(self, config=None):
         super(Validator, self).__init__(config=config)
@@ -165,21 +166,26 @@ class Validator(BaseValidatorNeuron):
                 with self.lock:
                     current_block = self.block
 
+                all_validator_query_period_blocks = MAX_COUNT_VALIDATORS * QUERING_WINDOW_BLOCKS
+                # Calculate query period blocks
                 start_period_block = (
-                    (current_block // ALL_VALIDATOR_QUERY_PERIOD_BLOCKS) * ALL_VALIDATOR_QUERY_PERIOD_BLOCKS + 
-                    validator_index * VALIDATOR_QUERY_PERIOD_BLOCKS
+                    (current_block // all_validator_query_period_blocks) * 
+                    all_validator_query_period_blocks + 
+                    validator_index * QUERING_WINDOW_BLOCKS
                 )
-                end_period_block = start_period_block + ALL_VALIDATOR_QUERY_PERIOD_BLOCKS / 2
+                end_period_block = start_period_block + QUERING_WINDOW_BLOCKS / 2
                 bt.logging.info(f"Query period blocks - "
                                 f"Start: {start_period_block}, "
                                 f"End: {end_period_block}, "
                                 f"Current: {current_block}")
                 # Sleep if outside query window
                 if current_block < start_period_block:
-                    bt.logging.info(f"Sleeping for {start_period_block - current_block} blocks before querying miners")
-                    time.sleep((start_period_block - current_block) * BLOCK_IN_SECONDS)
-                elif current_block >= end_period_block:
-                    sleep_blocks = (start_period_block - current_block + ALL_VALIDATOR_QUERY_PERIOD_BLOCKS)
+                    sleep_blocks = start_period_block - current_block
+                    bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
+                    time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
+                    continue
+                elif current_block > end_period_block:
+                    sleep_blocks = (start_period_block - current_block + all_validator_query_period_blocks)
                     bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
                     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
                     continue
@@ -202,7 +208,6 @@ class Validator(BaseValidatorNeuron):
                 bt.logging.error(f"Error during scoring: {str(e)}")
             if self.should_exit:
                 break
-            time.sleep(1)
 
     def synthensize_task_loop(self):
         bt.logging.info(f"Synthensize task loop starting")
@@ -234,13 +239,13 @@ class Validator(BaseValidatorNeuron):
                 # Calculate the end block number for the next weight setting period
                 # This aligns with 3 tempo boundaries
                 set_weights_end_block = (
-                    (current_block + COMPETITION_PERIOD_BLOCKS - 1) 
-                    // COMPETITION_PERIOD_BLOCKS 
-                    * COMPETITION_PERIOD_BLOCKS
+                    (current_block + SESSION_WINDOW_BLOCKS - 1) 
+                    // SESSION_WINDOW_BLOCKS 
+                    * SESSION_WINDOW_BLOCKS
                 )
 
                 # Start setting weights 50 blocks before the end
-                set_weights_start_block = set_weights_end_block - SET_WEIGHTS_PERIOD_BLOCKS
+                set_weights_start_block = set_weights_end_block - WEIGHT_SETTING_WINDOW_BLOCKS
                 bt.logging.info(
                     f"Set weights blocks - "
                     f"Start: {set_weights_start_block}, "

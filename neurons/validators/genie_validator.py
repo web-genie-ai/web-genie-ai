@@ -23,6 +23,7 @@ from webgenie.storage import (
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
+from webgenie.storage import store_results_to_database
 from webgenie.tasks import Solution, ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
 
@@ -67,8 +68,10 @@ class GenieValidator:
                 QualityChallenge, 
                 SeoChallenge,
             ]  
+            
             with self.neuron.lock:
                 session_number = self.neuron.session_number
+
             challenge_class = available_challenges_classes[session_number % len(available_challenges_classes)]
             challenge = challenge_class(task=task, session_number=session_number)
             synapse.competition_type = challenge.competition_type
@@ -98,6 +101,7 @@ class GenieValidator:
             bt.logging.info(f"Received {len(solutions)} valid solutions")
             with self.neuron.lock:
                 self.miner_results.append(challenge)
+
         except Exception as e:
             bt.logging.error(f"Error in query_miners: {e}")
             raise e
@@ -119,9 +123,23 @@ class GenieValidator:
         bt.logging.info("Scoring")
         solutions = challenge.solutions
         miner_uids = [solution.miner_uid for solution in solutions]
+
         aggregated_scores, scores = await challenge.calculate_scores()
+        
         bt.logging.success(f"scores: {scores}")
         bt.logging.success(f"Final scores for {miner_uids}: {aggregated_scores}")
+
+        store_results_to_database(
+            {
+                "neuron": self.neuron,
+                "miner_uids": miner_uids,
+                "solutions": solutions,
+                "scores": scores,
+                "aggregated_scores": aggregated_scores,
+                "challenge": challenge,
+            }
+        )
+         
         self.neuron.score_manager.update_scores(
             aggregated_scores, 
             miner_uids, 

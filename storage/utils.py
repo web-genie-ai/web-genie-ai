@@ -45,8 +45,10 @@ def get_neuron_id(hotkey: str):
     finally:
         session.close()  # Ensure the session is closed
 
-def create_leaderboard_session(created_at: datetime, competition_id: int):
-    return create_record(session, LeaderboardSession, created_at=created_at, competition_id=competition_id)
+def create_leaderboard_session(session_number: int, created_at: datetime, competition_id: int):
+    return create_record(session, LeaderboardSession,
+                         id=session_number,
+                         created_at=created_at, competition_id=competition_id)
 
 def query_leaderboard_session(timestamp: datetime):
     # Calculate the time range
@@ -86,6 +88,9 @@ def create_task_solution(miner_answer: str, challenge_id: int, created_at: datet
 
 def create_solution_evaluation(solution_id: int, score_type_id: int, judgement_id: int, value: float):
     return create_record(session, SolutionEvaluation, solution_id=solution_id, score_type_id=score_type_id, judgement_id=judgement_id, value=value)
+
+def store_results_to_database(results: dict):
+    pass
 
 if __name__ == "__main__":
     neuron_id = add_neuron("5GKH9FPPnWSUoeeTJp19wVtd84XqFW4pyK2ijV2GsFbhTrP1", "5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3")
