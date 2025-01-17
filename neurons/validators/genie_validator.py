@@ -1,5 +1,6 @@
 import os
 import bittensor as bt
+import numpy as np
 import random
 from typing import Union
 
@@ -11,14 +12,17 @@ from webgenie.constants import (
 )
 from webgenie.competitions import (
     ImageTaskAccuracyCompetition, 
-    TextTaskAccuracyCompetition,
     ImageTaskQualityCompetition,
-    TextTaskQualityCompetition,
+    ImageTaskSeoCompetition,
     RESERVED_WEIGHTS,
     ACCURACY_METRIC_NAME,
     QUALITY_METRIC_NAME,
+    SEO_METRIC_NAME,
 )
-from webgenie.helpers.dashboard import upload_competition_result
+from webgenie.storage import (
+    upload_competition,
+    upload_competition_result,
+)
 from webgenie.helpers.htmls import preprocess_html, validate_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
@@ -34,10 +38,9 @@ class GenieValidator:
         self.synthetic_tasks = []
 
         self.avail_competitions = [
-            (TextTaskAccuracyCompetition(), 0.5),
-            (TextTaskQualityCompetition(), 0.5),
-            (ImageTaskAccuracyCompetition(), 0.5),
-            (ImageTaskQualityCompetition(), 0.5),
+            (ImageTaskAccuracyCompetition(), 0.4),
+            (ImageTaskSeoCompetition(), 0.3),
+            (ImageTaskQualityCompetition(), 0.3),
         ]
 
         self.make_work_dir()
@@ -59,13 +62,18 @@ class GenieValidator:
 
             task, synapse = self.synthetic_tasks.pop(0)
             miner_uids = get_all_available_uids(self.neuron)
+            if len(miner_uids) == 0:
+                bt.logging.warning("No miners available")
+                return
             
+            bt.logging.debug(f"Querying {len(miner_uids)} miners")
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 all_synapse_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                     synapse=synapse,
                     timeout=task.timeout,
                 )
+            bt.logging.debug(f"Received {len(all_synapse_results)} synapse results")
 
             solutions = []
             for synapse, miner_uid in zip(all_synapse_results, miner_uids):
@@ -78,11 +86,16 @@ class GenieValidator:
                             process_time = processed_synapse.dendrite.process_time,
                         )
                     )
-            
+            bt.logging.info(f"Received {len(solutions)} solutions")
             self.competitions.append((task, solutions))
         except Exception as e:
             bt.logging.error(f"Error in query_miners: {e}")
             raise e
+
+    async def foward(self):
+        await self.synthensize_task()
+        await self.query_miners()
+        await self.score()
 
     async def score(self):
         if not self.competitions:
@@ -97,6 +110,11 @@ class GenieValidator:
         
         solutions.sort(key=lambda solution: solution.process_time)
         competition = task.competition
+        upload_competition({
+            "competition_type": competition.COMPETITION_TYPE,
+            "task": task,
+        })
+
         miner_uids = [solution.miner_uid for solution in solutions]
         
         final_scores, scores = await competition.calculate_final_scores(task, solutions)
@@ -108,6 +126,7 @@ class GenieValidator:
                 "final_score": final_scores[i],
                 "accuracy": scores[ACCURACY_METRIC_NAME][i],
                 "quality": scores[QUALITY_METRIC_NAME][i],
+                "seo": scores[SEO_METRIC_NAME][i],
                 "html": solutions[i].html,
             })
             
@@ -126,7 +145,7 @@ class GenieValidator:
             if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
                 return
 
-            bt.logging.debug(f"Synthensize task")
+            bt.logging.info(f"Synthensize task")
             
             competition, _ = random.choices(
                 self.avail_competitions,
@@ -144,27 +163,35 @@ class GenieValidator:
         else:
             bt.logging.debug(f"Organic image forward: {image_debug_str(synapse.base64_image)}...")
 
-        best_miner_uid = get_most_available_uid(self.neuron)
+        all_miner_uids = get_all_available_uids(self.neuron)
         try:
-            axon = self.neuron.metagraph.axons[best_miner_uid]
+            if not all_miner_uids:
+                raise Exception("No miners available")
+            
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 responses = await dendrite(
-                    axons=[axon],
+                    axons=[self.neuron.metagraph.axons[uid] for uid in all_miner_uids],
                     synapse=synapse,
                     timeout=synapse.timeout,
                 )
-
-            processed_synapse = await self.process_synapse(responses[0])
-            if processed_synapse is None:
-                raise Exception(f"No valid solution received")
- 
-            return processed_synapse
+            # Sort miner UIDs and responses by incentive scores
+            incentives = self.neuron.metagraph.I[all_miner_uids]
+            sorted_indices = np.argsort(-incentives)  # Negative for descending order
+            all_miner_uids = [all_miner_uids[i] for i in sorted_indices]
+            responses = [responses[i] for i in sorted_indices]
+            for response in responses:
+                processed_synapse = await self.process_synapse(response)
+                if processed_synapse is None:
+                    continue
+                return processed_synapse
+            raise Exception(f"No valid solution received")
         except Exception as e:
             bt.logging.error(f"[forward_organic_synapse] Error querying dendrite: {e}")
             synapse.html = f"Error: {e}"
             return synapse
     
     async def process_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
+        bt.logging.debug(f"Processing synapse: {synapse.dendrite.status_code}")
         if synapse.dendrite.status_code == 200:
             html = preprocess_html(synapse.html)
             if not html:

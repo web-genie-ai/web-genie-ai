@@ -19,11 +19,12 @@ def check_uid_availability(
     if not metagraph.axons[uid].is_serving:
         return False
     # Filter validator permit > 1024 stake.
-    if metagraph.validator_permit[uid]:
-        if metagraph.S[uid] > vpermit_tao_limit:
-            return False
-    # Available otherwise.
     return True
+    # if metagraph.validator_permit[uid]:
+    #     if metagraph.S[uid] > vpermit_tao_limit:
+    #         return False
+    # # Available otherwise.
+    # return True
 
 
 def get_most_available_uid(self, exclude: List[int] = None) -> int:
@@ -45,7 +46,7 @@ def get_most_available_uid(self, exclude: List[int] = None) -> int:
             if uid_is_not_excluded:
                 candidate_uids.append(uid)
     
-    return candidate_uids[np.argmax(self.metagraph.S[candidate_uids])]
+    return candidate_uids[np.argmax(self.metagraph.I[candidate_uids])]
 
 def get_all_available_uids(
     self, exclude: List[int] = None

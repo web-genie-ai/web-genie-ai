@@ -12,7 +12,7 @@ from typing import List
 from webgenie.helpers.llms import openai_call
 from webgenie.prompts import PROMPT_RTC
 from webgenie.rewards.reward import Reward
-from webgenie.rewards.metrics import s_bert
+from webgenie.rewards.rtc_reward import s_bert
 from webgenie.tasks import Task, Solution
 
 
@@ -33,7 +33,7 @@ class RtcReward(Reward):
         return response["prompt"]
 
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
-        bt.logging.debug(f"Rewarding task in rtc reward")
+        bt.logging.info(f"Rewarding task in rtc reward")
         original_prompts = [task.prompt for _ in solutions]
         miner_prompts = [await self._get_prompt(task, solution) for solution in solutions]
         

@@ -1,16 +1,16 @@
 [project]
 name = "web-genie-ai"
-version = "0.1.0"
-description = "Add your description here"
+version = "1.0.0"
+description = "The first bittensor subnet for web generation"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12.4"
 dependencies = [
     "ansible-vault==2.1.0",
     "beautifulsoup4==4.12.3",
     "bert-score==0.3.13",
-    "bittensor==8.5.1",
+    "bittensor-cli==8.2.0rc8",
+    "bittensor==8.5.1rc5",
     "clip",
-    "colormath==3.0.0",
     "datasets==3.2.0",
     "ddt==1.6.0",
     "duckduckgo_search",
@@ -27,11 +27,16 @@ dependencies = [
     "pydantic==2.6",
     "python-dotenv==1.0.1",
     "scikit-learn==1.6.0",
-    "sentence-transformers",
     "shtab==1.6.5",
     "sqlalchemy",
     "tinycss2==1.4.0",
-    "wandb==0.19.0"
+    "wandb==0.19.0",
+    "numpy>=2.0.2",
+    "colormath>=3.0.0",
+    "scikit-image>=0.25.0",
+    "sentence-transformers",
+    "tensorflow>=2.18.0",
+    "tf-keras",
 ]
 
 [project.urls]

@@ -2,6 +2,7 @@
 # (https://arxiv.org/pdf/2402.08699#page=11&zoom=100,384,458) is our inspiration for this reward.
 
 import bittensor as bt
+import asyncio
 import numpy as np
 from pydantic import BaseModel, Field
 from typing import List
@@ -24,10 +25,12 @@ class QualityReward(Reward):
                 {"role": "system", "content": PROMPT_QUALITY.format(html=solution.html)},
             ],
             response_format = ScoreResponse,
+            deterministic=True,
         )
         return response.score / 100
 
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
-        bt.logging.debug(f"Rewarding task in quality reward")
-        scores = [await self._get_score(solution) for solution in solutions]
+        bt.logging.info(f"Rewarding task in quality reward")
+        get_score_tasks = [self._get_score(solution) for solution in solutions]
+        scores = await asyncio.gather(*get_score_tasks)
         return np.array(scores)
