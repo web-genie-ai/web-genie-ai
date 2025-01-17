@@ -97,7 +97,6 @@ class ScoreManager:
         """
         if not self.should_set_weights:
             return
-        self.should_set_weights = False
 
         self.scores = np.zeros_like(self.scores)
         best_index = np.argmax(self.tempo_accumulated_scores)
@@ -146,7 +145,8 @@ class ScoreManager:
                 version_key=self.neuron.spec_version,
             )
             if result is True:
-                bt.logging.info("set_weights on chain successfully!")
+                bt.logging.success("set_weights on chain successfully!")
+                self.should_set_weights = False
             else:
                 bt.logging.error("set_weights failed", msg)
                 
