@@ -88,14 +88,23 @@ def create_solution_evaluation(solution_id: int, score_type_id: int, judgement_i
     return create_record(session, SolutionEvaluation, solution_id=solution_id, score_type_id=score_type_id, judgement_id=judgement_id, value=value)
 
 if __name__ == "__main__":
-    neuron_id = add_neuron("5GKH9FPPnWSUoeeTJp19wVtd84XqFW4pyK2ijV2GsFbhTrP1", "5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3")
-    logging.info(f"neuron_id: {neuron_id}")
+    validator1 = add_neuron("5GKH9FPPnWSUoeeTJp19wVtd84XqFW4pyK2ijV2GsFbhTrP1", "5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3")
+    miner1 = add_neuron("5GKH9FPPnWSUoeeTJp19wVtd84XqFW4pyK2ijV2GsFbhTrP1", "5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3")
 
-    html = "<div>test</div>"
+    html1 = "<div>test</div>"
 
     create_competition("Accuracy")
     create_competition("SEO")
-    create_competition("CODE_QUALITY")
-    create_competition("WEIGHTED_SCORE")
+    create_competition("code_quality")
+    create_competition("weighted_score")
+    accuracy_type_id = create_evaluation_type("accuracy")
+    code_quality_id = create_evaluation_type("code_quality")
+    seo_type_id = create_evaluation_type("seo")
     session_id = create_leaderboard_session(datetime.now(), 1)
-    challenge = create_challenge(session_id, html)
+    challenge1 = create_challenge(session_id, html1)
+    tasksolution1 = create_task_solution("<div>test</div>", challenge1, datetime.now())
+    judgement_id = create_judgement(validator1, miner1)
+    create_solution_evaluation(tasksolution1, accuracy_type_id, judgement_id, 0.98)
+    create_solution_evaluation(tasksolution1, code_quality_id, judgement_id, 0.88)
+    create_solution_evaluation(tasksolution1, seo_type_id, judgement_id, 0.88)
+

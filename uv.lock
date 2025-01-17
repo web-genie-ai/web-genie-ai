@@ -748,6 +748,18 @@ wheels = [
 ]
 
 [[package]]
+name = "eralchemy"
+version = "1.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sqlalchemy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/19/05/5f69930e83a02360d9ed16660bdd58d9d501bffabd43d7dbbe8c14269143/eralchemy-1.5.0.tar.gz", hash = "sha256:fa66a3cd324abd27ad8e65908d7af48d8198c0c185aeb22189cf40516de25941", size = 24847 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/10/ba/3cdc8433aa3d4afc95dd302c2a21611b90cc5b3ebbff5a4889bf6b2e3bdd/eralchemy-1.5.0-py3-none-any.whl", hash = "sha256:c87099aa1a4ac313df690cbe4eb642b596a635fc6b578f7963ce9570994dccc8", size = 19301 },
+]
+
+[[package]]
 name = "eth-hash"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -970,6 +982,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/35/4a/0bd53b36ff0323d10d5f24ebd67af2de10a1117f5cf4d7add90df92756f1/google-pasta-0.2.0.tar.gz", hash = "sha256:c9f2c8dfc8f96d0d5808299920721be30c9eec37f2389f28904f454565c8a16e", size = 40430 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a3/de/c648ef6835192e6e2cc03f40b19eeda4382c49b5bafb43d88b931c4c74ac/google_pasta-0.2.0-py3-none-any.whl", hash = "sha256:b32482794a366b5366a32c92a9a9201b107821889935a02b3e51f6b432ea84ed", size = 57471 },
+]
+
+[[package]]
+name = "graphviz"
+version = "0.20.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fa/83/5a40d19b8347f017e417710907f824915fba411a9befd092e52746b63e9f/graphviz-0.20.3.zip", hash = "sha256:09d6bc81e6a9fa392e7ba52135a9d49f1ed62526f96499325930e87ca1b5925d", size = 256455 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/00/be/d59db2d1d52697c6adc9eacaf50e8965b6345cc143f671e1ed068818d5cf/graphviz-0.20.3-py3-none-any.whl", hash = "sha256:81f848f2904515d8cd359cc611faba817598d2feaac4027b266aa3eda7b3dde5", size = 47126 },
 ]
 
 [[package]]
@@ -3311,6 +3332,8 @@ dependencies = [
     { name = "ddt" },
     { name = "duckduckgo-search" },
     { name = "einops" },
+    { name = "eralchemy" },
+    { name = "graphviz" },
     { name = "lxml" },
     { name = "matplotlib-inline" },
     { name = "nltk" },
@@ -3347,6 +3370,8 @@ requires-dist = [
     { name = "ddt", specifier = "==1.6.0" },
     { name = "duckduckgo-search" },
     { name = "einops" },
+    { name = "eralchemy", specifier = ">=1.5.0" },
+    { name = "graphviz", specifier = ">=0.20.3" },
     { name = "lxml", specifier = "==5.3.0" },
     { name = "matplotlib-inline", specifier = "==0.1.7" },
     { name = "nltk" },

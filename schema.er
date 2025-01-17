@@ -1,0 +1,41 @@
+[challenges]
+    *id {label:"INTEGER"}
+    ground_truth_html {label:"VARCHAR"}
+    session_id {label:"INTEGER"}
+[leaderboard_sessions]
+    *id {label:"INTEGER"}
+    competition_id {label:"INTEGER"}
+    created_at {label:"DATETIME"}
+[competitions]
+    *id {label:"INTEGER"}
+    name {label:"VARCHAR"}
+[evaluation_types]
+    *id {label:"INTEGER"}
+    name {label:"VARCHAR"}
+[judgements]
+    *id {label:"INTEGER"}
+    miner_id {label:"INTEGER"}
+    validator_id {label:"INTEGER"}
+[neurons]
+    *id {label:"INTEGER"}
+    coldkey {label:"VARCHAR"}
+    hotkey {label:"VARCHAR"}
+[solution_evaluations]
+    *id {label:"INTEGER"}
+    judgement_id {label:"INTEGER"}
+    score_type_id {label:"INTEGER"}
+    solution_id {label:"INTEGER"}
+    value {label:"FLOAT"}
+[task_solutions]
+    *id {label:"INTEGER"}
+    challenge_id {label:"INTEGER"}
+    created_at {label:"DATETIME"}
+    miner_answer {label:"JSON"}
+leaderboard_sessions."id" 1--* challenges."session_id"
+competitions."id" 1--* leaderboard_sessions."competition_id"
+neurons."id" 1--* judgements."validator_id"
+neurons."id" 1--* judgements."miner_id"
+task_solutions."id" 1--* solution_evaluations."solution_id"
+judgements."id" 1--* solution_evaluations."judgement_id"
+evaluation_types."id" 1--* solution_evaluations."score_type_id"
+challenges."id" 1--* task_solutions."challenge_id"
