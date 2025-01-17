@@ -1,6 +1,6 @@
 # WebGenieAI Subnet
 
-Welcome to WebGenieAI Subnet, a pioneering Bittensor-based subnet designed to revolutionize project generation through advanced AI models. WebGenieAI aims to transform diverse prompts—ranging from text and voice to images and Figma designs—into fully functional, ready-to-deploy projects. This subnet is tailored for developers, designers, and innovators who seek to accelerate their project development process with high-quality, AI-generated outputs.
+Welcome to WebGenieAI Subnet, a pioneering Bittensor-based subnet designed to revolutionize project generation through advanced AI models. WebGenieAI aims to transform diverse prompts—ranging from texts to concept sketches and images into fully functional, ready-to-deploy projects. This subnet is tailored for developers, designers, and innovators who seek to accelerate their project development process with high-quality, AI-generated outputs.
 
 ## Table of Contents
 
@@ -12,7 +12,7 @@ Welcome to WebGenieAI Subnet, a pioneering Bittensor-based subnet designed to re
 
 ## Overview
 
-WebGenieAI Subnet leverages state-of-the-art AI models to interpret and convert various types of prompts into complete, deployable projects. Whether you're starting with a simple HTML/CSS framework or aiming to develop a complex React application, WebGenieAI can generate the entire codebase, ensuring it meets your specified requirements and is ready for immediate deployment.
+WebGenieAI Subnet leverages state-of-the-art AI models to interpret and convert various prompts into complete, deployable projects. Whether starting with a simple HTML/CSS framework or aiming to develop a complex CMS or React application, WebGenieAI can generate the entire codebase, ensuring it meets your specified requirements and is ready for immediate deployment.
 
 ### Vision
 
@@ -22,24 +22,23 @@ WebGenieAI envisions a future where project creation is seamless, automated, and
 
 The primary purpose of WebGenieAI is to:
 
-- Automate Project Generation: Provide a platform that can autonomously generate high-quality projects from diverse input prompts.
-- Enhance Productivity: Reduce the time and effort required for project development, enabling developers to quickly bring their ideas to life.
+- Automate Project Generation: Provide a platform that autonomously generates high-quality projects from diverse input prompts.
+- Enhance Productivity: Reduce the time and effort required for project development, enabling developers to bring their ideas to life quickly.
 - Promote Innovation: Encourage innovative solutions and optimizations in project generation through competitive incentivization.
 
 ## Features
 
 - **Text Prompt**: Generate projects by describing them in text.
-- **Voice Prompt**: Create projects by giving voice commands.
 - **Image Prompt**: Upload an image of a website or app, and WebGenieAI will generate a pixel-perfect project.
-- **Figma Prompt**: Convert Figma designs into functional projects.
-- **Automated Downloads**: Directly download the generated projects as complete folders.
+- **Sketch Prompt**: Convert concept sketches into functional projects.
+- **Automated Deployment**: Deploy the generated projects into your own domain with click.
 
 ## Incentive Mechanism v1
 
 The WebGenieAI subnet incentivizes miners and validators to ensure high-quality outputs. Here’s how it works specifically for this subnet:
 
 - Task Assignment: Subnet miners are assigned tasks related to generating and improving machine learning models based on various prompts (text and image).
-- Performance Evaluation: Validators evaluate the outputs produced by miners. The evaluation criteria include accuracy, efficiency, and innovation.
+- Evaluation: Validators evaluate the outputs produced by miners. The evaluation criteria include accuracy, code quality, and performance metrics.
 - Ranking and Rewarding: Validators rank the miners according to their performance. The Bittensor blockchain’s Yuma Consensus mechanism determines the TAO rewards distribution based on these rankings.
 
 ## Evaluation Process
@@ -151,14 +150,16 @@ pm2 start --name auto_update auto_update.sh
 - [ ] Launch on mainnet
 
 ### Phase 2: Upgrade (Q1 2025)
-- [ ] Build dashboard to track miner performance and progress
+- [ ] Build a leaderboard to track miner performance and progress
 - [ ] Upgrade front-end application to v2
+    - Online IDE like code sandbox and auto-deployment with one click
 - [ ] Upgrade incentive mechanism to v2
-    - Output CMS such as Wordpress, shopify, and Magento
+    - Output CMS such as WordPress, Shopify, and Magento
 
 ### Phase 3: Expand (Q2 2025)
 - [ ] Upgrade incentive mechanism to v3
-   - Generate full framework based projects on React, Vue, and Next.js from text and image prompts
+   - Add sketch prompt
+   - Generate full framework-based projects on React, Vue, and Next.js from text/image/sketch prompts
 - [ ] Add features to monetize the application
    - Add payment gateways
    - Automate the downloading of fully functional projects
