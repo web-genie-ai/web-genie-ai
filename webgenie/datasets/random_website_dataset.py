@@ -37,78 +37,83 @@ class RandomWebsiteDataset(Dataset):
         return None
 
     async def get_rendered_html(self, url):
-        async with async_playwright() as p:
-            browser = await p.chromium.launch()
-            page = await browser.new_page()
-            await page.goto(url)
-            # Wait for 10 seconds to ensure content loads
-            await page.wait_for_timeout(GROUND_TRUTH_HTML_LOAD_TIME)
-            rendered_html = await page.content()  # Get the rendered HTML
-            await browser.close()
+        try:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch()
+                page = await browser.new_page()
+                await page.goto(url)
+                # Wait for 10 seconds to ensure content loads
+                await page.wait_for_timeout(GROUND_TRUTH_HTML_LOAD_TIME)
+                rendered_html = await page.content()  # Get the rendered HTML
+                await browser.close()
 
-            # Parse the HTML with BeautifulSoup
-            soup = BeautifulSoup(rendered_html, 'html.parser')
+                # Parse the HTML with BeautifulSoup
+                soup = BeautifulSoup(rendered_html, 'html.parser')
 
-            # Attributes that need to be absolute
-            attributes = ['href', 'src', 'srcset']
+                # Attributes that need to be absolute
+                attributes = ['href', 'src', 'srcset']
 
-            # Find all elements with 'href', 'src', or 'srcset' attributes
-            for attr in attributes:
-                for element in soup.find_all(attrs={attr: True}):
-                    original_attr = element[attr]
-                    # Handle 'srcset' differently because it can contain multiple URLs
-                    if attr == 'srcset':
-                        new_urls = []
-                        parts = original_attr.split(',')
-                        for part in parts:
-                            # Split on whitespace and check if there is a descriptor
-                            pieces = part.strip().split(maxsplit=1)
-                            if len(pieces) == 2:
-                                url_part, descriptor = pieces
-                            else:
-                                url_part = pieces[0]
-                                descriptor = ''
+                # Find all elements with 'href', 'src', or 'srcset' attributes
+                for attr in attributes:
+                    for element in soup.find_all(attrs={attr: True}):
+                        original_attr = element[attr]
+                        # Handle 'srcset' differently because it can contain multiple URLs
+                        if attr == 'srcset':
+                            new_urls = []
+                            parts = original_attr.split(',')
+                            for part in parts:
+                                # Split on whitespace and check if there is a descriptor
+                                pieces = part.strip().split(maxsplit=1)
+                                if len(pieces) == 2:
+                                    url_part, descriptor = pieces
+                                else:
+                                    url_part = pieces[0]
+                                    descriptor = ''
 
-                            new_url = urljoin(url, url_part.strip())
-                            if descriptor:
-                                new_urls.append(f"{new_url} {descriptor}")
-                            else:
-                                new_urls.append(new_url)
+                                new_url = urljoin(url, url_part.strip())
+                                if descriptor:
+                                    new_urls.append(f"{new_url} {descriptor}")
+                                else:
+                                    new_urls.append(new_url)
 
-                        element[attr] = ', '.join(new_urls)
-                    else:
-                        element[attr] = urljoin(url, original_attr)
+                            element[attr] = ', '.join(new_urls)
+                        else:
+                            element[attr] = urljoin(url, original_attr)
 
-            # Return the modified HTML as a string
-            return str(soup)
+                # Return the modified HTML as a string
+                return str(soup)
+        except Exception as e:
+            bt.logging.error(f"Error in get_rendered_html: {e}")
+            raise Exception(f"Error in get_rendered_html: {e}")
         
     async def shorten_html(self, html: str, max_children: int = 20, max_text_length: int = 400)->str:
-        soup = BeautifulSoup(html, "html.parser")
-        def traverse(node):
-            # If it’s a tag, we might need to limit its children
-            if isinstance(node, Tag):
-                # If node has too many children, remove the extras
-                if len(node.contents) > max_children:
-                    # Keep only the first max_children
-                    node.contents = node.contents[:max_children]
-                
-                # Recurse on each child
-                for child in node.contents:
-                    traverse(child)
+        try:
+            soup = BeautifulSoup(html, "html.parser")
+            def traverse(node):
+                    # If it’s a tag, we might need to limit its children
+                if isinstance(node, Tag):
+                    # If node has too many children, remove the extras
+                    if len(node.contents) > max_children:
+                        # Keep only the first max_children
+                        node.contents = node.contents[:max_children]
+                    
+                    # Recurse on each child
+                    for child in node.contents:
+                        traverse(child)
 
-            # If it’s a text node, shorten if needed
-            elif isinstance(node, NavigableString):
-                text_str = str(node)
-                if len(text_str) > max_text_length:
-                    shortened = text_str[:max_text_length] + "..."
-                    node.replace_with(shortened)
+                # If it’s a text node, shorten if needed
+                elif isinstance(node, NavigableString):
+                    text_str = str(node)
+                    if len(text_str) > max_text_length:
+                        shortened = text_str[:max_text_length] + "..."
+                        node.replace_with(shortened)
 
-        # Start traversal from the root soup element (html, body, etc.)
-        traverse(soup)
-
-        return str(soup)
-
-
+            # Start traversal from the root soup element (html, body, etc.)
+            traverse(soup)
+            return str(soup)
+        except Exception as e:
+            bt.logging.error(f"Error in shorten_html: {e}")
+            raise Exception(f"Error in shorten_html: {e}")
 
     async def generate_context(self)->DatasetEntry:
         try:
