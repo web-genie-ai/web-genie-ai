@@ -43,6 +43,8 @@ MAX_MINER_HTML_LEN = 1000000
 # work dir
 WORK_DIR = "work"
 
+
 HTML_EXTENSION = ".html"
 IMAGE_EXTENSION = ".png"
+
 
