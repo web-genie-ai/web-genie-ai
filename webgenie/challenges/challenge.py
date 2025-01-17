@@ -27,7 +27,7 @@ class Challenge(BaseModel):
 
 
 class AccuracyChallenge(Challenge):
-    competition_type = ACCURACY_COMPETITION_TYPE
+    competition_type: str = Field(default=ACCURACY_COMPETITION_TYPE, description="The type of competition")
 
     async def calculate_scores(self) -> dict[str, np.ndarray]:
         scores = await self.task_generator.calculate_scores(self.task, self.solutions)
@@ -36,7 +36,7 @@ class AccuracyChallenge(Challenge):
 
 
 class SeoChallenge(Challenge):
-    competition_type = SEO_COMPETITION_TYPE
+    competition_type: str = Field(default=SEO_COMPETITION_TYPE, description="The type of competition")
 
     async def calculate_scores(self) -> dict[str, np.ndarray]:
         scores = await self.task_generator.calculate_scores(self.task, self.solutions)
@@ -47,7 +47,7 @@ class SeoChallenge(Challenge):
 
 
 class QualityChallenge(Challenge):
-    competition_type = QUALITY_COMPETITION_TYPE
+    competition_type: str = Field(default=QUALITY_COMPETITION_TYPE, description="The type of competition")
 
     async def calculate_scores(self) -> dict[str, np.ndarray]:
         scores = await self.task_generator.calculate_scores(self.task, self.solutions)

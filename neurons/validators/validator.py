@@ -47,9 +47,6 @@ class Validator(BaseValidatorNeuron):
 
     def __init__(self, config=None):
         super(Validator, self).__init__(config=config)
-
-        bt.logging.info("load_state()")
-        self.load_state()
         
         # Create asyncio event loop to manage async tasks.
         self.synthensize_task_event_loop = asyncio.new_event_loop()
@@ -68,6 +65,9 @@ class Validator(BaseValidatorNeuron):
         
         self.genie_validator = GenieValidator(neuron=self)
         self.score_manager = ScoreManager(neuron=self)
+
+        bt.logging.info("load_state()")
+        self.load_state()
 
         self.sync()
 
@@ -260,10 +260,16 @@ class Validator(BaseValidatorNeuron):
             bt.logging.info("Starting validator in background thread")
             self.is_running = True
             self.should_exit = False
+            
             self.synthensize_task_thread = threading.Thread(target=self.synthensize_task_loop)
             self.query_miners_thread = threading.Thread(target=self.query_miners_loop)
             self.score_thread = threading.Thread(target=self.score_loop)
             self.set_weights_thread = threading.Thread(target=self.set_weights_loop)
+
+            self.synthensize_task_thread.start()
+            self.query_miners_thread.start()
+            self.score_thread.start()
+            self.set_weights_thread.start()
             bt.logging.info("Started background threads")
     
     def stop_background_threads(self):
@@ -271,10 +277,16 @@ class Validator(BaseValidatorNeuron):
             bt.logging.info("Stopping background threads")
             self.should_exit = True
             self.is_running = False
+            
             self.synthensize_task_thread.join(5)
             self.query_miners_thread.join(5)
             self.score_thread.join(5)
             self.set_weights_thread.join(5)
+
+            self.synthensize_task_thread = None
+            self.query_miners_thread = None
+            self.score_thread = None
+            self.set_weights_thread = None
             bt.logging.info("Stopped background threads")
 
     def __enter__(self):
@@ -289,5 +301,4 @@ class Validator(BaseValidatorNeuron):
 if __name__ == "__main__":
     with Validator() as validator:
         while True:
-            bt.logging.info("Validator is running ... {time.time()}")
             time.sleep(5)

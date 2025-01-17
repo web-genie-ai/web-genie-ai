@@ -5,7 +5,7 @@ from .challenge import (
     SeoChallenge,
 )
 
-from .competition_types import (
+from .challenge_types import (
     ACCURACY_COMPETITION_TYPE,
     QUALITY_COMPETITION_TYPE,
     SEO_COMPETITION_TYPE,
