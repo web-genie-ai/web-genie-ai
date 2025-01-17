@@ -146,10 +146,10 @@ pm2 start --name auto_update auto_update.sh
     - Enable Text & image inputs
 - [x] Incentive mechanism v1
     - Generate pure HTML/CSS web pages from text & image based prompts
-- [ ] Begin marketing for brand awareness and interest
-- [ ] Launch on mainnet
+- [x] Begin marketing for brand awareness and interest
 
 ### Phase 2: Upgrade (Q1 2025)
+- [ ] Launch on mainnet
 - [ ] Build a leaderboard to track miner performance and progress
 - [ ] Upgrade front-end application to v2
     - Online IDE like code sandbox and auto-deployment with one click
