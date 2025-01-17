@@ -38,7 +38,6 @@ class GenieValidator:
             (ImageTaskGenerator(), 1.0),
         ]
         
-        self.lock = threading.Lock()
         self.make_work_dir()
 
     def make_work_dir(self):
@@ -48,7 +47,7 @@ class GenieValidator:
 
     async def query_miners(self):
         try:
-            with self.lock:
+            with self.neuron.lock:
                 if len(self.miner_results) > MAX_COMPETETION_HISTORY_SIZE:
                     return
                 
@@ -67,9 +66,11 @@ class GenieValidator:
                 AccuracyChallenge, 
                 QualityChallenge, 
                 SeoChallenge,
-            ]
-            challenge_class = available_challenges_classes[self.neuron.session_number % len(available_challenges_classes)]
-            challenge = challenge_class(task=task, session_number=self.neuron.session_number)
+            ]  
+            with self.neuron.lock:
+                session_number = self.neuron.session_number
+            challenge_class = available_challenges_classes[session_number % len(available_challenges_classes)]
+            challenge = challenge_class(task=task, session_number=session_number)
             synapse.competition_type = challenge.competition_type
 
             bt.logging.debug(f"Querying {len(miner_uids)} miners")
@@ -95,14 +96,14 @@ class GenieValidator:
             challenge.solutions = solutions
 
             bt.logging.info(f"Received {len(solutions)} solutions")
-            with self.lock:
+            with self.neuron.lock:
                 self.miner_results.append(challenge)
         except Exception as e:
             bt.logging.error(f"Error in query_miners: {e}")
             raise e
 
     async def score(self):
-        with self.lock:
+        with self.neuron.lock:
             if not self.miner_results:
                 return
 
@@ -111,9 +112,11 @@ class GenieValidator:
         if not challenge.solutions:
             return
         
-        if challenge.session_number != self.neuron.session_number:
-            return
-
+        with self.neuron.lock:
+            if challenge.session_number != self.neuron.session_number:
+                return
+        
+        bt.logging.info("Scoring")
         solutions = challenge.solutions
         miner_uids = [solution.miner_uid for solution in solutions]
         aggregated_scores, scores = await challenge.calculate_scores()
@@ -123,8 +126,9 @@ class GenieValidator:
 
     async def synthensize_task(self):
         try:
-            with self.lock:
+            with self.neuron.lock:
                 if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
+                    bt.logging.info(f"Synthetic task size {len(self.synthetic_tasks)} exceeds max size {MAX_SYNTHETIC_TASK_SIZE}, skipping")
                     return
 
             bt.logging.info(f"Synthensize task")
@@ -135,7 +139,7 @@ class GenieValidator:
             )[0]
             
             task, synapse = await competition.generate_task()
-            with self.lock:
+            with self.neuron.lock:
                 self.synthetic_tasks.append((task, synapse))
         
         except Exception as e:

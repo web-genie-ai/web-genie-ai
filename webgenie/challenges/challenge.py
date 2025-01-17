@@ -30,7 +30,7 @@ class AccuracyChallenge(Challenge):
     competition_type: str = Field(default=ACCURACY_COMPETITION_TYPE, description="The type of competition")
 
     async def calculate_scores(self) -> dict[str, np.ndarray]:
-        scores = await self.task_generator.calculate_scores(self.task, self.solutions)
+        scores = await self.task.task_generator.calculate_scores(self.task, self.solutions)
         aggregated_scores = scores[ACCURACY_METRIC_NAME] * 0.9 + scores[QUALITY_METRIC_NAME] * 0.1
         return aggregated_scores, scores
 
@@ -39,7 +39,7 @@ class SeoChallenge(Challenge):
     competition_type: str = Field(default=SEO_COMPETITION_TYPE, description="The type of competition")
 
     async def calculate_scores(self) -> dict[str, np.ndarray]:
-        scores = await self.task_generator.calculate_scores(self.task, self.solutions)
+        scores = await self.task.task_generator.calculate_scores(self.task, self.solutions)
         accuracy_scores = scores[ACCURACY_METRIC_NAME]
         seo_scores = scores[SEO_METRIC_NAME]
         aggregated_scores = np.where(accuracy_scores > 0.7, seo_scores, 0)
@@ -50,7 +50,7 @@ class QualityChallenge(Challenge):
     competition_type: str = Field(default=QUALITY_COMPETITION_TYPE, description="The type of competition")
 
     async def calculate_scores(self) -> dict[str, np.ndarray]:
-        scores = await self.task_generator.calculate_scores(self.task, self.solutions)
+        scores = await self.task.task_generator.calculate_scores(self.task, self.solutions)
         accuracy_scores = scores[ACCURACY_METRIC_NAME]
         quality_scores = scores[QUALITY_METRIC_NAME]
         aggregated_scores = np.where(accuracy_scores > 0.7, quality_scores, 0)

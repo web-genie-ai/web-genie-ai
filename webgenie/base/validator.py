@@ -33,6 +33,7 @@ from webgenie.helpers.weights import init_wandb
 from webgenie.mock import MockDendrite
 from webgenie.utils.config import add_validator_args
 
+
 class BaseValidatorNeuron(BaseNeuron):
     """
     Base class for Bittensor validators. Your validator should inherit from this class.

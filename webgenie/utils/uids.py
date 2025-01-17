@@ -5,7 +5,8 @@ from typing import List
 
 
 def is_validator(metagraph: "bt.metagraph.Metagraph", uid: int, vpermit_tao_limit: int) -> bool:
-    return metagraph.S[uid] >= vpermit_tao_limit
+    return True
+    #return metagraph.S[uid] >= vpermit_tao_limit
 
 
 def get_validator_index(self, uid: int) -> int:

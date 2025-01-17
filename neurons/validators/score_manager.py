@@ -18,6 +18,8 @@ class ScoreManager:
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
         self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         self.tempo_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        self.should_save = False
+        self.should_set_weights = False
 
     def load_scores(self):
         bt.logging.info("Loading scores")
@@ -35,6 +37,9 @@ class ScoreManager:
             self.tempo_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
 
     def save_scores(self):
+        if not self.should_save:
+            return
+        self.should_save = False
         bt.logging.info("Saving scores")
         np.savez(
             self.neuron.config.neuron.full_path + "/state.npz",
@@ -69,55 +74,30 @@ class ScoreManager:
 
         # Update the hotkeys.
         self.hotkeys = copy.deepcopy(new_hotkeys)
+        self.should_save = True
+        self.should_set_weights = True
 
     def update_scores(self, rewards: np.ndarray, uids: List[int], session_number: int):
         if self.scoring_session_number != session_number:
-            # In the new session, reset the scores
             self.scoring_session_number = session_number
             self.tempo_accumulated_scores = np.zeros_like(self.scores)
 
-        # Check if rewards contains NaN values.
-        if np.isnan(rewards).any():
-            bt.logging.warning(f"NaN values detected in rewards: {rewards}")
-            rewards = np.nan_to_num(rewards, nan=0)
-
-        # Ensure rewards is a numpy array.
-        rewards = np.asarray(rewards)
-
-        # Check if `uids` is already a numpy array and copy it to avoid the warning.
-        if isinstance(uids, np.ndarray):
-            uids_array = uids.copy()
-        else:
-            uids_array = np.array(uids)
-
-        # Handle edge case: If either rewards or uids_array is empty.
-        if rewards.size == 0 or uids_array.size == 0:
-            bt.logging.info(f"rewards: {rewards}, uids_array: {uids_array}")
-            bt.logging.warning(
-                "Either rewards or uids_array is empty. No updates will be performed."
-            )
-            return
-
-        # Check if sizes of rewards and uids_array match.
-        if rewards.size != uids_array.size:
-            raise ValueError(
-                f"Shape mismatch: rewards array of shape {rewards.shape} "
-                f"cannot be broadcast to uids array of shape {uids_array.shape}"
-            )
-
-        # Compute forward pass rewards, assumes uids are mutually exclusive.
-        # shape: [ metagraph.n ]
         scattered_rewards: np.ndarray = np.zeros_like(self.scores)
-        scattered_rewards[uids_array] = rewards
-        bt.logging.debug(f"Scattered rewards: {scattered_rewards}")
-
+        scattered_rewards[uids] = rewards
         self.tempo_accumulated_scores: np.ndarray = scattered_rewards + self.tempo_accumulated_scores
         bt.logging.debug(f"Updated scores: {self.tempo_accumulated_scores}")
+        
+        self.should_save = True
+        self.should_set_weights = True
     
     def set_weights(self):
         """
         Sets the validator weights to the metagraph hotkeys based on the scores it has received from the miners. The weights determine the trust and incentive level the validator assigns to miner nodes on the network.
         """
+        if not self.should_set_weights:
+            return
+        self.should_set_weights = False
+
         self.scores = np.zeros_like(self.scores)
         best_index = np.argmax(self.tempo_accumulated_scores)
         self.scores[best_index] = 1
@@ -133,45 +113,39 @@ class ScoreManager:
 
         # Compute raw_weights safely
         raw_weights = self.scores / norm
+        
+        with self.neuron.lock:
+            # Process the raw weights to final_weights via subtensor limitations.
+            (
+                processed_weight_uids,
+                processed_weights,
+            ) = process_weights_for_netuid(
+                uids=self.neuron.metagraph.uids,
+                weights=raw_weights,
+                netuid=self.neuron.config.netuid,
+                subtensor=self.neuron.subtensor,
+                metagraph=self.neuron.metagraph,
+            )
 
-        bt.logging.debug("raw_weights", raw_weights)
-        bt.logging.debug("raw_weight_uids", str(self.metagraph.uids.tolist()))
-        # Process the raw weights to final_weights via subtensor limitations.
-        (
-            processed_weight_uids,
-            processed_weights,
-        ) = process_weights_for_netuid(
-            uids=self.metagraph.uids,
-            weights=raw_weights,
-            netuid=self.config.netuid,
-            subtensor=self.subtensor,
-            metagraph=self.metagraph,
-        )
-        bt.logging.debug("processed_weights", processed_weights)
-        bt.logging.debug("processed_weight_uids", processed_weight_uids)
-
-        # Convert to uint16 weights and uids.
-        (
-            uint_uids,
-            uint_weights,
-        ) = convert_weights_and_uids_for_emit(
-            uids=processed_weight_uids, weights=processed_weights
-        )
-        bt.logging.debug("uint_weights", uint_weights)
-        bt.logging.debug("uint_uids", uint_uids)
-
-        # Set the weights on chain via our subtensor connection.
-        result, msg = self.neuron.subtensor.set_weights(
-            wallet=self.neuron.wallet,
-            netuid=self.neuron.config.netuid,
-            uids=uint_uids,
-            weights=uint_weights,
-            wait_for_finalization=False,
-            wait_for_inclusion=False,
-            version_key=self.neuron.spec_version,
-        )
-        if result is True:
-            bt.logging.info("set_weights on chain successfully!")
-        else:
-            bt.logging.error("set_weights failed", msg)
-            
+            # Convert to uint16 weights and uids.
+            (
+                uint_uids,
+                uint_weights,
+            ) = convert_weights_and_uids_for_emit(
+                uids=processed_weight_uids, weights=processed_weights
+            )
+            # Set the weights on chain via our subtensor connection.
+            result, msg = self.neuron.subtensor.set_weights(
+                wallet=self.neuron.wallet,
+                netuid=self.neuron.config.netuid,
+                uids=uint_uids,
+                weights=uint_weights,
+                wait_for_finalization=False,
+                wait_for_inclusion=False,
+                version_key=self.neuron.spec_version,
+            )
+            if result is True:
+                bt.logging.info("set_weights on chain successfully!")
+            else:
+                bt.logging.error("set_weights failed", msg)
+                
