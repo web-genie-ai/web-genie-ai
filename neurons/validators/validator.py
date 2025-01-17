@@ -249,7 +249,7 @@ class Validator(BaseValidatorNeuron):
                 )
                 # Check if we're in the weight setting window
                 if (current_block >= set_weights_start_block and 
-                    current_block < set_weights_end_block):
+                    current_block <= set_weights_end_block):
                     
                     bt.logging.info(f"Trying to set weights at block {current_block}")
                     self.score_manager.set_weights()
@@ -279,6 +279,7 @@ class Validator(BaseValidatorNeuron):
             self.score_thread.start()
             self.set_weights_thread.start()
             bt.logging.info("Started background threads")
+            bt.logging.info("=" * 40)
     
     def stop_background_threads(self):
         if self.is_running:

@@ -31,7 +31,6 @@ async def low_level_matching_score(predict_html_path_list, original_html_path):
         input_score = calculate_input_matching_similarity(predicted_input_elements, original_input_elements)
         text_score = calculate_text_matching_similarity(predicted_text_elements, original_text_elements)
         score = button_score * 0.25 + input_score * 0.25 + text_score * 0.25 + anchor_score * 0.25
-        print(button_score, input_score, text_score, anchor_score)
         results.append(score)
     
     return np.array(results)

@@ -95,7 +95,7 @@ class GenieValidator:
                     )
             challenge.solutions = solutions
 
-            bt.logging.info(f"Received {len(solutions)} solutions")
+            bt.logging.info(f"Received {len(solutions)} valid solutions")
             with self.neuron.lock:
                 self.miner_results.append(challenge)
         except Exception as e:
@@ -123,7 +123,7 @@ class GenieValidator:
         bt.logging.success(f"scores: {scores}")
         bt.logging.success(f"Final scores for {miner_uids}: {aggregated_scores}")
         self.neuron.score_manager.update_scores(
-            scores, 
+            aggregated_scores, 
             miner_uids, 
             challenge.session_number,
         )
@@ -183,7 +183,6 @@ class GenieValidator:
             return synapse
     
     async def process_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
-        bt.logging.debug(f"Processing synapse: {synapse.dendrite.status_code}")
         if synapse.dendrite.status_code == 200:
             html = preprocess_html(synapse.html)
             if not html:

@@ -54,5 +54,4 @@ def calculate_visual_similarity(
     sift_score = match_sift_features(predicted_element.keypoints, predicted_element.descriptors, 
                                     original_element.keypoints, original_element.descriptors)
     avg_color_score = color_similarity_ciede2000(predicted_element.avg_color, original_element.avg_color)
-    print(sift_score, avg_color_score)
     return sift_score * 0.5 + avg_color_score * 0.5

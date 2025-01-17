@@ -35,7 +35,6 @@ def calculate_text_matching_similarity(predicted_elements, original_elements):
     color_similarity_sum = 0
 
     for i , j in zip(row_ind, col_ind):
-        print(predicted_elements[i].text, original_elements[j].text)
         text_similarity = calculate_text_similarity(predicted_elements[i], original_elements[j])
         if text_similarity < 0.5:
             continue
@@ -57,6 +56,3 @@ def calculate_text_matching_similarity(predicted_elements, original_elements):
     color_similarity_score = color_similarity_sum / total_count
     
     return text_similarity_score * 0.5 + block_similarity_score * 0.3 + color_similarity_score * 0.2
-
-
-
