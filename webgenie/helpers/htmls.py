@@ -50,16 +50,11 @@ def is_valid_html(html_content: str) -> bool:
     Check if the HTML is valid.
     """
     try:
-        # Use XML parser to enforce strict validation
-        # Force the document to follow XML standards, which requires properly closed tags
-        etree.XML(html_content)  # Strict XML parser to catch malformed tags
-        return True  # If parsing succeeds, the HTML is valid.
-
-    except XMLSyntaxError:
-        return False  # If parsing fails, the HTML is invalid due to malformed tags.
+        soup = BeautifulSoup(html_content, 'html.parser')
+        return True
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return False  # Any other error, return False.
+        bt.logging.error(f"An error occurred: {e}")
+        return False
 
 
 def seperate_html_css(html_content: str) -> tuple[str, str]: 

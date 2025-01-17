@@ -11,6 +11,7 @@ from webgenie.base.utils.weight_utils import (
 ) 
 from webgenie.base.neuron import BaseNeuron
 
+
 class ScoreManager:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron

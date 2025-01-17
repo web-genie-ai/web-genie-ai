@@ -79,7 +79,9 @@ class RandomWebsiteDataset(Dataset):
                             element[attr] = ', '.join(new_urls)
                         else:
                             element[attr] = urljoin(url, original_attr)
-
+                # Remove all script tags
+                for script in soup.find_all('script'):
+                    script.decompose()
                 # Return the modified HTML as a string
                 return str(soup)
         except Exception as e:

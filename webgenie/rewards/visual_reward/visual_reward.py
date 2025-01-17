@@ -40,8 +40,8 @@ class VisualReward(Reward):
         high_level_scores = await high_level_matching_score(miner_html_paths, original_html_path)
         low_level_scores = await low_level_matching_score(miner_html_paths, original_html_path)
         
-        bt.logging.debug(f"Visual scores: {high_level_scores}")
-        bt.logging.debug(f"Visual scores: {low_level_scores}")
+        bt.logging.debug(f"High level visual scores: {high_level_scores}")
+        bt.logging.debug(f"Low level visual scores: {low_level_scores}")
 
         scores = high_level_scores * 0.3 + low_level_scores * 0.7
         await stop_browser()

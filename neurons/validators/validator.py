@@ -251,7 +251,7 @@ class Validator(BaseValidatorNeuron):
                 if (current_block >= set_weights_start_block and 
                     current_block < set_weights_end_block):
                     
-                    bt.logging.info(f"Setting weights at block {current_block}")
+                    bt.logging.info(f"Trying to set weights at block {current_block}")
                     self.score_manager.set_weights()
                 else:
                     # Sleep until next weight setting window

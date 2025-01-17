@@ -120,9 +120,13 @@ class GenieValidator:
         solutions = challenge.solutions
         miner_uids = [solution.miner_uid for solution in solutions]
         aggregated_scores, scores = await challenge.calculate_scores()
-
+        bt.logging.success(f"scores: {scores}")
         bt.logging.success(f"Final scores for {miner_uids}: {aggregated_scores}")
-        self.neuron.score_manager.update_scores(miner_uids, scores, challenge.session_number)
+        self.neuron.score_manager.update_scores(
+            scores, 
+            miner_uids, 
+            challenge.session_number,
+        )
 
     async def synthensize_task(self):
         try:
@@ -133,12 +137,12 @@ class GenieValidator:
 
             bt.logging.info(f"Synthensize task")
             
-            competition, _ = random.choices(
+            task_generator, _ = random.choices(
                 self.task_generators,
                 weights=[weight for _, weight in self.task_generators],
             )[0]
             
-            task, synapse = await competition.generate_task()
+            task, synapse = await task_generator.generate_task()
             with self.neuron.lock:
                 self.synthetic_tasks.append((task, synapse))
         
