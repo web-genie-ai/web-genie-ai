@@ -12,7 +12,6 @@ async def take_screenshot(url, output_file_path, load_time = DEFAULT_LOAD_TIME, 
         return
     if os.path.exists(output_file_path) and overwrite:
         os.remove(output_file_path)
-    print(f"Taking screenshot of {url} to {output_file_path}")
         
     try:
         page = await web_player["browser"].new_page()

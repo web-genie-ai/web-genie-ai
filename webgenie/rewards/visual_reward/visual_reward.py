@@ -36,16 +36,24 @@ class VisualReward(Reward):
             with open(path, "w") as f:
                 f.write(solution.html)
             miner_html_paths.append(path)
-
-        high_level_scores = await high_level_matching_score(miner_html_paths, original_html_path)
-        low_level_scores = await low_level_matching_score(miner_html_paths, original_html_path)
+        try:
+            high_level_scores = await high_level_matching_score(miner_html_paths, original_html_path)
+        except Exception as e:
+            bt.logging.error(f"Error in high_level_matching_score: {e}")
+            high_level_scores = np.zeros(len(miner_html_paths))
+        try:
+            low_level_scores = await low_level_matching_score(miner_html_paths, original_html_path)
+        except Exception as e:
+            bt.logging.error(f"Error in low_level_matching_score: {e}")
+            low_level_scores = np.zeros(len(miner_html_paths))
         
-        bt.logging.debug(f"Visual scores: {high_level_scores}")
-        bt.logging.debug(f"Visual scores: {low_level_scores}")
+        bt.logging.debug(f"High level visual scores: {high_level_scores}")
+        bt.logging.debug(f"Low level visual scores: {low_level_scores}")
 
         scores = high_level_scores * 0.3 + low_level_scores * 0.7
         await stop_browser()
         return scores
+    
     def sync_reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:
         return asyncio.run(self.reward_worker(task, solutions, current_work_dir))
 

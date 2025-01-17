@@ -15,6 +15,12 @@ class WebgenieTextSynapse(bt.Synapse):
         description="The prompt to be sent to miners.",
     )
 
+    competition_type: str = pydantic.Field(
+        "",
+        title="Competition Type",
+        description="The competition type.",
+    )
+
     html: str = pydantic.Field(
         "",
         title="HTML",
@@ -30,6 +36,12 @@ class WebgenieImageSynapse(bt.Synapse):
         "",
         title="Base64 Image",
         description="The base64 image to be sent to miners.",
+    )
+    
+    competition_type: str = pydantic.Field(
+        "",
+        title="Competition Type",
+        description="The competition type.",
     )
 
     html: str = pydantic.Field(
