@@ -20,7 +20,6 @@ class ScoreManager:
         self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         self.session_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         self.should_save = False
-        self.should_set_weights = False
 
     def load_scores(self):
         bt.logging.info("Loading scores")
@@ -40,6 +39,7 @@ class ScoreManager:
     def save_scores(self):
         if not self.should_save:
             return
+        
         self.should_save = False
         bt.logging.info("Saving scores")
         np.savez(
@@ -76,7 +76,6 @@ class ScoreManager:
         # Update the hotkeys.
         self.hotkeys = copy.deepcopy(new_hotkeys)
         self.should_save = True
-        self.should_set_weights = True
 
     def update_scores(self, rewards: np.ndarray, uids: List[int], session_number: int):
         if self.scoring_session_number != session_number:
@@ -89,15 +88,11 @@ class ScoreManager:
         bt.logging.debug(f"Updated scores: {self.session_accumulated_scores}")
         
         self.should_save = True
-        self.should_set_weights = True
     
     def set_weights(self):
         """
         Sets the validator weights to the metagraph hotkeys based on the scores it has received from the miners. The weights determine the trust and incentive level the validator assigns to miner nodes on the network.
         """
-        if not self.should_set_weights:
-            return
-        
         if not self.neuron.should_set_weights():
             return
 
@@ -149,7 +144,6 @@ class ScoreManager:
             )
             if result is True:
                 bt.logging.success("set_weights on chain successfully!")
-                self.should_set_weights = False
             else:
                 bt.logging.error("set_weights failed", msg)
                 
