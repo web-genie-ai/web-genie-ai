@@ -174,7 +174,7 @@ class Validator(BaseValidatorNeuron):
                     validator_index * QUERING_WINDOW_BLOCKS
                 )
                 end_period_block = start_period_block + QUERING_WINDOW_BLOCKS / 2
-                bt.logging.info(f"Query period blocks - "
+                bt.logging.info(f"Query window - "
                                 f"Start: {start_period_block}, "
                                 f"End: {end_period_block}, "
                                 f"Current: {current_block}")
@@ -247,7 +247,7 @@ class Validator(BaseValidatorNeuron):
                 # Start setting weights 50 blocks before the end
                 set_weights_start_block = set_weights_end_block - WEIGHT_SETTING_WINDOW_BLOCKS
                 bt.logging.info(
-                    f"Set weights blocks - "
+                    f"Set weights window - "
                     f"Start: {set_weights_start_block}, "
                     f"End: {set_weights_end_block}, "
                     f"Current: {current_block}"

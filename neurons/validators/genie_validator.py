@@ -16,14 +16,10 @@ from webgenie.challenges import (
     QualityChallenge,
     SeoChallenge,
 )
-from webgenie.storage import (
-    upload_competition,
-    upload_competition_result,
-)
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
-from webgenie.storage import store_results_to_database
+#from webgenie.storage.utils import store_results_to_database
 from webgenie.tasks import Solution, ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
 
@@ -50,9 +46,11 @@ class GenieValidator:
         try:
             with self.neuron.lock:
                 if len(self.miner_results) > MAX_COMPETETION_HISTORY_SIZE:
+                    bt.logging.info(f"Competition history size {len(self.miner_results)} exceeds max size {MAX_COMPETETION_HISTORY_SIZE}, skipping")
                     return
                 
                 if not self.synthetic_tasks:
+                    bt.logging.info("No synthetic tasks available, skipping")
                     return
 
                 task, synapse = self.synthetic_tasks.pop(0)
@@ -126,19 +124,21 @@ class GenieValidator:
 
         aggregated_scores, scores = await challenge.calculate_scores()
         
-        bt.logging.success(f"scores: {scores}")
+        bt.logging.success(f"Task Source: {challenge.task.src}")
+        bt.logging.success(f"Competition Type: {challenge.competition_type}")
+        bt.logging.success(f"Scores: {scores}")
         bt.logging.success(f"Final scores for {miner_uids}: {aggregated_scores}")
 
-        store_results_to_database(
-            {
-                "neuron": self.neuron,
-                "miner_uids": miner_uids,
-                "solutions": solutions,
-                "scores": scores,
-                "aggregated_scores": aggregated_scores,
-                "challenge": challenge,
-            }
-        )
+        # store_results_to_database(
+        #     {
+        #         "neuron": self.neuron,
+        #         "miner_uids": miner_uids,
+        #         "solutions": solutions,
+        #         "scores": scores,
+        #         "aggregated_scores": aggregated_scores,
+        #         "challenge": challenge,
+        #     }
+        # )
          
         self.neuron.score_manager.update_scores(
             aggregated_scores, 

@@ -67,6 +67,7 @@ class ImageTaskGenerator(TaskGenerator):
                 ground_truth_html=ground_truth_html,
                 timeout=IMAGE_TASK_TIMEOUT,
                 generator=self,
+                src=dataset_entry.src,
             ), 
             WebgenieImageSynapse(base64_image=base64_image),
         )
