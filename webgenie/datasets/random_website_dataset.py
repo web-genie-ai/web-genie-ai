@@ -42,9 +42,15 @@ class RandomWebsiteDataset(Dataset):
                 browser = await p.chromium.launch()
                 page = await browser.new_page()
                 await page.goto(url, timeout=CHROME_HTML_LOAD_TIME)
+                
                 # Wait for 10 seconds to ensure content loads
-                await page.wait_for_timeout(GROUND_TRUTH_HTML_LOAD_TIME)
+                # await page.wait_for_timeout(GROUND_TRUTH_HTML_LOAD_TIME)
+                
+                await page.wait_for_load_state('networkidle')
+                await page.wait_for_timeout(1000)
+                
                 rendered_html = await page.content()  # Get the rendered HTML
+                
                 await page.close()
                 await browser.close()
 

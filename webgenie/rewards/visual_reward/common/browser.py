@@ -1,3 +1,4 @@
+import bittensor as bt
 from playwright.async_api import async_playwright
 
 
@@ -13,6 +14,7 @@ async def start_browser():
     browser = await web_driver.chromium.launch(headless=True)
     web_player["web_driver"] = web_driver
     web_player["browser"] = browser
+    bt.logging.info(f"Started browser.")
 
 
 async def stop_browser():
@@ -21,4 +23,4 @@ async def stop_browser():
     await web_player["web_driver"].stop()
     web_player["web_driver"] = None
     web_player["browser"] = None
-
+    bt.logging.info(f"Stopped browser.")

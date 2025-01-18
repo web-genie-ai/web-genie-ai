@@ -1,3 +1,4 @@
+import bittensor as bt
 import numpy as np
 
 from webgenie.rewards.visual_reward.low_level_matching_score.element_matching_score import calculate_element_matching_similarity
@@ -15,6 +16,7 @@ async def low_level_matching_score(predict_html_path_list, original_html_path):
         original_input_elements, 
         original_anchor_elements,
     ) = await extract_html_elements(original_html_path)
+    bt.logging.info(f"Extracted original html elements.")
 
     results = []
     for predict_html_path in predict_html_path_list:
