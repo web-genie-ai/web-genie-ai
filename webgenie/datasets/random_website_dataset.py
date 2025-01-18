@@ -67,9 +67,11 @@ class RandomWebsiteDataset(Dataset):
                                 pieces = part.strip().split(maxsplit=1)
                                 if len(pieces) == 2:
                                     url_part, descriptor = pieces
-                                else:
+                                elif len(pieces) == 1:
                                     url_part = pieces[0]
                                     descriptor = ''
+                                else:
+                                    continue
 
                                 new_url = urljoin(url, url_part.strip())
                                 if descriptor:

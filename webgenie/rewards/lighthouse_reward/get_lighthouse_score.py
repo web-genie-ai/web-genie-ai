@@ -68,6 +68,7 @@ def get_lighthouse_score(htmls: List[str], port: int = LIGHTHOUSE_SERVER_PORT) -
     server_thread.start()
     
     def get_lighthouse_score_from_subprocess(url):
+        bt.logging.info(f"Getting lighthouse score from {url}...")
         try:
             result = subprocess.run(
                 ['lighthouse', url, '--output=json', '--quiet', '--chrome-flags="--headless --no-sandbox"'],
@@ -94,6 +95,7 @@ def get_lighthouse_score(htmls: List[str], port: int = LIGHTHOUSE_SERVER_PORT) -
             }
 
     time.sleep(1)  # Give the server time to start
+    bt.logging.info(f"Getting lighthouse scores from {port}...")
     scores = []
     for i in tqdm(range(len(htmls)), desc="Getting lighthouse scores"):
         url = f"http://localhost:{port}/lighthouse_score/{i}"

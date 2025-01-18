@@ -64,7 +64,6 @@ class ImageTaskGenerator(TaskGenerator):
         
         base64_image = await html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)    
         bt.logging.debug(f"Screenshot generated for {dataset_entry.src}")
-
         return (
             ImageTask(
                 base64_image=base64_image, 

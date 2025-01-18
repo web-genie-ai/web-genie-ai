@@ -163,6 +163,8 @@ class GenieValidator:
             task, synapse = await task_generator.generate_task()
             with self.neuron.lock:
                 self.synthetic_tasks.append((task, synapse))
+
+            bt.logging.success(f"Successfully generated task for {task.src}")
         
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")

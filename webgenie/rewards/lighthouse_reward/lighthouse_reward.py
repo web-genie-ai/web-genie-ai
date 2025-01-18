@@ -20,18 +20,22 @@ class LighthouseReward(Reward):
         pass
 
     def sync_reward_worker(self, htmls: List[str], port: int = LIGHTHOUSE_SERVER_PORT) -> List[float]:
-        scores_dict = get_lighthouse_score(htmls, port)
-        scores = []
-        weights = [0, 0.25, 0.25, 0.5]
-        for score_dict in scores_dict:
-            score = (
-                score_dict['performance'] * weights[0] + 
-                score_dict['accessibility'] * weights[1] + 
-                score_dict['best-practices'] * weights[2] + 
-                score_dict['seo'] * weights[3]
-            )
-            scores.append(score)
-        return scores
+        try:
+            scores_dict = get_lighthouse_score(htmls, port)
+            scores = []
+            weights = [0, 0.25, 0.25, 0.5]
+            for score_dict in scores_dict:
+                score = (
+                    score_dict['performance'] * weights[0] + 
+                    score_dict['accessibility'] * weights[1] + 
+                    score_dict['best-practices'] * weights[2] + 
+                    score_dict['seo'] * weights[3]
+                )
+                scores.append(score)
+            return scores
+        except Exception as e:
+            bt.logging.error(f"Error getting lighthouse score: {e}")
+            return [0] * len(htmls)
 
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
         bt.logging.info(f"Rewarding lighthouse task")

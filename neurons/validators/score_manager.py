@@ -97,6 +97,9 @@ class ScoreManager:
         """
         if not self.should_set_weights:
             return
+        
+        if not self.neuron.should_set_weights():
+            return
 
         self.scores = np.zeros_like(self.scores)
         best_index = np.argmax(self.session_accumulated_scores)
