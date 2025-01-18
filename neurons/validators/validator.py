@@ -189,8 +189,14 @@ class Validator(BaseValidatorNeuron):
                     bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
                     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
                     continue
-
-                self.query_miners_event_loop.run_until_complete(self.genie_validator.query_miners())
+                
+                QUERY_MINERS_TIMEOUT = 60 * 15
+                self.query_miners_event_loop.run_until_complete(
+                    asyncio.wait_for(
+                        self.genie_validator.query_miners(),
+                        timeout=QUERY_MINERS_TIMEOUT
+                    )
+                )
             except Exception as e:
                 bt.logging.error(f"Error during query miners loop: {str(e)}")
             if self.should_exit:
@@ -203,7 +209,14 @@ class Validator(BaseValidatorNeuron):
             try:
                 with self.lock:
                     self.sync()
-                self.score_event_loop.run_until_complete(self.genie_validator.score())
+
+                SCORE_TIMEOUT = 60 * 60
+                self.score_event_loop.run_until_complete(
+                    asyncio.wait_for(
+                        self.genie_validator.score(),
+                        timeout=SCORE_TIMEOUT
+                    )
+                )
             except Exception as e:
                 bt.logging.error(f"Error during scoring: {str(e)}")
             if self.should_exit:
@@ -217,7 +230,13 @@ class Validator(BaseValidatorNeuron):
                 with self.lock:
                     self.sync()
                 
-                self.synthensize_task_event_loop.run_until_complete(self.genie_validator.synthensize_task())
+                SYNTHETIC_TASK_TIMEOUT = 60 * 15
+                self.synthensize_task_event_loop.run_until_complete(
+                    asyncio.wait_for(
+                        self.genie_validator.synthensize_task(),
+                        timeout=SYNTHETIC_TASK_TIMEOUT
+                    )
+                )
             except Exception as e:
                 bt.logging.error(f"Error during synthensize task: {str(e)}")
             if self.should_exit:

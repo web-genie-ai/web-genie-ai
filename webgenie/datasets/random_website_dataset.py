@@ -45,6 +45,7 @@ class RandomWebsiteDataset(Dataset):
                 # Wait for 10 seconds to ensure content loads
                 await page.wait_for_timeout(GROUND_TRUTH_HTML_LOAD_TIME)
                 rendered_html = await page.content()  # Get the rendered HTML
+                await page.close()
                 await browser.close()
 
                 # Parse the HTML with BeautifulSoup

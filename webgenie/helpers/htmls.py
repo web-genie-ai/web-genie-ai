@@ -101,7 +101,7 @@ async def html_to_screenshot(html_content: str, page_load_time: int = 1000) -> s
             await page.wait_for_timeout(page_load_time)
             # Take the screenshot
             await page.screenshot(path=png_path, full_page=True, animations="disabled", timeout=60000)
-
+            await page.close()
             await browser.close()
     except Exception as e: 
         print(f"Failed to take screenshot due to: {e}. Generating a blank image.")
