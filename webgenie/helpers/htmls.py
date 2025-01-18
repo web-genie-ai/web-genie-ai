@@ -12,6 +12,7 @@ from playwright.async_api import async_playwright
 
 from webgenie.constants import (
     WORK_DIR,
+    CHROME_HTML_LOAD_TIME,
     PLACE_HOLDER_IMAGE_URL,
 )
 from webgenie.helpers.images import image_to_base64
@@ -97,10 +98,15 @@ async def html_to_screenshot(html_content: str, page_load_time: int = 1000) -> s
             page = await browser.new_page()
 
             # Navigate to the URL
-            await page.goto(url, timeout=60000)
+            await page.goto(url, timeout=CHROME_HTML_LOAD_TIME)
             await page.wait_for_timeout(page_load_time)
             # Take the screenshot
-            await page.screenshot(path=png_path, full_page=True, animations="disabled", timeout=60000)
+            await page.screenshot(
+                path=png_path, 
+                full_page=True, 
+                animations="disabled", 
+                timeout=CHROME_HTML_LOAD_TIME,
+            )
             await page.close()
             await browser.close()
     except Exception as e: 

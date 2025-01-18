@@ -1,3 +1,4 @@
+import bittensor as bt
 from database import Session as DBSession
 from models import Neuron, LeaderboardSession, Competition, Challenge, Judgement, EvaluationType, TaskSolution, SolutionEvaluation
 from datetime import datetime, timedelta
@@ -88,9 +89,6 @@ def create_task_solution(miner_answer: str, challenge_id: int, created_at: datet
 
 def create_solution_evaluation(solution_id: int, score_type_id: int, judgement_id: int, value: float):
     return create_record(session, SolutionEvaluation, solution_id=solution_id, score_type_id=score_type_id, judgement_id=judgement_id, value=value)
-
-def store_results_to_database(results: dict):
-    pass
 
 if __name__ == "__main__":
     neuron_id = add_neuron("5GKH9FPPnWSUoeeTJp19wVtd84XqFW4pyK2ijV2GsFbhTrP1", "5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3")

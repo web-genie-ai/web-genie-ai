@@ -35,6 +35,9 @@ SCREENSHOT_SCRIPT_PATH = "webgenie/rewards/visual_reward/metrics/screenshot_sing
 GROUND_TRUTH_HTML_LOAD_TIME = 20000
 
 # miner html load time
+CHROME_HTML_LOAD_TIME = 60000
+
+# miner html load time
 MINER_HTML_LOAD_TIME = 2000
 
 # max miner html length
@@ -43,8 +46,11 @@ MAX_MINER_HTML_LEN = 1000000
 # work dir
 WORK_DIR = "work"
 
-
+# html extension
 HTML_EXTENSION = ".html"
+
+# image extension
 IMAGE_EXTENSION = ".png"
 
-
+# image extension
+IMAGE_EXTENSION = ".png"

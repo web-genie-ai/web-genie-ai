@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 from typing import Optional
 
 from webgenie.datasets.dataset import Dataset, DatasetEntry
-from webgenie.constants import GROUND_TRUTH_HTML_LOAD_TIME
+from webgenie.constants import GROUND_TRUTH_HTML_LOAD_TIME, CHROME_HTML_LOAD_TIME
 
 class RandomWebsiteDataset(Dataset):
     def __init__(self , **kwargs):
@@ -41,7 +41,7 @@ class RandomWebsiteDataset(Dataset):
             async with async_playwright() as p:
                 browser = await p.chromium.launch()
                 page = await browser.new_page()
-                await page.goto(url)
+                await page.goto(url, timeout=CHROME_HTML_LOAD_TIME)
                 # Wait for 10 seconds to ensure content loads
                 await page.wait_for_timeout(GROUND_TRUTH_HTML_LOAD_TIME)
                 rendered_html = await page.content()  # Get the rendered HTML

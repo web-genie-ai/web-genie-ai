@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 
-from webgenie.constants import DEFAULT_LOAD_TIME
+from webgenie.constants import DEFAULT_LOAD_TIME, CHROME_HTML_LOAD_TIME
 from webgenie.rewards.visual_reward.common.browser import web_player
 
 
@@ -15,9 +15,14 @@ async def take_screenshot(url, output_file_path, load_time = DEFAULT_LOAD_TIME, 
         
     try:
         page = await web_player["browser"].new_page()
-        await page.goto(url)
+        await page.goto(url, timeout=CHROME_HTML_LOAD_TIME)
         await page.wait_for_timeout(load_time)
-        await page.screenshot(path=output_file_path, full_page=True, animations='disabled')
+        await page.screenshot(
+            path=output_file_path, 
+            full_page=True, 
+            animations='disabled', 
+            timeout=CHROME_HTML_LOAD_TIME,
+        )
         await page.close()
     except Exception as e:
         print(f"Failed to take screenshot due to: {e}. Generating a blank image.")

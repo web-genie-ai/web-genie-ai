@@ -19,7 +19,7 @@ from webgenie.challenges import (
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
-#from webgenie.storage.utils import store_results_to_database
+from webgenie.storage import store_results_to_database
 from webgenie.tasks import Solution, ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
 
@@ -129,16 +129,16 @@ class GenieValidator:
         bt.logging.success(f"Scores: {scores}")
         bt.logging.success(f"Final scores for {miner_uids}: {aggregated_scores}")
 
-        # store_results_to_database(
-        #     {
-        #         "neuron": self.neuron,
-        #         "miner_uids": miner_uids,
-        #         "solutions": solutions,
-        #         "scores": scores,
-        #         "aggregated_scores": aggregated_scores,
-        #         "challenge": challenge,
-        #     }
-        # )
+        store_results_to_database(
+            {
+                "neuron": self.neuron,
+                "miner_uids": miner_uids,
+                "solutions": solutions,
+                "scores": scores,
+                "aggregated_scores": aggregated_scores,
+                "challenge": challenge,
+            }
+        )
          
         self.neuron.score_manager.update_scores(
             aggregated_scores, 
