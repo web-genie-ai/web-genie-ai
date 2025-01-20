@@ -124,7 +124,7 @@ git clone https://github.com/web-genie-ai/web-genie-ai.git
 cd web-genie-ai
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
-Install the packages in the new terminal:
+Install the packages in a new terminal:
 ```bash
 uv sync
 ```
