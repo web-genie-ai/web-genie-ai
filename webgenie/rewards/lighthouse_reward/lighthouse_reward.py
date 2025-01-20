@@ -19,9 +19,9 @@ class LighthouseReward(Reward):
     def __init__(self):
         pass
 
-    def sync_reward_worker(self, htmls: List[str], port: int = LIGHTHOUSE_SERVER_PORT) -> List[float]:
+    def sync_reward_worker(self, htmls: List[str]) -> List[float]:
         try:
-            scores_dict = get_lighthouse_score(htmls, port)
+            scores_dict = get_lighthouse_score(htmls)
             scores = []
             weights = [0, 0.25, 0.25, 0.5]
             for score_dict in scores_dict:
@@ -49,11 +49,9 @@ class LighthouseReward(Reward):
             
             # Create partial tasks for each chunk
             futures = []
-            port = LIGHTHOUSE_SERVER_PORT
             for chunk in html_chunks:
-                future = pool.apply_async(self.sync_reward_worker, args=(chunk, port))
+                future = pool.apply_async(self.sync_reward_worker, args=(chunk))
                 futures.append(future)
-                port += 1
             
             # Gather all results
             scores = []

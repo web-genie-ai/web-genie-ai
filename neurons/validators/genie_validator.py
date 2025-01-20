@@ -21,7 +21,6 @@ from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.storage import store_results_to_database
-from webgenie.rewards.lighthouse_reward import start_lighthouse_server_thread
 from webgenie.tasks import Solution, ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
 
@@ -38,7 +37,6 @@ class GenieValidator:
         ]
         
         self.make_work_dir()
-        start_lighthouse_server_thread()
 
     def make_work_dir(self):
         if not os.path.exists(WORK_DIR):

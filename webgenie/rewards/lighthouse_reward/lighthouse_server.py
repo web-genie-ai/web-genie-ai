@@ -24,8 +24,8 @@ def start_lighthouse_server():
         httpd = HTTPServer(('localhost', LIGHTHOUSE_SERVER_PORT), CustomHTTPRequestHandler)
         httpd.serve_forever()
         bt.logging.success(f"Lighthouse server started on port {LIGHTHOUSE_SERVER_PORT}")
-    except KeyboardInterrupt:
-        bt.logging.info("Keyboard interrupt detected, stopping server")
+    except Exception as e:
+        bt.logging.error(f"Error starting lighthouse server: {e}")
         httpd.shutdown()
         httpd.server_close()
         httpd = None
@@ -37,8 +37,18 @@ def start_lighthouse_server_thread():
     try:
         lighthouse_server_thread = threading.Thread(target=start_lighthouse_server, daemon=True)
         lighthouse_server_thread.start()
-    except KeyboardInterrupt:
-        bt.logging.info("Keyboard interrupt detected, stopping server")
+        bt.logging.info("Lighthouse server started")
+    except Exception as e:
+        bt.logging.error(f"Error starting lighthouse server: {e}")
         httpd.shutdown()
         httpd.server_close()
+        bt.logging.info("Server stopped")
+
+
+def stop_lighthouse_server():
+    global httpd
+    if httpd:
+        httpd.shutdown()
+        httpd.server_close()
+        httpd = None
         bt.logging.info("Server stopped")

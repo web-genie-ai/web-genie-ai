@@ -17,6 +17,7 @@ from typing import Tuple, Union
 from webgenie.base.validator import BaseValidatorNeuron
 from webgenie.constants import API_HOTKEY
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
+from webgenie.rewards.lighthouse_reward import start_lighthouse_server_thread, stop_lighthouse_server
 from webgenie.utils.uids import get_validator_index
 
 from neurons.validators.genie_validator import GenieValidator
@@ -301,7 +302,8 @@ class Validator(BaseValidatorNeuron):
             self.synthensize_task_thread.start()
             self.query_miners_thread.start()
             self.score_thread.start()
-            self.set_weights_thread.start()
+            self.set_weights_thread.start()        
+            start_lighthouse_server_thread()
             bt.logging.info("Started background threads")
             bt.logging.info("=" * 40)
     
@@ -320,6 +322,7 @@ class Validator(BaseValidatorNeuron):
             self.query_miners_thread = None
             self.score_thread = None
             self.set_weights_thread = None
+            stop_lighthouse_server()
             bt.logging.info("Stopped background threads")
 
     def __enter__(self):
