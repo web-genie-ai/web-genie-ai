@@ -1,5 +1,6 @@
 import bittensor as bt
 import os
+import sys
 import threading
 import uvicorn
 from fastapi import FastAPI
@@ -35,7 +36,7 @@ def start_lighthouse_server():
     except Exception as e:
         bt.logging.error(f"Error starting lighthouse server: {e}")
         stop_lighthouse_server()
-        raise e
+        sys.exit(1)
 
 
 
@@ -48,4 +49,4 @@ def start_lighthouse_server_thread():
     except Exception as e:
         bt.logging.error(f"Error starting lighthouse server: {e}")
         stop_lighthouse_server()
-        raise e
+        sys.exit(1)
