@@ -61,7 +61,6 @@ HTML_EXTENSION = ".html"
 # image extension
 IMAGE_EXTENSION = ".png"
 
-<<<<<<< HEAD
 
 MAX_COUNT_VALIDATORS = 1
 
@@ -71,7 +70,5 @@ SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 3
 
 QUERING_WINDOW_BLOCKS = 10
 WEIGHT_SETTING_WINDOW_BLOCKS = 50 # 50 blocks = 10 minutes
-=======
 # image extension
 IMAGE_EXTENSION = ".png"
->>>>>>> d479540c463c84c143f3b2ec47c8399ee9de644c

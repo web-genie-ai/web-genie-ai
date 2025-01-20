@@ -1,9 +1,5 @@
-<<<<<<< HEAD:storage/utils.py
 from bittensor import Wallet
 from io import BufferedReader
-=======
-import bittensor as bt
->>>>>>> d479540c463c84c143f3b2ec47c8399ee9de644c:webgenie/storage/utils.py
 from database import Session as DBSession
 from models import Neuron, LeaderboardSession, Competition, Challenge, Judgement, EvaluationType, TaskSolution, SolutionEvaluation
 from datetime import datetime
@@ -103,7 +99,6 @@ def create_task_solution(miner_answer: dict, challenge_id: int):
 def create_solution_evaluation(solution_id: int, score_type_id: int, judgement_id: int, value: float):
     return create_record(session, SolutionEvaluation, solution_id=solution_id, score_type_id=score_type_id, judgement_id=judgement_id, value=value)
 
-<<<<<<< HEAD:storage/utils.py
 def store_results_to_database(results: dict):
     # Extracting validator keys correctly
     vali_coldkey = results["validator"]["coldkey"]
@@ -137,11 +132,6 @@ def store_results_to_database(results: dict):
         for eval_type, score_value in score.items():
             evaluation_type_id = create_evaluation_type(eval_type)
             create_solution_evaluation(solution_id, evaluation_type_id, judgement_id, score_value)
-=======
-if __name__ == "__main__":
-    neuron_id = add_neuron("5GKH9FPPnWSUoeeTJp19wVtd84XqFW4pyK2ijV2GsFbhTrP1", "5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3")
-    logging.info(f"neuron_id: {neuron_id}")
->>>>>>> d479540c463c84c143f3b2ec47c8399ee9de644c:webgenie/storage/utils.py
 
 def get_session_data(session_number: int):
     try:
