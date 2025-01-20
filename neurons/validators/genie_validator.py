@@ -4,6 +4,8 @@ import numpy as np
 import random
 import threading
 import time
+
+from datetime import datetime, timedelta
 from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
@@ -14,6 +16,8 @@ from webgenie.constants import (
     LIGHTHOUSE_SERVER_WORK_DIR,
     TASK_REVEAL_TIME,
     TASK_REVEAL_TIMEOUT,
+    SESSION_WINDOW_BLOCKS,
+    BLOCK_IN_SECONDS,
 )
 from webgenie.challenges import (
     AccuracyChallenge,
@@ -22,9 +26,18 @@ from webgenie.challenges import (
 )
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
-from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
+from webgenie.protocol import (
+    WebgenieImageSynapse, 
+    WebgenieTextSynapse,
+    verify_answer_hash,
+)
 from webgenie.storage import store_results_to_database
 from webgenie.tasks import Solution
+from webgenie.tasks.metric_types import (
+    ACCURACY_METRIC_NAME, 
+    QUALITY_METRIC_NAME,
+    SEO_METRIC_NAME,
+)
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
 
@@ -88,7 +101,7 @@ class GenieValidator:
             
             query_time = time.time()
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
-                all_synapse_results = await dendrite(
+                all_synapse_hash_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                     synapse=synapse,
                     timeout=task.timeout,
@@ -98,16 +111,19 @@ class GenieValidator:
             sleep_time_before_reveal = max(0, task.timeout - elapsed_time) + TASK_REVEAL_TIME
             time.sleep(sleep_time_before_reveal)
 
+            bt.logging.debug(f"Revealing task {task.task_id}")
+            
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
-                all_synapse_results = await dendrite(
+                all_synapse_reveal_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                     synapse=synapse,
                     timeout=TASK_REVEAL_TIMEOUT,
                 )
             
             solutions = []
-            for synapse, miner_uid in zip(all_synapse_results, miner_uids):
-                checked_synapse = await self.checked_synapse(synapse)
+            for reveal_synapse, hash_synapse, miner_uid in zip(all_synapse_reveal_results, all_synapse_hash_results, miner_uids):
+                reveal_synapse.html_hash = hash_synapse.html_hash
+                checked_synapse = await self.checked_synapse(reveal_synapse)
                 if checked_synapse is not None:
                     solutions.append(
                         Solution(
@@ -149,17 +165,51 @@ class GenieValidator:
         bt.logging.success(f"Competition Type: {challenge.competition_type}")
         bt.logging.success(f"Scores: {scores}")
         bt.logging.success(f"Final scores for {miner_uids}: {aggregated_scores}")
-
-        store_results_to_database(
-            {
-                "neuron": self.neuron,
-                "miner_uids": miner_uids,
-                "solutions": solutions,
-                "scores": scores,
-                "aggregated_scores": aggregated_scores,
-                "challenge": challenge,
+        
+        with self.neuron.lock:
+            current_block = self.neuron.block
+            session_number = self.neuron.session_number
+            session_start_block = session_number * SESSION_WINDOW_BLOCKS
+            session_start_datetime = (
+                datetime.now() - 
+                timedelta(
+                    seconds=(current_block - session_start_block) * BLOCK_IN_SECONDS
+                )
+            )
+            payload = {
+                "validator": {
+                    "hotkey": self.neuron.metagraph.axons[self.neuron.uid].hotkey,
+                    "coldkey": self.neuron.metagraph.axons[self.neuron.uid].coldkey,
+                },
+                "miners": [
+                    {
+                        "coldkey": self.neuron.metagraph.axons[miner_uids[i]].coldkey,
+                        "hotkey": self.neuron.metagraph.axons[miner_uids[i]].hotkey,
+                    } for i in range(len(miner_uids))
+                ],
+                "solutions": [
+                    {
+                        "miner_answer": { "html": solution.html },
+                    } for solution in solutions
+                ],
+                "scores": [
+                    {
+                        "aggregated_score": aggregated_scores[i],
+                        "accuracy": scores[ACCURACY_METRIC_NAME][i],
+                        "seo": scores[SEO_METRIC_NAME][i],
+                        "code_quality": scores[QUALITY_METRIC_NAME][i],
+                    } for i in range(len(miner_uids))
+                ],
+                "challenge": {
+                    "task": challenge.task.ground_truth_html,
+                    "competition_type": challenge.competition_type,
+                    "session_number": challenge.session_number,
+                },
+                "session_start_datetime": session_start_datetime,
             }
-        )
+
+        bt.logging.info(f"Storing results to database: {payload}")
+        store_results_to_database(payload)
          
         self.neuron.score_manager.update_scores(
             aggregated_scores, 
@@ -243,10 +293,13 @@ class GenieValidator:
     
     async def checked_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
-            if not synapse.verify_answer_hash():
+            if not verify_answer_hash(synapse):
+                bt.logging.warning(f"Invalid answer hash: {synapse.html_hash}")
                 return None
 
+            html = preprocess_html(synapse.html)
             if not is_valid_resources(html):
+                bt.logging.warning(f"Invalid resources: {html}")
                 return None
 
             synapse.html = html

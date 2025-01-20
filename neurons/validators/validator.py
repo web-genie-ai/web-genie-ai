@@ -179,16 +179,16 @@ class Validator(BaseValidatorNeuron):
                                 f"End: {end_period_block}, "
                                 f"Current: {current_block}")
                 # Sleep if outside query window
-                if current_block < start_period_block:
-                    sleep_blocks = start_period_block - current_block
-                    bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
-                    time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
-                    continue
-                elif current_block > end_period_block:
-                    sleep_blocks = (start_period_block - current_block + all_validator_query_period_blocks)
-                    bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
-                    time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
-                    continue
+                # if current_block < start_period_block:
+                #     sleep_blocks = start_period_block - current_block
+                #     bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
+                #     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
+                #     continue
+                # elif current_block > end_period_block:
+                #     sleep_blocks = (start_period_block - current_block + all_validator_query_period_blocks)
+                #     bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
+                #     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
+                #     continue
                 
                 QUERY_MINERS_TIMEOUT = 60 * 15
                 self.query_miners_event_loop.run_until_complete(
