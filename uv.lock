@@ -186,6 +186,15 @@ wheels = [
 ]
 
 [[package]]
+name = "asyncstdlib"
+version = "3.13.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9b/5e/15e50af11110c3256f8d328f8681dcf404f2803e89a3d1dd3ab1b9be2427/asyncstdlib-3.13.0.tar.gz", hash = "sha256:f2a6ffb44f118233bb99bef50861d6f64c432decbdcc4c2cb93b3fff40d1b533", size = 49688 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1e/59/6b16492aef217e0fa1fae0ad49cf65ed4aa56b3691919cceb21a2c901fc1/asyncstdlib-3.13.0-py3-none-any.whl", hash = "sha256:60e097c19e815f3c419a77426cf6c3653aebcb766544d631d5ce6128d0851ae8", size = 43928 },
+]
+
+[[package]]
 name = "attrs"
 version = "24.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -245,11 +254,12 @@ wheels = [
 
 [[package]]
 name = "bittensor"
-version = "8.5.1rc5"
+version = "8.5.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "async-property" },
+    { name = "asyncstdlib" },
     { name = "bittensor-cli" },
     { name = "bittensor-commit-reveal" },
     { name = "bittensor-wallet" },
@@ -277,9 +287,9 @@ dependencies = [
     { name = "websockets" },
     { name = "wheel" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/df/03/b86759459b09456a2eb6a5e84713cf0bd0db10558c0f724ce6ca7940c346/bittensor-8.5.1rc5.tar.gz", hash = "sha256:b4f26b237b45964666fde21d77b5d71fe26270ce9f9450e724b58b8d8bf705e9", size = 217653 }
+sdist = { url = "https://files.pythonhosted.org/packages/c5/3b/430a897d6045f430bcb7eeadbadf6c60653a1023c495afb24d50a4a98943/bittensor-8.5.2.tar.gz", hash = "sha256:2adcfd47b016ce499cd9f378f0d5562ca55d40801128ca12418abf6ada14898b", size = 211979 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/01/11/e1b42d98cb955a090df195d004759e4f2a6563513b6d5e1f7dffcd9e2b4e/bittensor-8.5.1rc5-py3-none-any.whl", hash = "sha256:60904f4e8a296ab1a45bfbbba5b39cc62812709562a82f6b4ee16cb38b873a46", size = 265253 },
+    { url = "https://files.pythonhosted.org/packages/6e/23/84fa9b12eb3dca3a1caf7654123b08c6d926d71d9863a2d05d6dcb276b86/bittensor-8.5.2-py3-none-any.whl", hash = "sha256:ccee3e48c6d0747e7194eb148980c485f9ed857d97b50fed3ae933b9344767ef", size = 260629 },
 ]
 
 [[package]]
@@ -315,23 +325,23 @@ wheels = [
 
 [[package]]
 name = "bittensor-commit-reveal"
-version = "0.1.0"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/01/93/f6361d6d617f1620f1b642308384d7f22c7917c169b821ddb3a90856a0c9/bittensor_commit_reveal-0.1.0.tar.gz", hash = "sha256:1c8bb8d77f6279988902c5c28361cc460167829c63ffa8d788209f8810933211", size = 23249 }
+sdist = { url = "https://files.pythonhosted.org/packages/a7/97/2bb9e34f807b06d6faaaf765285eddedb5bd969ad97bd5f5f99d53f81934/bittensor_commit_reveal-0.2.0.tar.gz", hash = "sha256:d67bc49cb93b94136ae10af25a98ec29fe9a88b4ebefadd4f8504eebf63643c0", size = 23303 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/3a/7705ea18c3d61c8affc4696b8ab483bdb7e3d0bfdfb61ca1583a787ef1e0/bittensor_commit_reveal-0.1.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:8509250549b6f5c475a9150e941b28fc66e82f30b27fe078fd80fa840943bb7b", size = 491259 },
-    { url = "https://files.pythonhosted.org/packages/80/21/02b400750c7d1d5ed081dc22c740e21e22fd72fbb18b72517d5687eca8bd/bittensor_commit_reveal-0.1.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:bed04f82f162121747cfd7f51bb5d625dda0bf763a0699054565f255d219a9c2", size = 492612 },
-    { url = "https://files.pythonhosted.org/packages/9a/82/bf02fda4c7bfbe6830709476cf1893ad4e7b591c4e1f62eab2abbfcd0106/bittensor_commit_reveal-0.1.0-cp312-cp312-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:25af2d9c82cacc4278095460493430d36070cb2843c0aa54b1c563788d0742eb", size = 712159 },
-    { url = "https://files.pythonhosted.org/packages/31/d1/7e41e52251c277bf0bebe0fcb3f700e6faf6a488c9cefa8b8fb2bae42cee/bittensor_commit_reveal-0.1.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f8f530793274698aaf4ac7cc8f24e915749d8156df8302c9e1e16446177b429d", size = 551180 },
-    { url = "https://files.pythonhosted.org/packages/fa/20/272b35206c52db8b385ff7f2a6579ca700fa996c147e4533cd4d323446a7/bittensor_commit_reveal-0.1.0-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:e52955d652b61f091310e2b9b232d26b9e586a928e3b414a09a1b6615e9cc7a0", size = 491231 },
-    { url = "https://files.pythonhosted.org/packages/ee/05/02329c66db0970569a31779c0effcee67a1f6bb20a12ccbd667123d89f3f/bittensor_commit_reveal-0.1.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:7be8c8f79dea2e137f5add6ee4711447c4f5d43668be26616ab7c1cacf317e07", size = 492469 },
-    { url = "https://files.pythonhosted.org/packages/f4/47/ca9a347273e6993b8775a2a04e9d3df5569aaab46dc95247bf0c1f1b5ea1/bittensor_commit_reveal-0.1.0-cp313-cp313-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:b88ecb6a0989c2200486e29419a8e7d3b3f7918bdbde4ec04dbb4464abdee08f", size = 711920 },
-    { url = "https://files.pythonhosted.org/packages/fe/87/cbef0fa4b4d3159030d61d09da5a09181c0ca8f25bbb451437cb50627ac7/bittensor_commit_reveal-0.1.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4ac015f9eefa9dbddd2875cd7214e3a0bc2e394a2915772e655bdcc5c0af67de", size = 551137 },
+    { url = "https://files.pythonhosted.org/packages/76/10/12fc321dc44eb0f6c305993d1644698baf2b4a8fe0e70490128fcd26fa14/bittensor_commit_reveal-0.2.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:9e6546b9b22fd392dfc569b58e6b3e86899427fc1c07ae52cb60e90c0a520796", size = 491647 },
+    { url = "https://files.pythonhosted.org/packages/46/27/0025957757c40da992263d8de8d93cc3dc7ecf512071a8b3cbd42419acff/bittensor_commit_reveal-0.2.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:76218ffdba8b08248ea02b6f349d22171b12300126cb9a24d48241d746ad444f", size = 492798 },
+    { url = "https://files.pythonhosted.org/packages/9a/b3/789aa75457705cbb244ef28cb34e4361e692c01eb035ee66943a75ee0b54/bittensor_commit_reveal-0.2.0-cp312-cp312-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:44773448eef88d28c0cc2953d06a4a7137f83b90ff4a246abd41c9d275601b4a", size = 723463 },
+    { url = "https://files.pythonhosted.org/packages/8a/57/e7a808ccb4e3a4728e8ab0960e84219707bd1774a5152a6b07fe863ffca2/bittensor_commit_reveal-0.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:81979fd35f95456a60da90e872d1c2d2e68babc8a745778ab5d4025659fef2d7", size = 566260 },
+    { url = "https://files.pythonhosted.org/packages/95/7e/b902231bee489162ac4e59c787dd93f5e75e71d13c2bb88ebb6459be1aa8/bittensor_commit_reveal-0.2.0-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:78b6041b783735788af75d1994bf11a3fb610caa40547b0e55e494dbb35a7947", size = 491623 },
+    { url = "https://files.pythonhosted.org/packages/9e/f9/21c45618d67c220a95058ac95b44dcd2bf1091029c8a5c3314310d90ed68/bittensor_commit_reveal-0.2.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:999a50cc3be74ecaf23d4e6cfc9eac8640733745d5c88ac80bed8733c39908b6", size = 492654 },
+    { url = "https://files.pythonhosted.org/packages/07/4b/e9633a718b86e6ef82dcc817bd7373fd3085f9d2934a0fefd32160ec47d9/bittensor_commit_reveal-0.2.0-cp313-cp313-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:c708ac43c37514c979a447dc7f01d567a4c4caac33d47b946876d30d30ce7807", size = 723252 },
+    { url = "https://files.pythonhosted.org/packages/4d/ce/e7fc2d1c3ccf1115f1793aa7cec2185699c7ac3fd467724d2b7766204575/bittensor_commit_reveal-0.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1f690c5cdb00dd340fa948171f586c5daaccb9429bf898ebf21cff86e5767c99", size = 566030 },
 ]
 
 [[package]]
 name = "bittensor-wallet"
-version = "2.1.3"
+version = "3.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
@@ -340,19 +350,18 @@ dependencies = [
     { name = "password-strength" },
     { name = "py-bip39-bindings" },
     { name = "rich" },
-    { name = "substrate-interface" },
     { name = "termcolor" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a4/17/38a9ec85be2167dd2c1aa2e75f0ac7c25ccf7c31859fe9b0d325b474fbbb/bittensor_wallet-2.1.3.tar.gz", hash = "sha256:41927d7e5d68fff1494cef5abd861ede0afc684dff366824b0806cfa3ce13af0", size = 70285 }
+sdist = { url = "https://files.pythonhosted.org/packages/51/79/324672b28f7b3ac58baadc92f9a1b9fa74b32c978a7adf3430233103b06f/bittensor_wallet-3.0.0.tar.gz", hash = "sha256:045561e1be2546965a4adecb1515f61c7953b262328809c71d1acdb3aeddc20f", size = 72409 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a7/b0/a803fb7abe4b004464d67f6812f5067ee0346e7ba0bfb1e3012f569261cd/bittensor_wallet-2.1.3-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:1e2f0d03a21a0c54b1f8cd59f34941d7a60df490e9aab7d7776b03f290de6074", size = 797657 },
-    { url = "https://files.pythonhosted.org/packages/24/35/506d88aed623872fe4ecbcc2d6484ac864dc2c639ef8810141628fd28763/bittensor_wallet-2.1.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:24c446b0af4c9ffc3ac122f97a1de25b283c877aa49892748ad06a8a61a74e13", size = 752425 },
-    { url = "https://files.pythonhosted.org/packages/eb/37/c6feb7d6ac75c24bfe170ffabbd42f2d91bc34cc75b99575f2417ec486b1/bittensor_wallet-2.1.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9eafd9c82720644b3eeac2f68deaa9cec4cf175836b16c89206d98ce22590e8e", size = 3146851 },
-    { url = "https://files.pythonhosted.org/packages/8e/63/0dfe52c8c4c7d943d3ca2f52530039e1ee0dbdbffb3d16a90d770725b9bd/bittensor_wallet-2.1.3-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:f5122b05d8eede2bfc2eb242214b75ecab08f0da5d4f7547ed01ad253349e019", size = 2954118 },
-    { url = "https://files.pythonhosted.org/packages/ad/81/670424362f512f96760694839cd44a1d4aa6401d5e1c93ff1bf37f3a3653/bittensor_wallet-2.1.3-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:88020b18aa2f91b336a6f04354b7acb124701f9678d74e41f5ffb64a7e1e5731", size = 797707 },
-    { url = "https://files.pythonhosted.org/packages/e8/de/81744fd99af5339aa196c4c5e559ae3d2dd773d8fc1e39059fd651982b4b/bittensor_wallet-2.1.3-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:eb7dd2ed4c12e617574b7302a6c20fb8e915477ce2942627f624293b5de9a003", size = 752028 },
-    { url = "https://files.pythonhosted.org/packages/41/3c/309505722c2390337d417c17cc50040ddcbdaee03cc8fc664a34320f777a/bittensor_wallet-2.1.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:de47dea7d283e83449465f9780d4dde608fe09da45d6ef8c795806e49ccf4fd2", size = 3145919 },
-    { url = "https://files.pythonhosted.org/packages/bc/3f/e973420941b0d0b23d944fd60cd95c3bbbca38f5c582d83409f6243880fa/bittensor_wallet-2.1.3-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:e35adc5303b2186df889e07c79bf0bc074df382df49e6c216a8feb27f00453a4", size = 2953541 },
+    { url = "https://files.pythonhosted.org/packages/87/35/c3bf16166c596dcc3b1498e336163cb7622dcdbfa6734c9c6b59c69642c0/bittensor_wallet-3.0.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:7f1744f87d2a859700409d6419448f12475147f8c213b4d1bcc073e11fb8e12d", size = 805856 },
+    { url = "https://files.pythonhosted.org/packages/f2/7a/4efc2f566fbecc3a2b2c6b96794620d4f5ce322f6bafe58f82b0ae05ab37/bittensor_wallet-3.0.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:48b5e32c40f1dfa9f6dc30c9525aedb02975fb25ea70692efd31890d02789225", size = 771198 },
+    { url = "https://files.pythonhosted.org/packages/56/e5/8235041c2fa655f42d4a3a45720863c5e810aa310a401f081db68c816a85/bittensor_wallet-3.0.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a5beae01cffc7557dc6a68c3ceaf0568f105b25b8b53a4f02db8b39aa364fed4", size = 3165442 },
+    { url = "https://files.pythonhosted.org/packages/f7/a3/14a9beec68caffda7660d92835c19fb1bf4d3bf07bc2c805b9682f8caab4/bittensor_wallet-3.0.0-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:a69271528f81386dd644ca6c03ea902f60b19c5fd9520d86340137cb67241368", size = 2968740 },
+    { url = "https://files.pythonhosted.org/packages/92/1f/c0e016333f84bd5cbce6a5855cfb50564f6fcf4d13662f7a5a6ad7c721fc/bittensor_wallet-3.0.0-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:ef66c0b08386c0437fc1ee45c33cc59e5ce713a4f08fd40285c70ccec3129ab5", size = 805237 },
+    { url = "https://files.pythonhosted.org/packages/cd/a6/876548ed4833c7340c9880bfe017b49d68e1b2d6ce053a102815678a1514/bittensor_wallet-3.0.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:f410a21382b128a90b403dd0c0a9b3751c5d76cbd5eb4c12e3629a5a7e6db898", size = 770657 },
+    { url = "https://files.pythonhosted.org/packages/2e/02/da36c134dc5b575d606b6d180603fef66a48a8684417bc61f045206a83df/bittensor_wallet-3.0.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3998ba3f0c2a563dae5605a01f971c421ed4291a0f57f9db5fe6ff4f5acea3eb", size = 3164911 },
+    { url = "https://files.pythonhosted.org/packages/2f/fc/9a69465dfdfec846d92b9de5569f4eb62669c45951aceaeb37ca0b4f4385/bittensor_wallet-3.0.0-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:ded68ced27dcaf4473219eef27709c8bd30f2dbc6bbec7656329ab550af234a6", size = 2968063 },
 ]
 
 [[package]]
@@ -3275,7 +3284,6 @@ dependencies = [
     { name = "beautifulsoup4" },
     { name = "bert-score" },
     { name = "bittensor" },
-    { name = "bittensor-cli" },
     { name = "clip" },
     { name = "colormath" },
     { name = "datasets" },
@@ -3310,8 +3318,7 @@ requires-dist = [
     { name = "ansible-vault", specifier = "==2.1.0" },
     { name = "beautifulsoup4", specifier = "==4.12.3" },
     { name = "bert-score", specifier = "==0.3.13" },
-    { name = "bittensor", specifier = "==8.5.1rc5" },
-    { name = "bittensor-cli", specifier = "==8.2.0rc8" },
+    { name = "bittensor", specifier = "==8.5.2" },
     { name = "clip", git = "https://github.com/openai/CLIP.git" },
     { name = "colormath", specifier = ">=3.0.0" },
     { name = "datasets" },
