@@ -7,10 +7,8 @@ import multiprocessing
 import numpy as np
 from typing import List
 
-from webgenie.constants import LIGHTHOUSE_SERVER_PORT
 from webgenie.rewards.reward import Reward
 from webgenie.tasks import Task, Solution
-
 
 from .get_lighthouse_score import get_lighthouse_score
 
@@ -45,12 +43,13 @@ class LighthouseReward(Reward):
         with multiprocessing.Pool(processes=os.cpu_count()) as pool:
             # Convert solutions into chunks for parallel processing
             chunk_size = max(1, len(htmls) // os.cpu_count()) 
+
             html_chunks = [htmls[i:i + chunk_size] for i in range(0, len(htmls), chunk_size)]
             
             # Create partial tasks for each chunk
             futures = []
             for chunk in html_chunks:
-                future = pool.apply_async(self.sync_reward_worker, args=(chunk))
+                future = pool.apply_async(self.sync_reward_worker, args=(chunk,))
                 futures.append(future)
             
             # Gather all results
@@ -58,3 +57,4 @@ class LighthouseReward(Reward):
             for future in futures:
                 scores.extend(future.get())
         return np.array(scores)
+    

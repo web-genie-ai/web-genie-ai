@@ -78,26 +78,39 @@ class GenieValidator:
 
             challenge_class = available_challenges_classes[session_number % len(available_challenges_classes)]
             challenge = challenge_class(task=task, session_number=session_number)
+
+            synapse.task_id = task.task_id
             synapse.competition_type = challenge.competition_type
 
             bt.logging.debug(f"Querying {len(miner_uids)} miners")
+            
+            query_time = time.time()
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 all_synapse_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                     synapse=synapse,
                     timeout=task.timeout,
                 )
-            bt.logging.debug(f"Received {len(all_synapse_results)} synapse results")
+         
+            elapsed_time = time.time() - query_time
+            sleep_time_before_reveal = max(0, task.timeout - elapsed_time) + TASK_REVEAL_TIME
+            time.sleep(sleep_time_before_reveal)
 
+            async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
+                all_synapse_results = await dendrite(
+                    axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
+                    synapse=synapse,
+                    timeout=TASK_REVEAL_TIMEOUT,
+                )
+            
             solutions = []
             for synapse, miner_uid in zip(all_synapse_results, miner_uids):
-                processed_synapse = await self.process_synapse(synapse)
-                if processed_synapse is not None:
+                checked_synapse = await self.checked_synapse(synapse)
+                if checked_synapse is not None:
                     solutions.append(
                         Solution(
-                            html = processed_synapse.html, 
+                            html = checked_synapse.html, 
                             miner_uid = miner_uid, 
-                            process_time = processed_synapse.dendrite.process_time,
                         )
                     )
             challenge.solutions = solutions
@@ -178,6 +191,9 @@ class GenieValidator:
     async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
         if isinstance(synapse, WebgenieTextSynapse):
             bt.logging.debug(f"Organic text forward: {synapse.prompt}")
+            bt.logging.info("Not supported yet.")
+            synapse.html = "Not supported yet."
+            return synapse
         else:
             bt.logging.debug(f"Organic image forward: {image_debug_str(synapse.base64_image)}...")
 
@@ -186,35 +202,51 @@ class GenieValidator:
             if not all_miner_uids:
                 raise Exception("No miners available")
             
+            query_time = time.time()
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 responses = await dendrite(
                     axons=[self.neuron.metagraph.axons[uid] for uid in all_miner_uids],
                     synapse=synapse,
                     timeout=synapse.timeout,
                 )
+
+            elapsed_time = time.time() - query_time
+            sleep_time_before_reveal = max(0, synapse.timeout - elapsed_time) + TASK_REVEAL_TIME
+            time.sleep(sleep_time_before_reveal)
+
+            async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
+                responses = await dendrite(
+                    axons=[self.neuron.metagraph.axons[uid] for uid in all_miner_uids],
+                    synapse=synapse,
+                    timeout=TASK_REVEAL_TIMEOUT,
+                )
+
             # Sort miner UIDs and responses by incentive scores
             incentives = self.neuron.metagraph.I[all_miner_uids]
             sorted_indices = np.argsort(-incentives)  # Negative for descending order
             all_miner_uids = [all_miner_uids[i] for i in sorted_indices]
+            
             responses = [responses[i] for i in sorted_indices]
             for response in responses:
-                processed_synapse = await self.process_synapse(response)
-                if processed_synapse is None:
+                checked_synapse = await self.checked_synapse(response)
+                if checked_synapse is None:
                     continue
-                return processed_synapse
+                return checked_synapse
+            
             raise Exception(f"No valid solution received")
         except Exception as e:
             bt.logging.error(f"[forward_organic_synapse] Error querying dendrite: {e}")
             synapse.html = f"Error: {e}"
             return synapse
     
-    async def process_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
+    async def checked_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
-            html = preprocess_html(synapse.html)
-            if not html:
+            if not synapse.verify_answer_hash():
                 return None
+
             if not is_valid_resources(html):
                 return None
+
             synapse.html = html
             return synapse
         return None

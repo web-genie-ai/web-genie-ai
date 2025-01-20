@@ -3,11 +3,16 @@ import json
 import subprocess
 import threading
 import time
+import uuid
+import os
 
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from typing import List, Dict
 
-from webgenie.constants import LIGHTHOUSE_SERVER_PORT
+from webgenie.constants import (
+    LIGHTHOUSE_SERVER_PORT, 
+    LIGHTHOUSE_SERVER_WORK_DIR,
+)
 from webgenie.rewards.lighthouse_reward.lighthouse_server import httpd
 
 def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
@@ -45,7 +50,7 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
         with open(f"{LIGHTHOUSE_SERVER_WORK_DIR}/{file_name}", "w") as f:
             f.write(htmls[i])
 
-        url = f"http://localhost:{LIGHTHOUSE_SERVER_PORT}/lighthouse_score/{file_name}"
+        url = f"http://localhost:{LIGHTHOUSE_SERVER_PORT}/{file_name}"
         scores.append(get_lighthouse_score_from_subprocess(url))
 
         os.remove(f"{LIGHTHOUSE_SERVER_WORK_DIR}/{file_name}")

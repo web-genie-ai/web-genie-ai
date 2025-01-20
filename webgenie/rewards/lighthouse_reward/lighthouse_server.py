@@ -18,6 +18,15 @@ class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, **kwargs)
 
 
+def stop_lighthouse_server():
+    global httpd
+    if httpd:
+        httpd.shutdown()
+        httpd.server_close()
+        httpd = None
+        bt.logging.info("Lighthouse server stopped")
+
+
 def start_lighthouse_server():
     global httpd
     try:
@@ -26,10 +35,9 @@ def start_lighthouse_server():
         bt.logging.success(f"Lighthouse server started on port {LIGHTHOUSE_SERVER_PORT}")
     except Exception as e:
         bt.logging.error(f"Error starting lighthouse server: {e}")
-        httpd.shutdown()
-        httpd.server_close()
-        httpd = None
-        bt.logging.info("Server stopped")
+        stop_lighthouse_server()
+        raise e
+
 
 
 def start_lighthouse_server_thread():
@@ -40,15 +48,5 @@ def start_lighthouse_server_thread():
         bt.logging.info("Lighthouse server started")
     except Exception as e:
         bt.logging.error(f"Error starting lighthouse server: {e}")
-        httpd.shutdown()
-        httpd.server_close()
-        bt.logging.info("Server stopped")
-
-
-def stop_lighthouse_server():
-    global httpd
-    if httpd:
-        httpd.shutdown()
-        httpd.server_close()
-        httpd = None
-        bt.logging.info("Server stopped")
+        stop_lighthouse_server()
+        raise e

@@ -32,6 +32,12 @@ class WebgenieImageSynapse(bt.Synapse):
     """
     A protocol for the webgenie image task.
     """
+    task_id: str = pydantic.Field(
+        factory=lambda: str(uuid.uuid4()),
+        title="Task ID",
+        description="The task ID.",
+    )
+
     base64_image: str = pydantic.Field(
         "",
         title="Base64 Image",
@@ -49,3 +55,30 @@ class WebgenieImageSynapse(bt.Synapse):
         title="HTML",
         description="The HTML received from miners.",
     )
+
+    html_hash: str = pydantic.Field(
+        "",
+        title="HTML Hash",
+        description="The hash of the HTML.",
+    )
+
+    nonce: int = pydantic.Field(
+        "",
+        title="Nonce",
+        description="The nonce.",
+    )
+
+    def add_answer_hash(self, html: str):
+        nonce = random.randint(0, 1000000)
+        hash_input = html + str(nonce)
+        self.html_hash = hashlib.sha256(hash_input.encode()).hexdigest()
+        self.nonce = nonce
+        return nonce
+
+    def verify_answer_hash(self):
+        hash_input = self.html + str(self.nonce)
+        return hashlib.sha256(hash_input.encode()).hexdigest() == self.html_hash
+
+    def hide_secret_info(self):
+        self.html = ""
+        self.nonce = 0

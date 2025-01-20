@@ -10,8 +10,14 @@ IMAGE_TASK_TIMEOUT = 100
 # text task timeout
 TEXT_TASK_TIMEOUT = 100
 
+# reveal time
+TASK_REVEAL_TIME = 20
+
+# reveal time out
+TASK_REVEAL_TIMEOUT = 20
+
 # lighthouse server port
-LIGHTHOUSE_SERVER_PORT = 5000
+LIGHTHOUSE_SERVER_PORT = 5002
 
 # max competition history size
 MAX_COMPETETION_HISTORY_SIZE = 30
