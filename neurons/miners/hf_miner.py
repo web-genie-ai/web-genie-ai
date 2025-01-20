@@ -5,16 +5,19 @@ from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.helpers.images import base64_to_image
 
 from webgenie.utils.gpus import get_gpu_info
-total_memory_mb, _, _ = get_gpu_info()
 
-if total_memory_mb is None:
-    raise ValueError("No GPU detected. HfMiner requires a GPU.")
+def check_requirements():
+    total_memory_mb, _, _ = get_gpu_info()
 
-bt.logging.info(f"Total memory: {total_memory_mb}")
+    if total_memory_mb is None:
+        raise ValueError("No GPU detected. HfMiner requires a GPU.")
 
-if total_memory_mb < 1024 * 25:
-    raise ValueError("Insufficient GPU memory. HfMiner requires at least 25GB of GPU memory.")
+    bt.logging.info(f"Total memory: {total_memory_mb}")
 
+    if total_memory_mb < 1024 * 25:
+        raise ValueError("Insufficient GPU memory. HfMiner requires at least 25GB of GPU memory.")
+
+check_requirements()
 
 class HfMiner:
     def __init__(self, neuron: BaseNeuron):
