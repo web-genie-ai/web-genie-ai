@@ -62,6 +62,7 @@ class Miner(BaseMinerNeuron):
     async def forward_text(
         self, synapse: WebgenieTextSynapse
     ) -> WebgenieTextSynapse:
+        raise Exception("Not Supported yet.")
         bt.logging.debug(f"Miner text forward called with prompt: {synapse.prompt}")
         return await self.genie_miner.forward_text(synapse)
 

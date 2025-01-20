@@ -12,13 +12,8 @@ if total_memory_mb is None:
 
 bt.logging.info(f"Total memory: {total_memory_mb}")
 
-if total_memory_mb < 1024 * 23:
+if total_memory_mb < 1024 * 25:
     raise ValueError("Insufficient GPU memory. HfMiner requires at least 25GB of GPU memory.")
-
-from neurons.miners.hf_models.websight_finetuned import generate_html_from_image
-
-if total_memory_mb > 1024 * 50:
-    from neurons.miners.hf_models.falcon7b import generate_html_from_text
 
 
 class HfMiner:
@@ -26,6 +21,7 @@ class HfMiner:
         self.neuron = neuron
  
     async def forward_text(self, synapse: WebgenieTextSynapse) -> WebgenieTextSynapse:  
+        raise Exception("Not Supported yet.")
         try:  
             if total_memory_mb > 1024 * 50:
                 synapse.html = generate_html_from_text(synapse.prompt)
