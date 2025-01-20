@@ -109,7 +109,8 @@ cd web-genie-ai
 Install the web-genie-ai Python package:
 
 ```bash
-python -m pip install -e .
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
 ```
 
 ## 7. Set up wallets
@@ -298,13 +299,13 @@ Run the subnet miner and subnet validator. Make sure to specify your subnet para
 Run the subnet miner:
 
 ```bash
-python neurons/miner.py --netuid 1 --subtensor.chain_endpoint ws://127.0.0.1:9946 --wallet.name miner --wallet.hotkey default --logging.debug
+uv run neurons/miners/miner.py --netuid 1 --subtensor.chain_endpoint ws://127.0.0.1:9946 --wallet.name miner --wallet.hotkey default --logging.debug
 ```
 
 Run the subnet validator:
 
 ```bash
-python neurons/validator.py --netuid 1 --subtensor.chain_endpoint ws://127.0.0.1:9946 --wallet.name validator --wallet.hotkey default --logging.debug
+uv run neurons/validators/validator.py --netuid 1 --subtensor.chain_endpoint ws://127.0.0.1:9946 --wallet.name validator --wallet.hotkey default --logging.debug
 ```
 
 ## 14. Set weights for your subnet

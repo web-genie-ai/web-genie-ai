@@ -31,6 +31,7 @@ After installing `bittensor`, proceed as below:
 In your project directory:
 
 ```bash
+npm install pm2 -g
 git clone https://github.com/web-genie-ai/web-genie-ai.git 
 ```
 
@@ -43,7 +44,8 @@ cd web-genie-ai
 Install the Bittensor subnet template package:
 
 ```bash
-python -m pip install -e . # Install your subnet template package
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
 ```
 
 ## 2. Create wallets 
@@ -202,25 +204,25 @@ miner    default  1      True   0.00000  0.00000  0.00000    0.00000    0.00000 
 Run the subnet miner:
 
 ```bash
-python neurons/miner.py --netuid [mainnet_netuid] --wallet.name miner --wallet.hotkey default --logging.debug
+pm2 start "uv run neurons/miners/miner.py --netuid 54 --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --axon.port [axon_port]" --name webgenie_miner
 ```
 
 You will see the below terminal output:
 
 ```bash
->> 2023-08-08 16:58:11.223 |       INFO       | Running miner for subnet: 1 on network: wss://entrypoint-finney.opentensor.ai:443 with config: ...
+>> 2023-08-08 16:58:11.223 |       INFO       | Running miner for subnet: 54 on network: wss://entrypoint-finney.opentensor.ai:443 with config: ...
 ```
 
 Run the subnet validator:
 
 ```bash
-python neurons/validator.py --netuid [mainnet_netuid] --wallet.name validator --wallet.hotkey default --logging.debug
+pm2 start "uv run neurons/validators/validator.py --netuid 54 --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --neuron.axon_port [axon_port]" --name webgenie_validator
 ```
 
 You will see the below terminal output:
 
 ```bash
->> 2023-08-08 16:58:11.223 |       INFO       | Running validator for subnet: 1 on network: wss://entrypoint-finney.opentensor.ai:443 with config: ...
+>> 2023-08-08 16:58:11.223 |       INFO       | Running validator for subnet: 54 on network: wss://entrypoint-finney.opentensor.ai:443 with config: ...
 ```
 
 ## 8. Get emissions flowing
