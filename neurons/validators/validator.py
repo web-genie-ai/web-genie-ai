@@ -17,7 +17,6 @@ from typing import Tuple, Union
 from webgenie.base.validator import BaseValidatorNeuron
 from webgenie.constants import (
     API_HOTKEY,
-    MAX_COUNT_VALIDATORS,
     BLOCK_IN_SECONDS,
     SESSION_WINDOW_BLOCKS,
     QUERING_WINDOW_BLOCKS,
@@ -153,20 +152,15 @@ class Validator(BaseValidatorNeuron):
             try:
                 with self.lock:
                     self.sync()
-                    validator_index = get_validator_index(self, self.uid)
+                    validator_index, max_validator_count = get_validator_index(self, self.uid)
                     if validator_index == -1:
                         continue
-                    validator_index = 0
-
-                # Only allow first N validators to query miners
-                # if validator_index > MAX_VALIDATORS:
-                #     continue
 
                 # Calculate query period blocks
                 with self.lock:
                     current_block = self.block
 
-                all_validator_query_period_blocks = MAX_COUNT_VALIDATORS * QUERING_WINDOW_BLOCKS
+                all_validator_query_period_blocks = max_validator_count * QUERING_WINDOW_BLOCKS
                 # Calculate query period blocks
                 start_period_block = (
                     (current_block // all_validator_query_period_blocks) * 
@@ -179,16 +173,16 @@ class Validator(BaseValidatorNeuron):
                                 f"End: {end_period_block}, "
                                 f"Current: {current_block}")
                 # Sleep if outside query window
-                # if current_block < start_period_block:
-                #     sleep_blocks = start_period_block - current_block
-                #     bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
-                #     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
-                #     continue
-                # elif current_block > end_period_block:
-                #     sleep_blocks = (start_period_block - current_block + all_validator_query_period_blocks)
-                #     bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
-                #     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
-                #     continue
+                if current_block < start_period_block:
+                    sleep_blocks = start_period_block - current_block
+                    bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
+                    time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
+                    continue
+                elif current_block > end_period_block:
+                    sleep_blocks = (start_period_block - current_block + all_validator_query_period_blocks)
+                    bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
+                    time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
+                    continue
                 
                 QUERY_MINERS_TIMEOUT = 60 * 15
                 self.query_miners_event_loop.run_until_complete(

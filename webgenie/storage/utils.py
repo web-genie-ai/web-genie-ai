@@ -213,7 +213,7 @@ def get_session_data(session_number: int):
         session.close()  
 
 def make_signed_request(
-    wallet: Any,
+    wallet: "bt.Wallet",
     url: str,
     subnet_id: int,
     payload: dict,
@@ -250,8 +250,7 @@ def make_signed_request(
     response = requests.request(method, url, headers=headers, files=files, json=payload, timeout=5)
     return response
 
-def send_challenge_to_stats_collector(session_number: int) -> None:
-    wallet = Wallet()
+def send_challenge_to_stats_collector(wallet: "bt.Wallet", session_number: int) -> None:
     session_data = get_session_data(session_number)
     response = make_signed_request(
         wallet=wallet,
