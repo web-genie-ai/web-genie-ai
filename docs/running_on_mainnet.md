@@ -204,6 +204,7 @@ miner    default  1      True   0.00000  0.00000  0.00000    0.00000    0.00000 
 Run the subnet miner:
 
 ```bash
+export PYTHONPATH="."
 pm2 start "uv run neurons/miners/miner.py --netuid 54 --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --axon.port [axon_port]" --name webgenie_miner
 ```
 
@@ -216,6 +217,7 @@ You will see the below terminal output:
 Run the subnet validator:
 
 ```bash
+export PYTHONPATH="."
 pm2 start "uv run neurons/validators/validator.py --netuid 54 --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --neuron.axon_port [axon_port]" --name webgenie_validator
 ```
 
