@@ -3282,6 +3282,7 @@ dependencies = [
     { name = "ddt" },
     { name = "duckduckgo-search" },
     { name = "einops" },
+    { name = "fastapi" },
     { name = "lxml" },
     { name = "matplotlib-inline" },
     { name = "nltk" },
@@ -3300,6 +3301,7 @@ dependencies = [
     { name = "tensorflow" },
     { name = "tf-keras" },
     { name = "tinycss2" },
+    { name = "uvicorn" },
     { name = "wandb" },
 ]
 
@@ -3317,6 +3319,7 @@ requires-dist = [
     { name = "ddt", specifier = "==1.6.0" },
     { name = "duckduckgo-search" },
     { name = "einops" },
+    { name = "fastapi" },
     { name = "lxml", specifier = "==5.3.0" },
     { name = "matplotlib-inline", specifier = "==0.1.7" },
     { name = "nltk" },
@@ -3335,6 +3338,7 @@ requires-dist = [
     { name = "tensorflow", specifier = ">=2.18.0" },
     { name = "tf-keras" },
     { name = "tinycss2", specifier = "==1.4.0" },
+    { name = "uvicorn" },
     { name = "wandb", specifier = "==0.19.0" },
 ]
 
