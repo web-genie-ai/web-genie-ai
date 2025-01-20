@@ -8,16 +8,26 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from webgenie.constants import (
+    WORK_DIR,
     LIGHTHOUSE_SERVER_WORK_DIR,
     LIGHTHOUSE_SERVER_PORT,
 )
 
 
 app = FastAPI()
-
 static_folder = f"/{LIGHTHOUSE_SERVER_WORK_DIR}"
 lighthouse_server_thread = None
 
+def make_work_dir(self):
+    if not os.path.exists(WORK_DIR):
+        os.makedirs(WORK_DIR)
+        bt.logging.info(f"Created work directory at {WORK_DIR}")
+
+    if not os.path.exists(LIGHTHOUSE_SERVER_WORK_DIR):
+        os.makedirs(LIGHTHOUSE_SERVER_WORK_DIR)
+        bt.logging.info(f"Created lighthouse server work directory at {LIGHTHOUSE_SERVER_WORK_DIR}")
+
+make_work_dir()
 app.mount("/", StaticFiles(directory=f"{LIGHTHOUSE_SERVER_WORK_DIR}"), name="static")
 
 

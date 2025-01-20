@@ -52,17 +52,6 @@ class GenieValidator:
         self.task_generators = [
             (ImageTaskGenerator(), 1.0),
         ]
-        
-        self.make_work_dir()
-
-    def make_work_dir(self):
-        if not os.path.exists(WORK_DIR):
-            os.makedirs(WORK_DIR)
-            bt.logging.info(f"Created work directory at {WORK_DIR}")
-
-        if not os.path.exists(LIGHTHOUSE_SERVER_WORK_DIR):
-            os.makedirs(LIGHTHOUSE_SERVER_WORK_DIR)
-            bt.logging.info(f"Created lighthouse server work directory at {LIGHTHOUSE_SERVER_WORK_DIR}")
 
     async def query_miners(self):
         try:
