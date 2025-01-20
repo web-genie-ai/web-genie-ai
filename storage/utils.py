@@ -87,8 +87,8 @@ def create_evaluation_type(name: str):
 
     return create_record(session, EvaluationType, name=name)
 
-def create_task_solution(miner_answer: dict, judgement_id, challenge_id: int, created_at: datetime):
-    return create_record(session, TaskSolution, miner_answer=miner_answer, judgement_id=judgement_id, challenge_id=challenge_id, created_at=created_at)
+def create_task_solution(miner_answer: dict, challenge_id: int):
+    return create_record(session, TaskSolution, miner_answer=miner_answer, challenge_id=challenge_id)
 
 def create_solution_evaluation(solution_id: int, score_type_id: int, judgement_id: int, value: float):
     return create_record(session, SolutionEvaluation, solution_id=solution_id, score_type_id=score_type_id, judgement_id=judgement_id, value=value)
@@ -116,17 +116,11 @@ def store_results_to_database(results: dict):
         neuron_validator_id = add_neuron(vali_coldkey, vali_hotkey)
         neuron_miner_id = add_neuron(coldkey, hotkey)
         judgement_id = create_judgement(neuron_validator_id, neuron_miner_id)
-        solution_id = create_task_solution(miner_answer, judgement_id, challenge_id)
-        # for type in evaluation_types:
-        #     # Check if the evaluation type already exists
-        #     evaluation_type_id = create_evaluation_type(type)
-        #     create_solution_evaluation(solution_id, evaluation_type_id, judgement_id, score[type])
+        solution_id = create_task_solution(miner_answer, challenge_id)
         # Collect evaluation types and their scores
         for eval_type, score_value in score.items():
             evaluation_type_id = create_evaluation_type(eval_type)
             create_solution_evaluation(solution_id, evaluation_type_id, judgement_id, score_value)
-
-    pass
 
 if __name__ == "__main__":
     neuron_id = add_neuron("5GKH9FPPnWSUoeeTJp19wVtd84XqFW4pyK2ijV2GsFbhTrP1", "5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3")

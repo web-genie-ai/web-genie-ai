@@ -57,7 +57,6 @@ class TaskSolution(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     challenge_id: Mapped[int] = mapped_column(ForeignKey("challenges.id"), index=True)
-    judgement_id: Mapped[int] = mapped_column(ForeignKey("judgements.id"), index=True)
     miner_answer: Mapped[dict] = mapped_column(JSON)
 
     # Relationship
@@ -68,6 +67,7 @@ class SolutionEvaluation(Base):
     __tablename__ = "solution_evaluations"
     id: Mapped[int] = mapped_column(primary_key=True)
     solution_id: Mapped[int] = mapped_column(ForeignKey("task_solutions.id"), index=True)
+    judgement_id: Mapped[int] = mapped_column(ForeignKey("judgements.id"), index=True)
     score_type_id: Mapped[int] = mapped_column(ForeignKey("evaluation_types.id"), index=True)
     value: Mapped[float]
 
