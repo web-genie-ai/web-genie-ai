@@ -64,13 +64,14 @@ class ImageTaskGenerator(TaskGenerator):
         
         base64_image = await html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)    
         bt.logging.debug(f"Screenshot generated for {dataset_entry.src}")
+        image_task = ImageTask(
+            base64_image=base64_image, 
+            ground_truth_html=ground_truth_html,
+            timeout=IMAGE_TASK_TIMEOUT,
+            generator=self,
+            src=dataset_entry.src,
+        )
         return (
-            ImageTask(
-                base64_image=base64_image, 
-                ground_truth_html=ground_truth_html,
-                timeout=IMAGE_TASK_TIMEOUT,
-                generator=self,
-                src=dataset_entry.src,
-            ), 
-            WebgenieImageSynapse(base64_image=base64_image),
+            image_task,  
+            WebgenieImageSynapse(base64_image=base64_image, task_id=image_task.task_id),
         )

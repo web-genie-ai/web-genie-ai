@@ -3,6 +3,7 @@ import bittensor as bt
 import numpy as np
 import random
 import threading
+import time
 from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
@@ -11,6 +12,8 @@ from webgenie.constants import (
     MAX_SYNTHETIC_TASK_SIZE, 
     WORK_DIR,
     LIGHTHOUSE_SERVER_WORK_DIR,
+    TASK_REVEAL_TIME,
+    TASK_REVEAL_TIMEOUT,
 )
 from webgenie.challenges import (
     AccuracyChallenge,
@@ -79,7 +82,6 @@ class GenieValidator:
             challenge_class = available_challenges_classes[session_number % len(available_challenges_classes)]
             challenge = challenge_class(task=task, session_number=session_number)
 
-            synapse.task_id = task.task_id
             synapse.competition_type = challenge.competition_type
 
             bt.logging.debug(f"Querying {len(miner_uids)} miners")

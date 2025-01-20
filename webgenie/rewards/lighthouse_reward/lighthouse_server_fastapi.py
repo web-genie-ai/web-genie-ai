@@ -2,9 +2,9 @@ import bittensor as bt
 import os
 import threading
 import uvicorn
-
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from webgenie.constants import (
     LIGHTHOUSE_SERVER_WORK_DIR,
@@ -13,17 +13,11 @@ from webgenie.constants import (
 
 
 app = FastAPI()
+
 static_folder = f"/{LIGHTHOUSE_SERVER_WORK_DIR}"
 lighthouse_server_thread = None
 
-
-@app.get("/{file_path:path}")
-async def serve_file(file_path: str):
-    try:
-        print("serving file", file_path)
-        return FileResponse(os.path.join(static_folder, file_path))
-    except Exception as e:
-        return FileResponse(status_code=404)
+app.mount("/", StaticFiles(directory=f"{LIGHTHOUSE_SERVER_WORK_DIR}"), name="static")
 
 
 def stop_lighthouse_server():
