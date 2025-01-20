@@ -79,6 +79,12 @@ def create_challenge(session_id: int, ground_truth_html: str):
     return create_record(session, Challenge, session_id=session_id, ground_truth_html=ground_truth_html)
 
 def create_judgement(validator_id: int, miner_id: int):
+    # Check if the judgement with the given validator and miner id already exists
+    existing_judgement = session.query(Judgement).filter_by(validator_id=validator_id, miner_id=miner_id).first()
+    if existing_judgement:
+        bt.logging.info(f"judgement with given {validator_id} and {miner_id} already exists. Skipping creation.")
+        return existing_judgement.id  # Return the existing competition id
+
     return create_record(session, Judgement, validator_id=validator_id, miner_id=miner_id)
 
 def create_evaluation_type(name: str):
