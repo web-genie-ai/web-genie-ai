@@ -127,16 +127,17 @@ uv sync
 ```
 - miner
 ```bash
-pm2 start uv -- run neurons/miners/miner.py --netuid [NET_UID] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --axon.port [axon_port]
+pm2 start "uv run neurons/miners/miner.py --netuid [NET_UID] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --axon.port [axon_port]" --name webgenie_miner
 ```
 - validator
 ```bash
 npm install -g lighthouse
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo dpkg -i google-chrome-stable_current_amd64.deb
+sudo apt-get install -f
 playwright install-deps
 playwright install
-pm2 start uv -- run neurons/validators/validator.py --netuid [NET_UID] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --neuron.axon_port [axon_port]
+pm2 start "uv run neurons/validators/validator.py --netuid [NET_UID] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --neuron.axon_port [axon_port]" --name webgenie_validator
 ```
 - running auto_update script for validators
 ```bash
