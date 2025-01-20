@@ -92,7 +92,7 @@ class GenieValidator:
             
             query_time = time.time()
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
-                all_synapse_results = await dendrite(
+                all_synapse_hash_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                     synapse=synapse,
                     timeout=task.timeout,
@@ -102,16 +102,19 @@ class GenieValidator:
             sleep_time_before_reveal = max(0, task.timeout - elapsed_time) + TASK_REVEAL_TIME
             time.sleep(sleep_time_before_reveal)
 
+            bt.logging.debug(f"Revealing task {task.task_id}")
+            
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
-                all_synapse_results = await dendrite(
+                all_synapse_reveal_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                     synapse=synapse,
                     timeout=TASK_REVEAL_TIMEOUT,
                 )
             
             solutions = []
-            for synapse, miner_uid in zip(all_synapse_results, miner_uids):
-                checked_synapse = await self.checked_synapse(synapse)
+            for reveal_synapse, hash_synapse, miner_uid in zip(all_synapse_reveal_results, all_synapse_hash_results, miner_uids):
+                reveal_synapse.html_hash = hash_synapse.html_hash
+                checked_synapse = await self.checked_synapse(reveal_synapse)
                 if checked_synapse is not None:
                     solutions.append(
                         Solution(
@@ -247,6 +250,10 @@ class GenieValidator:
     
     async def checked_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
+            bt.logging.debug(f"Checking synapse: {synapse.html}")
+            bt.logging.debug(f"Checking synapse: {synapse.nonce}")
+            bt.logging.debug(f"Checking synapse: {synapse.html_hash}")
+            bt.logging.debug(f"Checking synapse: {verify_answer_hash(synapse)}")
             if not verify_answer_hash(synapse):
                 return None
 

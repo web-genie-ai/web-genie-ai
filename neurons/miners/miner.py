@@ -24,7 +24,11 @@ import typing
 
 import bittensor as bt
 from webgenie.base.miner import BaseMinerNeuron
-from webgenie.constants import TASK_REVEAL_TIME
+from webgenie.constants import (
+    TASK_REVEAL_TIME,
+    IMAGE_TASK_TIMEOUT,
+    TEXT_TASK_TIMEOUT,
+)
 from webgenie.helpers.images import image_debug_str
 from webgenie.helpers.weights import init_wandb
 from webgenie.protocol import (

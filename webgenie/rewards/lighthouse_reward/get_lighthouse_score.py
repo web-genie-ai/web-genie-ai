@@ -13,7 +13,6 @@ from webgenie.constants import (
     LIGHTHOUSE_SERVER_PORT, 
     LIGHTHOUSE_SERVER_WORK_DIR,
 )
-from webgenie.rewards.lighthouse_reward.lighthouse_server import httpd
 
 def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
     def get_lighthouse_score_from_subprocess(url):

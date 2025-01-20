@@ -66,7 +66,7 @@ class WebgenieImageSynapse(bt.Synapse):
     )
 
     nonce: int = pydantic.Field(
-        "",
+        0,
         title="Nonce",
         description="The nonce.",
     )
