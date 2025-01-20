@@ -8,6 +8,7 @@ Welcome to WebGenieAI Subnet, a pioneering Bittensor-based subnet designed to re
 - [Features](#features)
 - [Incentive Mechanism](#incentive-mechanism-v1)
 - [Roadmap](#roadmap)
+- [Installation](#installation)
 - [References](#references)
 
 ## Overview
@@ -130,7 +131,8 @@ uv sync
 ```
 - miner
 ```bash
-pm2 start "uv run neurons/miners/miner.py --netuid [NET_UID] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --axon.port [axon_port]" --name webgenie_miner
+export PYTHONPATH="."
+pm2 start "uv run neurons/miners/miner.py --netuid [54 | 214] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --axon.port [axon_port]" --name webgenie_miner
 ```
 - validator
 ```bash
@@ -142,7 +144,7 @@ source .venv/bin/activate
 playwright install-deps
 playwright install
 export PYTHONPATH="."
-pm2 start "uv run neurons/validators/validator.py --netuid [NET_UID] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --neuron.axon_port [axon_port]" --name webgenie_validator
+pm2 start "uv run neurons/validators/validator.py --netuid [54 | 214] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --neuron.axon_port [axon_port]" --name webgenie_validator
 ```
 - running auto_update script for validators
 ```bash
@@ -160,7 +162,7 @@ pm2 start --name auto_update auto_update.sh
 - [x] Begin marketing for brand awareness and interest
 
 ### Phase 2: Upgrade (Q1 2025)
-- [ ] Launch on mainnet
+- [x] Launch on mainnet
 - [ ] Build a leaderboard to track miner performance and progress
 - [ ] Upgrade front-end application to v2
     - Online IDE like code sandbox and auto-deployment with one click
