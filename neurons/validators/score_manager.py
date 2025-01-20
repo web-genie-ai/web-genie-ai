@@ -22,15 +22,15 @@ class ScoreManager:
         self.should_save = False
 
     def load_scores(self):
-        bt.logging.info("Loading scores")
-        state = np.load(self.neuron.config.neuron.full_path + "/state.npz")
         try:
+            bt.logging.info("Loading scores")
+            state = np.load(self.neuron.config.neuron.full_path + "/state.npz")
             self.scores = state["scores"]
             self.hotkeys = state["hotkeys"]
             self.scoring_session_number = state["scoring_session_number"]
             self.session_accumulated_scores = state["tempo_accumulated_scores"]
         except Exception as e:
-            bt.logging.error(f"Error loading scores: {e}")
+            bt.logging.warning(f"Error loading scores: {e}")
             self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
             self.scoring_session_number = 0
