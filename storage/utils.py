@@ -94,24 +94,29 @@ def create_solution_evaluation(solution_id: int, score_type_id: int, judgement_i
     return create_record(session, SolutionEvaluation, solution_id=solution_id, score_type_id=score_type_id, judgement_id=judgement_id, value=value)
 
 def store_results_to_database(results: dict):
-    neuron = results["neuron"]
-    vali_coldkey, vali_hotkey = results["validator"]
-    miner_uids = results["miner_uids"]
+    # Extracting validator keys correctly
+    vali_coldkey = results["validator"]["coldkey"]
+    vali_hotkey = results["validator"]["hotkey"]
+    
+    # Extracting miners, solutions, scores, and challenge details
+    miners = results["miners"]
     solutions = results["solutions"]
     scores = results["scores"]
     challenge = results["challenge"]
+    
     session_number = challenge["session_number"]
-    block_start_datetime = results["block_start_datetime"]
+    session_start_datetime = results["session_start_datetime"]
     ground_truth_html = challenge["task"]
     competition_type = challenge["competition_type"]
+
     competition_id = create_competition(competition_type)
-    session_id = create_leaderboard_session(session_number, block_start_datetime, competition_id)
+    session_id = create_leaderboard_session(session_number, session_start_datetime, competition_id)
     challenge_id = create_challenge(session_id, ground_truth_html)
     
     # Iterate over miner_uids to store TaskSolution data
-    for miner_uid, solution, score in zip(miner_uids, solutions, scores):
-        coldkey = miner_uid["coldkey"]
-        hotkey = miner_uid["hotkey"]
+    for miner, solution, score in zip(miners, solutions, scores):
+        coldkey = miner["coldkey"]
+        hotkey = miner["hotkey"]
         miner_answer = solution['miner_answer']
         neuron_validator_id = add_neuron(vali_coldkey, vali_hotkey)
         neuron_miner_id = add_neuron(coldkey, hotkey)
