@@ -154,7 +154,7 @@ class Validator(BaseValidatorNeuron):
                     validator_index, validator_count = get_validator_index(self, self.uid)
 
                 if validator_index == -1:
-                    bt.logging.error(f"Validator index {validator_index} is not valid")
+                    bt.logging.error(f"No enough stake for the validator.")
                     continue
                 
                 bt.logging.info(f"Validator index: {validator_index}, Validator count: {validator_count}")
