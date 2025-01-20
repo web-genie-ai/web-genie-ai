@@ -1,3 +1,4 @@
+import bittensor as bt
 from database import Session as DBSession
 from models import Neuron, LeaderboardSession, Competition, Challenge, Judgement, EvaluationType, TaskSolution, SolutionEvaluation
 from datetime import datetime, timedelta
@@ -45,8 +46,10 @@ def get_neuron_id(hotkey: str):
     finally:
         session.close()  # Ensure the session is closed
 
-def create_leaderboard_session(created_at: datetime, competition_id: int):
-    return create_record(session, LeaderboardSession, created_at=created_at, competition_id=competition_id)
+def create_leaderboard_session(session_number: int, created_at: datetime, competition_id: int):
+    return create_record(session, LeaderboardSession,
+                         id=session_number,
+                         created_at=created_at, competition_id=competition_id)
 
 def query_leaderboard_session(timestamp: datetime):
     # Calculate the time range

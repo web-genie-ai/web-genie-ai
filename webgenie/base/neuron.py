@@ -142,10 +142,6 @@ class BaseNeuron(ABC):
         ) > self.config.neuron.epoch_length
 
     def should_set_weights(self) -> bool:
-        # Don't set weights on initialization.
-        if self.step == 0:
-            return False
-
         # Check if enough epoch blocks have elapsed since the last epoch.
         if self.config.neuron.disable_set_weights:
             return False

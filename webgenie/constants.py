@@ -10,8 +10,14 @@ IMAGE_TASK_TIMEOUT = 100
 # text task timeout
 TEXT_TASK_TIMEOUT = 100
 
+# reveal time
+TASK_REVEAL_TIME = 20
+
+# reveal time out
+TASK_REVEAL_TIMEOUT = 20
+
 # lighthouse server port
-LIGHTHOUSE_SERVER_PORT = 5000
+LIGHTHOUSE_SERVER_PORT = 5002
 
 # max competition history size
 MAX_COMPETETION_HISTORY_SIZE = 30
@@ -35,6 +41,9 @@ SCREENSHOT_SCRIPT_PATH = "webgenie/rewards/visual_reward/metrics/screenshot_sing
 GROUND_TRUTH_HTML_LOAD_TIME = 20000
 
 # miner html load time
+CHROME_HTML_LOAD_TIME = 60000
+
+# miner html load time
 MINER_HTML_LOAD_TIME = 2000
 
 # max miner html length
@@ -43,8 +52,14 @@ MAX_MINER_HTML_LEN = 1000000
 # work dir
 WORK_DIR = "work"
 
+# lighthouse server work dir
+LIGHTHOUSE_SERVER_WORK_DIR = f"{WORK_DIR}/lighthouse_server_work"
 
+# html extension
 HTML_EXTENSION = ".html"
+
+# image extension
 IMAGE_EXTENSION = ".png"
 
-
+# image extension
+IMAGE_EXTENSION = ".png"

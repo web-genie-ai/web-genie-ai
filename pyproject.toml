@@ -16,11 +16,11 @@ dependencies = [
     "duckduckgo_search",
     "datasets",
     "einops",
+    "fastapi",
     "lxml==5.3.0",
     "matplotlib-inline==0.1.7",
     "nltk",
     "openai",
-    "opencv-python==4.10.0.84",
     "peft",
     "pip-chill==1.0.3",
     "playwright==1.49.1",
@@ -37,6 +37,7 @@ dependencies = [
     "sentence-transformers",
     "tensorflow>=2.18.0",
     "tf-keras",
+    "uvicorn",
 ]
 
 [project.urls]

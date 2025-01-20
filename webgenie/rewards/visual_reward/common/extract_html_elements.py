@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from typing import Any
 from skimage import io, color
 
-from webgenie.constants import DEFAULT_LOAD_TIME
+from webgenie.constants import DEFAULT_LOAD_TIME, CHROME_HTML_LOAD_TIME
 from webgenie.rewards.visual_reward.common.browser import web_player
 from webgenie.rewards.visual_reward.common.sift import extract_sift_from_roi
 
@@ -26,27 +26,43 @@ class HTMLElement(BaseModel):
 
 
 def parse_rgb_string(rgb_str: str) -> tuple[int, int, int]:
-    """Convert RGB color string like 'rgb(23, 34, 45)' to (23, 34, 45) tuple."""
-    # Extract numbers from rgb(r,g,b) format using string manipulation
-    rgb_values = rgb_str.strip().removeprefix('rgb(').removesuffix(')').split(',')
-    return tuple(int(v.strip()) for v in rgb_values)
+    """Convert RGB/RGBA color string like 'rgb(23, 34, 45)' or 'rgba(23, 34, 45, 0.5)' to (23, 34, 45) tuple."""
+    # Handle both rgb and rgba formats
+    rgb_str = rgb_str.strip()
+    if rgb_str.startswith('rgba'):
+        rgb_str = rgb_str.removeprefix('rgba(')
+    else:
+        rgb_str = rgb_str.removeprefix('rgb(')
+    rgb_str = rgb_str.removesuffix(')')
+    
+    # Split and take only the RGB values, ignoring alpha if present
+    values = rgb_str.split(',')[:3]
+    return tuple(int(v.strip()) for v in values)
 
 
 async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
     if os.path.exists(file_path):
         url = f"file:///{os.path.abspath(file_path)}"
+
+    screenshot_path = file_path.replace(".html", ".png")
+
     text_elements = []
     button_elements = []
     input_elements = []
-    anchor_elements = []
+    anchor_elements = []        
     try:
         page = await web_player["browser"].new_page()
     
-        await page.goto(url)
+        await page.goto(url, timeout=CHROME_HTML_LOAD_TIME)
         await page.wait_for_timeout(load_time)
-        screenshot_path = file_path.replace(".html", ".png")
-        await page.screenshot(path=screenshot_path, full_page=True, animations="disabled")
+        await page.screenshot(
+            path=screenshot_path, 
+            full_page=True, 
+            animations="disabled", 
+            timeout=CHROME_HTML_LOAD_TIME,
+        )
         await asyncio.sleep(10)
+        
         with open(screenshot_path, "rb") as f:
             screenshot = Image.open(f)
             W, H = screenshot.size
@@ -127,11 +143,11 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
             
         await traverse(await page.query_selector('body'))
         await page.close()
+        preprocess_html_elements(file_path, button_elements)
+        preprocess_html_elements(file_path, input_elements)
+        preprocess_html_elements(file_path, anchor_elements)    
     except Exception as e:
         print(e)
-    preprocess_html_elements(file_path, button_elements)
-    preprocess_html_elements(file_path, input_elements)
-    preprocess_html_elements(file_path, anchor_elements)
     return text_elements, button_elements, input_elements, anchor_elements
 
 
@@ -141,10 +157,19 @@ def preprocess_html_elements(html_path, html_elements):
     for element in html_elements:
         bbox = element.bounding_box
         x, y, w, h = int(bbox["x"]), int(bbox["y"]), int(bbox["width"]), int(bbox["height"]) 
-        element.avg_color = np.mean(color_image[y:y+h, x:x+w], axis=(0, 1))
+        try:
+            element.avg_color = np.mean(color_image[y:y+h, x:x+w], axis=(0, 1))
+        except Exception as e:
+            print(e)
+            element.avg_color = (0, 0, 0)
 
     gray_image = color.rgb2gray(color_image)
     for element in html_elements:
         bbox = element.bounding_box
         x, y, w, h = int(bbox["x"]), int(bbox["y"]), int(bbox["width"]), int(bbox["height"])
-        element.keypoints, element.descriptors = extract_sift_from_roi(gray_image, (x, y, w, h))   
+        try:
+            element.keypoints, element.descriptors = extract_sift_from_roi(gray_image, (x, y, w, h))   
+        except Exception as e:
+            print(e)
+            element.keypoints = None
+            element.descriptors = None

@@ -17,19 +17,21 @@ from typing import Tuple, Union
 from webgenie.base.validator import BaseValidatorNeuron
 from webgenie.constants import API_HOTKEY
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
+from webgenie.rewards.lighthouse_reward import start_lighthouse_server_thread, stop_lighthouse_server
 from webgenie.utils.uids import get_validator_index
 
 from neurons.validators.genie_validator import GenieValidator
 from neurons.validators.score_manager import ScoreManager
 
-# Constants for block timing
+
+MAX_COUNT_VALIDATORS = 1
+
 BLOCK_IN_SECONDS = 12
-TEMPO_BLOCKS = 60
-MAX_VALIDATORS = 1
-VALIDATOR_QUERY_PERIOD_BLOCKS = 10
-ALL_VALIDATOR_QUERY_PERIOD_BLOCKS = MAX_VALIDATORS * VALIDATOR_QUERY_PERIOD_BLOCKS
-COMPETITION_PERIOD_BLOCKS = TEMPO_BLOCKS * 3
-SET_WEIGHTS_PERIOD_BLOCKS = 50 # 50 blocks = 10 minutes 
+TEMPO_BLOCKS = 360
+SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 3
+
+QUERING_WINDOW_BLOCKS = 10
+WEIGHT_SETTING_WINDOW_BLOCKS = 50 # 50 blocks = 10 minutes 
 
 
 class Validator(BaseValidatorNeuron):
@@ -43,7 +45,7 @@ class Validator(BaseValidatorNeuron):
     
     @property
     def session_number(self):
-        return self.block // COMPETITION_PERIOD_BLOCKS
+        return self.block // SESSION_WINDOW_BLOCKS
 
     def __init__(self, config=None):
         super(Validator, self).__init__(config=config)
@@ -165,26 +167,37 @@ class Validator(BaseValidatorNeuron):
                 with self.lock:
                     current_block = self.block
 
+                all_validator_query_period_blocks = MAX_COUNT_VALIDATORS * QUERING_WINDOW_BLOCKS
+                # Calculate query period blocks
                 start_period_block = (
-                    (current_block // ALL_VALIDATOR_QUERY_PERIOD_BLOCKS) * ALL_VALIDATOR_QUERY_PERIOD_BLOCKS + 
-                    validator_index * VALIDATOR_QUERY_PERIOD_BLOCKS
+                    (current_block // all_validator_query_period_blocks) * 
+                    all_validator_query_period_blocks + 
+                    validator_index * QUERING_WINDOW_BLOCKS
                 )
-                end_period_block = start_period_block + ALL_VALIDATOR_QUERY_PERIOD_BLOCKS / 2
-                bt.logging.info(f"Query period blocks - "
+                end_period_block = start_period_block + QUERING_WINDOW_BLOCKS / 2
+                bt.logging.info(f"Query window - "
                                 f"Start: {start_period_block}, "
                                 f"End: {end_period_block}, "
                                 f"Current: {current_block}")
                 # Sleep if outside query window
                 if current_block < start_period_block:
-                    bt.logging.info(f"Sleeping for {start_period_block - current_block} blocks before querying miners")
-                    time.sleep((start_period_block - current_block) * BLOCK_IN_SECONDS)
-                elif current_block >= end_period_block:
-                    sleep_blocks = (start_period_block - current_block + ALL_VALIDATOR_QUERY_PERIOD_BLOCKS)
+                    sleep_blocks = start_period_block - current_block
                     bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
                     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
                     continue
-
-                self.query_miners_event_loop.run_until_complete(self.genie_validator.query_miners())
+                elif current_block > end_period_block:
+                    sleep_blocks = (start_period_block - current_block + all_validator_query_period_blocks)
+                    bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
+                    time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
+                    continue
+                
+                QUERY_MINERS_TIMEOUT = 60 * 15
+                self.query_miners_event_loop.run_until_complete(
+                    asyncio.wait_for(
+                        self.genie_validator.query_miners(),
+                        timeout=QUERY_MINERS_TIMEOUT
+                    )
+                )
             except Exception as e:
                 bt.logging.error(f"Error during query miners loop: {str(e)}")
             if self.should_exit:
@@ -197,12 +210,18 @@ class Validator(BaseValidatorNeuron):
             try:
                 with self.lock:
                     self.sync()
-                self.score_event_loop.run_until_complete(self.genie_validator.score())
+
+                SCORE_TIMEOUT = 60 * 60
+                self.score_event_loop.run_until_complete(
+                    asyncio.wait_for(
+                        self.genie_validator.score(),
+                        timeout=SCORE_TIMEOUT
+                    )
+                )
             except Exception as e:
                 bt.logging.error(f"Error during scoring: {str(e)}")
             if self.should_exit:
                 break
-            time.sleep(1)
 
     def synthensize_task_loop(self):
         bt.logging.info(f"Synthensize task loop starting")
@@ -212,7 +231,13 @@ class Validator(BaseValidatorNeuron):
                 with self.lock:
                     self.sync()
                 
-                self.synthensize_task_event_loop.run_until_complete(self.genie_validator.synthensize_task())
+                SYNTHETIC_TASK_TIMEOUT = 60 * 15
+                self.synthensize_task_event_loop.run_until_complete(
+                    asyncio.wait_for(
+                        self.genie_validator.synthensize_task(),
+                        timeout=SYNTHETIC_TASK_TIMEOUT
+                    )
+                )
             except Exception as e:
                 bt.logging.error(f"Error during synthensize task: {str(e)}")
             if self.should_exit:
@@ -234,15 +259,15 @@ class Validator(BaseValidatorNeuron):
                 # Calculate the end block number for the next weight setting period
                 # This aligns with 3 tempo boundaries
                 set_weights_end_block = (
-                    (current_block + COMPETITION_PERIOD_BLOCKS - 1) 
-                    // COMPETITION_PERIOD_BLOCKS 
-                    * COMPETITION_PERIOD_BLOCKS
+                    (current_block + SESSION_WINDOW_BLOCKS - 1) 
+                    // SESSION_WINDOW_BLOCKS 
+                    * SESSION_WINDOW_BLOCKS
                 )
 
                 # Start setting weights 50 blocks before the end
-                set_weights_start_block = set_weights_end_block - SET_WEIGHTS_PERIOD_BLOCKS
+                set_weights_start_block = set_weights_end_block - WEIGHT_SETTING_WINDOW_BLOCKS
                 bt.logging.info(
-                    f"Set weights blocks - "
+                    f"Set weights window - "
                     f"Start: {set_weights_start_block}, "
                     f"End: {set_weights_end_block}, "
                     f"Current: {current_block}"
@@ -277,7 +302,8 @@ class Validator(BaseValidatorNeuron):
             self.synthensize_task_thread.start()
             self.query_miners_thread.start()
             self.score_thread.start()
-            self.set_weights_thread.start()
+            self.set_weights_thread.start()        
+            start_lighthouse_server_thread()
             bt.logging.info("Started background threads")
             bt.logging.info("=" * 40)
     
@@ -296,6 +322,7 @@ class Validator(BaseValidatorNeuron):
             self.query_miners_thread = None
             self.score_thread = None
             self.set_weights_thread = None
+            stop_lighthouse_server()
             bt.logging.info("Stopped background threads")
 
     def __enter__(self):

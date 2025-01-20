@@ -18,28 +18,28 @@ class ScoreManager:
         self.scoring_session_number = 0
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
         self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        self.tempo_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        self.session_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         self.should_save = False
-        self.should_set_weights = False
 
     def load_scores(self):
-        bt.logging.info("Loading scores")
-        state = np.load(self.neuron.config.neuron.full_path + "/state.npz")
         try:
+            bt.logging.info("Loading scores")
+            state = np.load(self.neuron.config.neuron.full_path + "/state.npz")
             self.scores = state["scores"]
             self.hotkeys = state["hotkeys"]
             self.scoring_session_number = state["scoring_session_number"]
-            self.tempo_accumulated_scores = state["tempo_accumulated_scores"]
+            self.session_accumulated_scores = state["tempo_accumulated_scores"]
         except Exception as e:
-            bt.logging.error(f"Error loading scores: {e}")
+            bt.logging.warning(f"Error loading scores: {e}")
             self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
             self.scoring_session_number = 0
-            self.tempo_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+            self.session_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
 
     def save_scores(self):
         if not self.should_save:
             return
+        
         self.should_save = False
         bt.logging.info("Saving scores")
         np.savez(
@@ -47,7 +47,7 @@ class ScoreManager:
             scores=self.scores,
             hotkeys=self.hotkeys,
             scoring_session_number=self.scoring_session_number,
-            tempo_accumulated_scores=self.tempo_accumulated_scores,
+            tempo_accumulated_scores=self.session_accumulated_scores,
         )
     
     def set_new_hotkeys(self, new_hotkeys: List[str]):
@@ -57,7 +57,7 @@ class ScoreManager:
         # Zero out all hotkeys that have been replaced.
         for uid, hotkey in enumerate(self.hotkeys):
             if hotkey != new_hotkeys[uid]:
-                self.tempo_accumulated_scores[uid] = 0
+                self.session_accumulated_scores[uid] = 0
                 self.scores[uid] = 0  # hotkey has been replaced
 
         # Check to see if the metagraph has changed size.
@@ -69,38 +69,35 @@ class ScoreManager:
             self.scores = new_scores
 
             new_tempo_accumulated_scores = np.zeros((len(new_hotkeys)))
-            min_len = min(len(self.hotkeys), len(self.tempo_accumulated_scores))
-            new_tempo_accumulated_scores[:min_len] = self.tempo_accumulated_scores[:min_len]
-            self.tempo_accumulated_scores = new_tempo_accumulated_scores
+            min_len = min(len(self.hotkeys), len(self.session_accumulated_scores))
+            new_tempo_accumulated_scores[:min_len] = self.session_accumulated_scores[:min_len]
+            self.session_accumulated_scores = new_tempo_accumulated_scores
 
         # Update the hotkeys.
         self.hotkeys = copy.deepcopy(new_hotkeys)
         self.should_save = True
-        self.should_set_weights = True
 
     def update_scores(self, rewards: np.ndarray, uids: List[int], session_number: int):
         if self.scoring_session_number != session_number:
             self.scoring_session_number = session_number
-            self.tempo_accumulated_scores = np.zeros_like(self.scores)
+            self.session_accumulated_scores = np.zeros_like(self.scores)
 
         scattered_rewards: np.ndarray = np.zeros_like(self.scores)
         scattered_rewards[uids] = rewards
-        self.tempo_accumulated_scores: np.ndarray = scattered_rewards + self.tempo_accumulated_scores
-        bt.logging.debug(f"Updated scores: {self.tempo_accumulated_scores}")
+        self.session_accumulated_scores: np.ndarray = scattered_rewards + self.session_accumulated_scores
+        bt.logging.debug(f"Updated scores: {self.session_accumulated_scores}")
         
         self.should_save = True
-        self.should_set_weights = True
     
     def set_weights(self):
         """
         Sets the validator weights to the metagraph hotkeys based on the scores it has received from the miners. The weights determine the trust and incentive level the validator assigns to miner nodes on the network.
         """
-        if not self.should_set_weights:
+        if not self.neuron.should_set_weights():
             return
-        self.should_set_weights = False
 
         self.scores = np.zeros_like(self.scores)
-        best_index = np.argmax(self.tempo_accumulated_scores)
+        best_index = np.argmax(self.session_accumulated_scores)
         self.scores[best_index] = 1
 
         # Calculate the average reward for each uid across non-zero values.
@@ -146,7 +143,7 @@ class ScoreManager:
                 version_key=self.neuron.spec_version,
             )
             if result is True:
-                bt.logging.info("set_weights on chain successfully!")
+                bt.logging.success("set_weights on chain successfully!")
             else:
                 bt.logging.error("set_weights failed", msg)
                 
