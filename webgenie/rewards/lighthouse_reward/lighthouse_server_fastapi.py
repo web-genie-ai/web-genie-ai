@@ -30,8 +30,8 @@ def stop_lighthouse_server():
 
 def start_lighthouse_server():
     try:
+        bt.logging.success(f"Trying to start lighthouse server on port {LIGHTHOUSE_SERVER_PORT}")
         uvicorn.run(app, host="0.0.0.0", port=LIGHTHOUSE_SERVER_PORT)
-        bt.logging.success(f"Lighthouse server started on port {LIGHTHOUSE_SERVER_PORT}")
     except Exception as e:
         bt.logging.error(f"Error starting lighthouse server: {e}")
         stop_lighthouse_server()
