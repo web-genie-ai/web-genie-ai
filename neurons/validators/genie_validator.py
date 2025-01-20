@@ -21,7 +21,8 @@ from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
 from webgenie.storage import store_results_to_database
-from webgenie.tasks import Solution, ImageTaskGenerator
+from webgenie.tasks import Solution
+from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
 
 
