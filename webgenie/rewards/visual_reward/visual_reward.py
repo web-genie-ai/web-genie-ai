@@ -57,7 +57,7 @@ class VisualReward(Reward):
     def sync_reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:
         try:
             # Timeout of 1 hour for visual reward processing
-            VISUAL_REWARD_TIMEOUT = 60 * 60  # seconds
+            VISUAL_REWARD_TIMEOUT = 60 * 60 * 2# seconds
             
             # Run the async reward worker with timeout
             return asyncio.run(
