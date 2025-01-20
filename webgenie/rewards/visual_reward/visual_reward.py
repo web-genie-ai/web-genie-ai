@@ -55,7 +55,20 @@ class VisualReward(Reward):
         return scores
     
     def sync_reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:
-        return asyncio.run(self.reward_worker(task, solutions, current_work_dir))
+        try:
+            # Timeout of 1 hour for visual reward processing
+            VISUAL_REWARD_TIMEOUT = 60 * 60  # seconds
+            
+            # Run the async reward worker with timeout
+            return asyncio.run(
+                asyncio.wait_for(
+                    self.reward_worker(task, solutions, current_work_dir),
+                    timeout=VISUAL_REWARD_TIMEOUT
+                )
+            )
+        except Exception as e:
+            bt.logging.error(f"Error in sync_reward_worker: {e}")
+            return [0] * len(solutions)
 
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
         if not isinstance(task, ImageTask):

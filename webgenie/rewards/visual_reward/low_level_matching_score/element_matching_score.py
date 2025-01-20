@@ -1,5 +1,4 @@
 import asyncio
-import cv2
 import numpy as np
 
 from difflib import SequenceMatcher

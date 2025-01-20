@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from typing import Any
 from skimage import io, color
 
-from webgenie.constants import DEFAULT_LOAD_TIME
+from webgenie.constants import DEFAULT_LOAD_TIME, CHROME_HTML_LOAD_TIME
 from webgenie.rewards.visual_reward.common.browser import web_player
 from webgenie.rewards.visual_reward.common.sift import extract_sift_from_roi
 
@@ -53,9 +53,14 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
     try:
         page = await web_player["browser"].new_page()
     
-        await page.goto(url)
+        await page.goto(url, timeout=CHROME_HTML_LOAD_TIME)
         await page.wait_for_timeout(load_time)
-        await page.screenshot(path=screenshot_path, full_page=True, animations="disabled")
+        await page.screenshot(
+            path=screenshot_path, 
+            full_page=True, 
+            animations="disabled", 
+            timeout=CHROME_HTML_LOAD_TIME,
+        )
         await asyncio.sleep(10)
         
         with open(screenshot_path, "rb") as f:

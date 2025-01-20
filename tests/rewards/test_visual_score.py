@@ -1,7 +1,6 @@
 import asyncio
 import sys
 import os
-import cv2
 import numpy as np
 from dotenv import load_dotenv, find_dotenv
 def init_test():

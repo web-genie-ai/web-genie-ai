@@ -15,6 +15,7 @@ class OpenaiMiner:
         self.neuron = neuron
 
     async def forward_text(self, synapse: WebgenieTextSynapse) -> WebgenieTextSynapse:  
+        raise Exception("Not Supported yet.")
         try:  
             html_response = await openai_call(
                 messages = [

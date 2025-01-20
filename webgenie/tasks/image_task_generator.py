@@ -52,8 +52,10 @@ class ImageTaskGenerator(TaskGenerator):
         
         dataset, _ = random.choices(self.datasets, weights=[weight for _, weight in self.datasets])[0]
         dataset_entry = await dataset.generate_context()
+        bt.logging.debug(f"Generated dataset entry: {dataset_entry.src}")
 
         ground_truth_html = preprocess_html(dataset_entry.ground_truth_html)
+        bt.logging.info(f"Preprocessed ground truth html")
         if not ground_truth_html :
             raise ValueError("Invalid ground truth html")
 
@@ -61,12 +63,15 @@ class ImageTaskGenerator(TaskGenerator):
             raise ValueError("Empty ground truth html")
         
         base64_image = await html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)    
+        bt.logging.debug(f"Screenshot generated for {dataset_entry.src}")
+        image_task = ImageTask(
+            base64_image=base64_image, 
+            ground_truth_html=ground_truth_html,
+            timeout=IMAGE_TASK_TIMEOUT,
+            generator=self,
+            src=dataset_entry.src,
+        )
         return (
-            ImageTask(
-                base64_image=base64_image, 
-                ground_truth_html=ground_truth_html,
-                timeout=IMAGE_TASK_TIMEOUT,
-                generator=self,
-            ), 
-            WebgenieImageSynapse(base64_image=base64_image),
+            image_task,  
+            WebgenieImageSynapse(base64_image=base64_image, task_id=image_task.task_id),
         )
