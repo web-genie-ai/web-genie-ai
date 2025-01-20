@@ -123,6 +123,9 @@ npm install pm2 -g
 git clone https://github.com/web-genie-ai/web-genie-ai.git
 cd web-genie-ai
 curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+Install the packages in a new terminal:
+```bash
 uv sync
 ```
 - miner
