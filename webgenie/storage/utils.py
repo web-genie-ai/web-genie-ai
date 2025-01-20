@@ -1,4 +1,3 @@
-from bittensor import Wallet
 import bittensor as bt
 from io import BufferedReader
 from .database import Session as DBSession
@@ -10,7 +9,6 @@ from sqlalchemy.orm import Session
 import json
 import time
 import requests
-from typing import Any
 
 # session period tempos
 SESSION_PERIOD = 2
