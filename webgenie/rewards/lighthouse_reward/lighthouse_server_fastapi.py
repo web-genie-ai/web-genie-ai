@@ -18,7 +18,7 @@ app = FastAPI()
 static_folder = f"/{LIGHTHOUSE_SERVER_WORK_DIR}"
 lighthouse_server_thread = None
 
-def make_work_dir(self):
+def make_work_dir():
     if not os.path.exists(WORK_DIR):
         os.makedirs(WORK_DIR)
         bt.logging.info(f"Created work directory at {WORK_DIR}")

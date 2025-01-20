@@ -141,6 +141,7 @@ sudo apt-get install -f
 source .venv/bin/activate
 playwright install-deps
 playwright install
+export PYTHONPATH="."
 pm2 start "uv run neurons/validators/validator.py --netuid [NET_UID] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --neuron.axon_port [axon_port]" --name webgenie_validator
 ```
 - running auto_update script for validators
