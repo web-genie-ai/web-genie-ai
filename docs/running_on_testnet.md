@@ -37,7 +37,8 @@ cd web-genie-ai # Enter the
 Install the web-genie-ai package:
 
 ```bash
-python -m pip install -e . 
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
 ```
 
 ## 2. Create wallets 
@@ -201,25 +202,25 @@ miner    default  1      True   0.00000  0.00000  0.00000    0.00000    0.00000 
 Run the subnet miner:
 
 ```bash
-python neurons/miner.py --netuid 214 --subtensor.network test --wallet.name miner --wallet.hotkey default --logging.debug
+uv run neurons/miners/miner.py --netuid 214 --subtensor.network test --wallet.name miner --wallet.hotkey default --logging.debug
 ```
 
 You will see the below terminal output:
 
 ```bash
->> 2023-08-08 16:58:11.223 |       INFO       | Running miner for subnet: 1 on network: ws://127.0.0.1:9946 with config: ...
+>> 2023-08-08 16:58:11.223 |       INFO       | Running miner for subnet: 214 on network: ws://127.0.0.1:9946 with config: ...
 ```
 
 Next, run the subnet validator:
 
 ```bash
-python neurons/validator.py --netuid 214 --subtensor.network test --wallet.name validator --wallet.hotkey default --logging.debug
+uv run neurons/validators/validator.py --netuid 214 --subtensor.network test --wallet.name validator --wallet.hotkey default --logging.debug
 ```
 
 You will see the below terminal output:
 
 ```bash
->> 2023-08-08 16:58:11.223 |       INFO       | Running validator for subnet: 1 on network: ws://127.0.0.1:9946 with config: ...
+>> 2023-08-08 16:58:11.223 |       INFO       | Running validator for subnet: 214 on network: ws://127.0.0.1:9946 with config: ...
 ```
 
 
