@@ -250,14 +250,13 @@ class GenieValidator:
     
     async def checked_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
-            bt.logging.debug(f"Checking synapse: {synapse.html}")
-            bt.logging.debug(f"Checking synapse: {synapse.nonce}")
-            bt.logging.debug(f"Checking synapse: {synapse.html_hash}")
-            bt.logging.debug(f"Checking synapse: {verify_answer_hash(synapse)}")
             if not verify_answer_hash(synapse):
+                bt.logging.warning(f"Invalid answer hash: {synapse.html_hash}")
                 return None
 
+            html = preprocess_html(synapse.html)
             if not is_valid_resources(html):
+                bt.logging.warning(f"Invalid resources: {html}")
                 return None
 
             synapse.html = html
