@@ -11,6 +11,8 @@ from webgenie.base.utils.weight_utils import (
 ) 
 from webgenie.base.neuron import BaseNeuron
 
+from webgenie.storage import send_challenge_to_stats_collector
+
 
 class ScoreManager:
     def __init__(self, neuron: BaseNeuron):
@@ -20,6 +22,7 @@ class ScoreManager:
         self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         self.session_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         self.should_save = False
+        self.last_send_stats_collector_session_number = -1
 
     def load_scores(self):
         try:
@@ -95,6 +98,13 @@ class ScoreManager:
         """
         if not self.neuron.should_set_weights():
             return
+        
+        with self.neuron.lock:
+            current_session_number = self.neuron.session_number
+            
+        if current_session_number != self.last_send_stats_collector_session_number:
+            send_challenge_to_stats_collector(self.neuron.wallet, current_session_number)
+            self.last_send_stats_collector_session_number = current_session_number
 
         self.scores = np.zeros_like(self.scores)
         best_index = np.argmax(self.session_accumulated_scores)

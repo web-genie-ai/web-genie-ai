@@ -1,4 +1,5 @@
-import bittensor as bt
+from .utils import (
+    store_results_to_database,
+    send_challenge_to_stats_collector,
+)
 
-def store_results_to_database(results: dict):
-    bt.logging.info(results)

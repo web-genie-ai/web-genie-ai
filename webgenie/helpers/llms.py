@@ -1,18 +1,19 @@
-import os
 import bittensor as bt
 
 from openai import AsyncOpenAI
 
-model = os.getenv("LLM_MODEL_ID")
-api_key = os.getenv("LLM_API_KEY")
-base_url = os.getenv("LLM_MODEL_URL")
+from webgenie.constants import (
+    LLM_MODEL_ID, 
+    LLM_API_KEY, 
+    LLM_MODEL_URL
+)
 
-if not api_key or not base_url or not model:
+if not LLM_API_KEY or not LLM_MODEL_URL or not LLM_MODEL_ID:
     raise Exception("LLM_API_KEY, LLM_MODEL_URL, and LLM_MODEL_ID must be set")
 
 client = AsyncOpenAI(
-    api_key=api_key,
-    base_url=base_url,
+    api_key=LLM_API_KEY,
+    base_url=LLM_MODEL_URL,
 )
 
 async def openai_call(messages, response_format, deterministic=False, retries=3):
@@ -20,14 +21,14 @@ async def openai_call(messages, response_format, deterministic=False, retries=3)
         try:
             if deterministic:
                 completion = await client.beta.chat.completions.parse(
-                    model=model,
+                    model=LLM_MODEL_ID,
                     messages= messages,
                     response_format=response_format,
                     temperature=0,
                 )
             else:
                 completion = await client.beta.chat.completions.parse(
-                    model=model,
+                    model=LLM_MODEL_ID,
                     messages= messages,
                     response_format=response_format,
                     temperature=0.7,

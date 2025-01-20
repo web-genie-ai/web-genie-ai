@@ -15,7 +15,13 @@ load_dotenv(find_dotenv(filename=".env.validator"))
 from typing import Tuple, Union
 
 from webgenie.base.validator import BaseValidatorNeuron
-from webgenie.constants import API_HOTKEY
+from webgenie.constants import (
+    API_HOTKEY,
+    BLOCK_IN_SECONDS,
+    SESSION_WINDOW_BLOCKS,
+    QUERING_WINDOW_BLOCKS,
+    WEIGHT_SETTING_WINDOW_BLOCKS
+)
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.rewards.lighthouse_reward import start_lighthouse_server_thread, stop_lighthouse_server
 from webgenie.utils.uids import get_validator_index
@@ -23,15 +29,7 @@ from webgenie.utils.uids import get_validator_index
 from neurons.validators.genie_validator import GenieValidator
 from neurons.validators.score_manager import ScoreManager
 
-
-MAX_COUNT_VALIDATORS = 1
-
-BLOCK_IN_SECONDS = 12
-TEMPO_BLOCKS = 360
-SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 3
-
-QUERING_WINDOW_BLOCKS = 10
-WEIGHT_SETTING_WINDOW_BLOCKS = 50 # 50 blocks = 10 minutes 
+ 
 
 
 class Validator(BaseValidatorNeuron):
@@ -154,20 +152,15 @@ class Validator(BaseValidatorNeuron):
             try:
                 with self.lock:
                     self.sync()
-                    validator_index = get_validator_index(self, self.uid)
+                    validator_index, max_validator_count = get_validator_index(self, self.uid)
                     if validator_index == -1:
                         continue
-                    validator_index = 0
-
-                # Only allow first N validators to query miners
-                # if validator_index > MAX_VALIDATORS:
-                #     continue
 
                 # Calculate query period blocks
                 with self.lock:
                     current_block = self.block
 
-                all_validator_query_period_blocks = MAX_COUNT_VALIDATORS * QUERING_WINDOW_BLOCKS
+                all_validator_query_period_blocks = max_validator_count * QUERING_WINDOW_BLOCKS
                 # Calculate query period blocks
                 start_period_block = (
                     (current_block // all_validator_query_period_blocks) * 

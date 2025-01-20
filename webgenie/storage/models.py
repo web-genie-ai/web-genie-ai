@@ -1,7 +1,7 @@
 from sqlalchemy import Column, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from datetime import datetime
-from database import Base, engine
+from .database import Base, engine
 
 class Neuron(Base):
     __tablename__ = "neurons"

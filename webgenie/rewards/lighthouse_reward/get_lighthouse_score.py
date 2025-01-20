@@ -13,7 +13,6 @@ from webgenie.constants import (
     LIGHTHOUSE_SERVER_PORT, 
     LIGHTHOUSE_SERVER_WORK_DIR,
 )
-from webgenie.rewards.lighthouse_reward.lighthouse_server import httpd
 
 def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
     def get_lighthouse_score_from_subprocess(url):
@@ -21,7 +20,7 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
         try:
             result = subprocess.run(
                 ['lighthouse', url, '--output=json', '--quiet', '--chrome-flags="--headless --no-sandbox"'],
-                capture_output=True, text=True, timeout=60
+                capture_output=True, text=True, timeout=180
             )
             if result.returncode == 0:
                 lighthouse_report = json.loads(result.stdout)
@@ -49,11 +48,11 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
     for i in range(len(htmls)):
         
         file_name = f"{uuid.uuid4()}.html"
-        file_name = file_name.replace("-", "")
 
         with open(f"{LIGHTHOUSE_SERVER_WORK_DIR}/{file_name}", "w") as f:
             f.write(htmls[i])
 
+        url = f"http://localhost:{LIGHTHOUSE_SERVER_PORT}/{file_name}"
         scores.append(get_lighthouse_score_from_subprocess(url))
         
         os.remove(f"{LIGHTHOUSE_SERVER_WORK_DIR}/{file_name}")
