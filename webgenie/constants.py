@@ -1,3 +1,5 @@
+import os
+
 # backend api hotkey
 API_HOTKEY = "5DXDCYTuPfLqQXbxfvvnarG31SdTDtaubqpQrzjrcMgoP9dp"
 
@@ -78,3 +80,22 @@ QUERING_WINDOW_BLOCKS = 10
 
 # weight setting window blocks
 WEIGHT_SETTING_WINDOW_BLOCKS = 50 # 50 blocks = 10 minutes
+
+# llm model id
+LLM_MODEL_ID = os.getenv("LLM_MODEL_ID")
+
+# llm api key
+LLM_API_KEY = os.getenv("LLM_API_KEY")
+
+# llm model url
+LLM_MODEL_URL = os.getenv("LLM_MODEL_URL")
+
+# wandb api key
+WANDB_API_KEY = os.getenv("WANDB_API_KEY")
+
+# wandb project name
+WANDB_PROJECT_NAME = os.getenv("WANDB_PROJECT_NAME")
+
+# wandb entity name
+WANDB_ENTITY_NAME = os.getenv("WANDB_ENTITY_NAME")
+
