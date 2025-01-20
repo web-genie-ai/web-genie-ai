@@ -1,20 +1,17 @@
 from bittensor import Wallet
+import bittensor as bt
 from io import BufferedReader
-from database import Session as DBSession
-from models import Neuron, LeaderboardSession, Competition, Challenge, Judgement, EvaluationType, TaskSolution, SolutionEvaluation
+from .database import Session as DBSession
+from .models import Neuron, LeaderboardSession, Competition, Challenge, Judgement, EvaluationType, TaskSolution, SolutionEvaluation
 from datetime import datetime
-import logging
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 import json
 import time
 import requests
+from typing import Any
 
-# Setup basic configuration for logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
 # session period tempos
 SESSION_PERIOD = 2
 
@@ -29,7 +26,7 @@ def create_record(session: Session, model_class, **kwargs):
         return new_record.id  # Return the new record's ID
     except Exception as e:
         session.rollback()  # Rollback in case of error
-        logging.error(f"An error occurred: {e}")
+        bt.logging.error(f"An error occurred: {e}")
         return None  # Return None to indicate failure
     finally:
         session.close()  # Close the session
@@ -39,7 +36,7 @@ def add_neuron(coldkey: str, hotkey: str):
     existing_neuron = session.query(Neuron).filter_by(hotkey=hotkey).first()
     
     if existing_neuron:
-        logging.info(f"neuron with hotkey {hotkey} already exists. Skipping creation.")
+        bt.logging.info(f"neuron with hotkey {hotkey} already exists. Skipping creation.")
         return existing_neuron.id  # Return the existing session id
 
     return create_record(session, Neuron, coldkey=coldkey, hotkey=hotkey)
@@ -52,7 +49,7 @@ def get_neuron_id(hotkey: str):
         else:
             return None  # Return None if no matching neuron is found
     except SQLAlchemyError as e:
-        logging.error(f"An error occurred while fetching neuron: {e}")
+        bt.logging.error(f"An error occurred while fetching neuron: {e}")
         return None
     finally:
         session.close()  # Ensure the session is closed
@@ -62,7 +59,7 @@ def create_leaderboard_session(session_number: int, created_at: datetime, compet
     existing_session = session.query(LeaderboardSession).filter_by(id=session_number).first()
     
     if existing_session:
-        logging.info(f"Session with id {session_number} already exists. Skipping creation.")
+        bt.logging.info(f"Session with id {session_number} already exists. Skipping creation.")
         return existing_session.id  # Return the existing session id
 
     return create_record(session, LeaderboardSession,
@@ -73,7 +70,7 @@ def create_competition(name: str):
     # Check if the competition with the given name already exists
     existing_competition = session.query(Competition).filter_by(name=name).first()
     if existing_competition:
-        logging.info(f"Competition with name {name} already exists. Skipping creation.")
+        bt.logging.info(f"Competition with name {name} already exists. Skipping creation.")
         return existing_competition.id  # Return the existing competition id
 
     return create_record(session, Competition, name=name)
@@ -88,7 +85,7 @@ def create_evaluation_type(name: str):
     # Check if the competition with the given name already exists
     existing_evaluation_type = session.query(EvaluationType).filter_by(name=name).first()
     if existing_evaluation_type:
-        logging.info(f"Evaluation type with name {name} already exists. Skipping creation.")
+        bt.logging.info(f"Evaluation type with name {name} already exists. Skipping creation.")
         return existing_evaluation_type.id  # Return the existing evaluation type id
 
     return create_record(session, EvaluationType, name=name)
@@ -109,7 +106,7 @@ def store_results_to_database(results: dict):
     solutions = results["solutions"]
     scores = results["scores"]
     challenge = results["challenge"]
-    
+
     session_number = challenge["session_number"]
     session_start_datetime = results["session_start_datetime"]
     ground_truth_html = challenge["task"]
@@ -204,13 +201,13 @@ def get_session_data(session_number: int):
 
         return payload
     except SQLAlchemyError as e:
-        logging.error(f"An error occurred while fetching neuron: {e}")
+        bt.logging.error(f"An error occurred while fetching neuron: {e}")
         return None
     finally:
         session.close()  
 
 def make_signed_request(
-    wallet: Wallet,
+    wallet: Any,
     url: str,
     subnet_id: int,
     payload: dict,
@@ -247,13 +244,13 @@ def make_signed_request(
     response = requests.request(method, url, headers=headers, files=files, json=payload, timeout=5)
     return response
 
-def test_send_payload(session_number: int) -> None:
+def send_challenge_to_stats_collector(session_number: int) -> None:
     wallet = Wallet()
     session_data = get_session_data(session_number)
     response = make_signed_request(
         wallet=wallet,
         url="https://webgenie-collector.bactensor.io/api/competitions/",
-        subnet_id=12,
+        subnet_id=54,
         method="POST",
         payload=session_data,
     )

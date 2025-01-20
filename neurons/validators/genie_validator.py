@@ -4,6 +4,8 @@ import numpy as np
 import random
 import threading
 import time
+
+from datetime import datetime, timedelta
 from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
@@ -14,6 +16,8 @@ from webgenie.constants import (
     LIGHTHOUSE_SERVER_WORK_DIR,
     TASK_REVEAL_TIME,
     TASK_REVEAL_TIMEOUT,
+    SESSION_WINDOW_BLOCKS,
+    BLOCK_IN_SECONDS,
 )
 from webgenie.challenges import (
     AccuracyChallenge,
@@ -29,6 +33,11 @@ from webgenie.protocol import (
 )
 from webgenie.storage import store_results_to_database
 from webgenie.tasks import Solution
+from webgenie.tasks.metric_types import (
+    ACCURACY_METRIC_NAME, 
+    QUALITY_METRIC_NAME,
+    SEO_METRIC_NAME,
+)
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
 
@@ -156,17 +165,51 @@ class GenieValidator:
         bt.logging.success(f"Competition Type: {challenge.competition_type}")
         bt.logging.success(f"Scores: {scores}")
         bt.logging.success(f"Final scores for {miner_uids}: {aggregated_scores}")
-
-        store_results_to_database(
-            {
-                "neuron": self.neuron,
-                "miner_uids": miner_uids,
-                "solutions": solutions,
-                "scores": scores,
-                "aggregated_scores": aggregated_scores,
-                "challenge": challenge,
+        
+        with self.neuron.lock:
+            current_block = self.neuron.block
+            session_number = self.neuron.session_number
+            session_start_block = session_number * SESSION_WINDOW_BLOCKS
+            session_start_datetime = (
+                datetime.now() - 
+                timedelta(
+                    seconds=(current_block - session_start_block) * BLOCK_IN_SECONDS
+                )
+            )
+            payload = {
+                "validator": {
+                    "hotkey": self.neuron.metagraph.axons[self.neuron.uid].hotkey,
+                    "coldkey": self.neuron.metagraph.axons[self.neuron.uid].coldkey,
+                },
+                "miners": [
+                    {
+                        "coldkey": self.neuron.metagraph.axons[miner_uids[i]].coldkey,
+                        "hotkey": self.neuron.metagraph.axons[miner_uids[i]].hotkey,
+                    } for i in range(len(miner_uids))
+                ],
+                "solutions": [
+                    {
+                        "miner_answer": { "html": solution.html },
+                    } for solution in solutions
+                ],
+                "scores": [
+                    {
+                        "aggregated_score": aggregated_scores[i],
+                        "accuracy": scores[ACCURACY_METRIC_NAME][i],
+                        "seo": scores[SEO_METRIC_NAME][i],
+                        "code_quality": scores[QUALITY_METRIC_NAME][i],
+                    } for i in range(len(miner_uids))
+                ],
+                "challenge": {
+                    "task": challenge.task.ground_truth_html,
+                    "competition_type": challenge.competition_type,
+                    "session_number": challenge.session_number,
+                },
+                "session_start_datetime": session_start_datetime,
             }
-        )
+
+        bt.logging.info(f"Storing results to database: {payload}")
+        store_results_to_database(payload)
          
         self.neuron.score_manager.update_scores(
             aggregated_scores, 

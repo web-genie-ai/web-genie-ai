@@ -20,7 +20,7 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
         try:
             result = subprocess.run(
                 ['lighthouse', url, '--output=json', '--quiet', '--chrome-flags="--headless --no-sandbox"'],
-                capture_output=True, text=True, timeout=60
+                capture_output=True, text=True, timeout=180
             )
             if result.returncode == 0:
                 lighthouse_report = json.loads(result.stdout)
