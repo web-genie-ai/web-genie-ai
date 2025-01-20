@@ -27,7 +27,12 @@ from webgenie.base.miner import BaseMinerNeuron
 from webgenie.constants import TASK_REVEAL_TIME
 from webgenie.helpers.images import image_debug_str
 from webgenie.helpers.weights import init_wandb
-from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
+from webgenie.protocol import (
+    WebgenieTextSynapse, 
+    WebgenieImageSynapse,
+    add_answer_hash,
+    hide_secret_info,
+)
 
 from neurons.miners.openai_miner import OpenaiMiner
 
@@ -68,17 +73,17 @@ class Miner(BaseMinerNeuron):
             create_time = time.time()
             synapse = await self.genie_miner.forward_image(synapse)
             
-            nonce = synapse.add_answer_hash(synapse.html)
+            nonce = add_answer_hash(synapse, synapse.html)
             self.task_state[synapse.task_id] = {
                 "html": synapse.html,
                 "nonce": nonce,
                 "create_time": create_time
             }
             
-            synapse.hide_secret_info()
+            hide_secret_info(synapse)
             return synapse
         else:
-            DELTA = 2
+            DELTA = 10
             create_time = self.task_state[synapse.task_id]["create_time"]
             if time.time() - create_time >= TASK_REVEAL_TIME + IMAGE_TASK_TIMEOUT - DELTA:
                 bt.logging.debug(f"Task {synapse.task_id} is ready to reveal.")

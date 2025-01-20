@@ -22,7 +22,11 @@ from webgenie.challenges import (
 )
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
-from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
+from webgenie.protocol import (
+    WebgenieImageSynapse, 
+    WebgenieTextSynapse,
+    verify_answer_hash,
+)
 from webgenie.storage import store_results_to_database
 from webgenie.tasks import Solution
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
@@ -243,7 +247,7 @@ class GenieValidator:
     
     async def checked_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
-            if not synapse.verify_answer_hash():
+            if not verify_answer_hash(synapse):
                 return None
 
             if not is_valid_resources(html):

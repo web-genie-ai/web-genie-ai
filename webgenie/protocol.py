@@ -2,7 +2,10 @@
 # Copyright © 2024 pycorn
 
 import bittensor as bt
+import hashlib
 import pydantic
+import random
+import uuid
 
 
 class WebgenieTextSynapse(bt.Synapse):
@@ -33,7 +36,7 @@ class WebgenieImageSynapse(bt.Synapse):
     A protocol for the webgenie image task.
     """
     task_id: str = pydantic.Field(
-        factory=lambda: str(uuid.uuid4()),
+        "",
         title="Task ID",
         description="The task ID.",
     )
@@ -68,17 +71,20 @@ class WebgenieImageSynapse(bt.Synapse):
         description="The nonce.",
     )
 
-    def add_answer_hash(self, html: str):
-        nonce = random.randint(0, 1000000)
-        hash_input = html + str(nonce)
-        self.html_hash = hashlib.sha256(hash_input.encode()).hexdigest()
-        self.nonce = nonce
-        return nonce
 
-    def verify_answer_hash(self):
-        hash_input = self.html + str(self.nonce)
-        return hashlib.sha256(hash_input.encode()).hexdigest() == self.html_hash
+def add_answer_hash(self, html: str) -> int:
+    nonce = random.randint(0, 1000000)
+    hash_input = html + str(nonce)
+    self.html_hash = hashlib.sha256(hash_input.encode()).hexdigest()
+    self.nonce = nonce
+    return nonce
 
-    def hide_secret_info(self):
-        self.html = ""
-        self.nonce = 0
+
+def verify_answer_hash(self) -> bool:
+    hash_input = self.html + str(self.nonce)
+    return hashlib.sha256(hash_input.encode()).hexdigest() == self.html_hash
+
+
+def hide_secret_info(self):
+    self.html = ""
+    self.nonce = 0
