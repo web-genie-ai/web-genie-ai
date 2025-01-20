@@ -150,6 +150,9 @@ def get_session_data(session_number: int):
         }
 
         for leaderboard_session in competition.sessions:
+            if leaderboard_session.id != session_number:
+                continue  # Skip sessions that do not match the session number
+            
             session_data = {
                 "external_id": leaderboard_session.id,
                 "created_at": leaderboard_session.created_at.isoformat(),
@@ -256,16 +259,3 @@ def test_send_payload(session_number: int) -> None:
     )
     if not response.ok:
         print(response.json())
-
-if __name__ == "__main__":
-    neuron_id = add_neuron("5GKH9FPPnWSUoeeTJp19wVtd84XqFW4pyK2ijV2GsFbhTrP1", "5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3")
-    logging.info(f"neuron_id: {neuron_id}")
-
-    html = "<div>test</div>"
-
-    create_competition("Accuracy")
-    create_competition("SEO")
-    create_competition("CODE_QUALITY")
-    create_competition("WEIGHTED_SCORE")
-    session_id = create_leaderboard_session(datetime.now(), 1)
-    challenge = create_challenge(session_id, html)
