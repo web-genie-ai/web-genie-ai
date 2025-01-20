@@ -1,18 +1,22 @@
-import random
 import bittensor as bt
+import random
+import re
 import numpy as np
 from typing import List, Tuple
+from webgenie.constants import (
+    VPERMIT_TAO_LIMIT,
+)
 
 
-def is_validator(metagraph: "bt.metagraph.Metagraph", uid: int, vpermit_tao_limit: int) -> bool:
-    return metagraph.S[uid] >= vpermit_tao_limit
+def is_validator(metagraph: "bt.metagraph.Metagraph", uid: int) -> bool:
+    return metagraph.S[uid] > VPERMIT_TAO_LIMIT
 
 
 def get_validator_index(self, uid: int) -> Tuple[int, int]:
     validator_uids = []
-    for uid in range(self.metagraph.n.item()):
-        if is_validator(self.metagraph, uid, self.config.neuron.vpermit_tao_limit):
-            validator_uids.append(uid)  
+    for each_uid in range(self.metagraph.n.item()):
+        if is_validator(self.metagraph, each_uid):
+            validator_uids.append(each_uid)  
     validator_uids.sort(key=lambda uid: self.metagraph.S[uid], reverse=True)
     try:
         return validator_uids.index(uid), len(validator_uids)
@@ -21,13 +25,12 @@ def get_validator_index(self, uid: int) -> Tuple[int, int]:
 
 
 def check_uid_availability(
-    metagraph: "bt.metagraph.Metagraph", uid: int, vpermit_tao_limit: int
+    metagraph: "bt.metagraph.Metagraph", uid: int
 ) -> bool:
     """Check if uid is available. The UID should be available if it is serving and has less than vpermit_tao_limit stake
     Args:
         metagraph (:obj: bt.metagraph.Metagraph): Metagraph object
         uid (int): uid to be checked
-        vpermit_tao_limit (int): Validator permit tao limit
     Returns:
         bool: True if uid is available, False otherwise
     """
@@ -36,7 +39,7 @@ def check_uid_availability(
         return False
     # Filter validator permit > 1024 stake.
     if metagraph.validator_permit[uid]:
-        if metagraph.S[uid] > vpermit_tao_limit:
+        if metagraph.S[uid] > VPERMIT_TAO_LIMIT:
             return False
     # Available otherwise.
     return True
@@ -52,7 +55,7 @@ def get_most_available_uid(self, exclude: List[int] = None) -> int:
 
     for uid in range(self.metagraph.n.item()):
         uid_is_available = check_uid_availability(
-            self.metagraph, uid, self.config.neuron.vpermit_tao_limit
+            self.metagraph, uid
         )
         uid_is_not_excluded = exclude is None or uid not in exclude
 
@@ -63,16 +66,18 @@ def get_most_available_uid(self, exclude: List[int] = None) -> int:
     
     return candidate_uids[np.argmax(self.metagraph.I[candidate_uids])]
 
+
 def get_all_available_uids(
     self, exclude: List[int] = None
 ) -> np.ndarray:
     avail_uids = []
     for uid in range(self.metagraph.n.item()):
-        uid_is_available = check_uid_availability(self.metagraph, uid, self.config.neuron.vpermit_tao_limit) 
+        uid_is_available = check_uid_availability(self.metagraph, uid) 
         uid_is_not_excluded = exclude is None or uid not in exclude
         if uid_is_available and uid_is_not_excluded:
             avail_uids.append(uid)
     return np.array(avail_uids)
+
 
 def get_random_uids(
     self, k: int, exclude: List[int] = None
@@ -91,7 +96,7 @@ def get_random_uids(
 
     for uid in range(self.metagraph.n.item()):
         uid_is_available = check_uid_availability(
-            self.metagraph, uid, self.config.neuron.vpermit_tao_limit
+            self.metagraph, uid
         )
         uid_is_not_excluded = exclude is None or uid not in exclude
 

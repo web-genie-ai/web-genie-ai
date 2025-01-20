@@ -20,7 +20,8 @@ from webgenie.constants import (
     BLOCK_IN_SECONDS,
     SESSION_WINDOW_BLOCKS,
     QUERING_WINDOW_BLOCKS,
-    WEIGHT_SETTING_WINDOW_BLOCKS
+    WEIGHT_SETTING_WINDOW_BLOCKS,
+    AXON_OFF,
 )
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.rewards.lighthouse_reward import start_lighthouse_server_thread, stop_lighthouse_server
@@ -28,9 +29,7 @@ from webgenie.utils.uids import get_validator_index
 
 from neurons.validators.genie_validator import GenieValidator
 from neurons.validators.score_manager import ScoreManager
-
  
-
 
 class Validator(BaseValidatorNeuron):
     """
@@ -71,7 +70,7 @@ class Validator(BaseValidatorNeuron):
 
         self.sync()
 
-        if not self.config.axon_off:
+        if not AXON_OFF:
             self.serve_axon()
 
     def resync_metagraph(self):
@@ -152,15 +151,18 @@ class Validator(BaseValidatorNeuron):
             try:
                 with self.lock:
                     self.sync()
-                    validator_index, max_validator_count = get_validator_index(self, self.uid)
-                    if validator_index == -1:
-                        continue
+                    validator_index, validator_count = get_validator_index(self, self.uid)
 
+                if validator_index == -1:
+                    bt.logging.error(f"Validator index {validator_index} is not valid")
+                    continue
+                
+                bt.logging.info(f"Validator index: {validator_index}, Validator count: {validator_count}")
                 # Calculate query period blocks
                 with self.lock:
                     current_block = self.block
 
-                all_validator_query_period_blocks = max_validator_count * QUERING_WINDOW_BLOCKS
+                all_validator_query_period_blocks = validator_count * QUERING_WINDOW_BLOCKS
                 # Calculate query period blocks
                 start_period_block = (
                     (current_block // all_validator_query_period_blocks) * 
@@ -204,7 +206,7 @@ class Validator(BaseValidatorNeuron):
                 with self.lock:
                     self.sync()
 
-                SCORE_TIMEOUT = 60 * 60
+                SCORE_TIMEOUT = 60 * 60 * 2
                 self.score_event_loop.run_until_complete(
                     asyncio.wait_for(
                         self.genie_validator.score(),

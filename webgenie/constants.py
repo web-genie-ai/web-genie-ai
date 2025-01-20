@@ -1,3 +1,4 @@
+import bittensor as bt
 import os
 
 # backend api hotkey
@@ -19,7 +20,7 @@ TASK_REVEAL_TIME = 20
 TASK_REVEAL_TIMEOUT = 20
 
 # lighthouse server port
-LIGHTHOUSE_SERVER_PORT = 5003
+LIGHTHOUSE_SERVER_PORT = int(os.getenv("LIGHTHOUSE_SERVER_PORT",5000))
 
 # max competition history size
 MAX_COMPETETION_HISTORY_SIZE = 30
@@ -98,4 +99,10 @@ WANDB_PROJECT_NAME = os.getenv("WANDB_PROJECT_NAME")
 
 # wandb entity name
 WANDB_ENTITY_NAME = os.getenv("WANDB_ENTITY_NAME")
+
+# vpermit tao limit
+VPERMIT_TAO_LIMIT = bt.Balance(float(os.getenv("VPERMIT_TAO_LIMIT", 4096)))
+
+# axon off
+AXON_OFF = os.getenv("AXON_OFF", "False").lower() == "true"
 
