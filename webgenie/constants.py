@@ -46,6 +46,9 @@ MAX_MINER_HTML_LEN = 1000000
 # work dir
 WORK_DIR = "work"
 
+# lighthouse server work dir
+LIGHTHOUSE_SERVER_WORK_DIR = f"{WORK_DIR}/lighthouse_server_work"
+
 # html extension
 HTML_EXTENSION = ".html"
 

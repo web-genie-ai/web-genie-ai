@@ -8,64 +8,9 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 from typing import List, Dict
 
 from webgenie.constants import LIGHTHOUSE_SERVER_PORT
+from webgenie.rewards.lighthouse_reward.lighthouse_server import httpd
 
-httpd = None
-
-def get_lighthouse_score(htmls: List[str], port: int = LIGHTHOUSE_SERVER_PORT) -> List[Dict[str, float]]:
-    class CustomHandler(SimpleHTTPRequestHandler):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-
-        def do_GET(self):
-            # Add CORS headers
-            self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-            if self.path == '/favicon.ico':
-                self.send_response(200)
-                self.send_header('Content-type', 'image/x-icon')
-                self.end_headers()
-                self.wfile.write(b'')  # send a blank byte or actual icon data
-            elif self.path == '/robots.txt':
-                self.send_response(200)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(b'User-agent: *\nDisallow: /')  # Example content
-            elif self.path.startswith('/lighthouse_score'):
-                try:
-                    html_index = int(self.path.split('/')[-1])
-                    self.send_header('Content-type', 'text/html')
-                    self.end_headers()
-                    self.wfile.write(htmls[html_index].encode('utf-8'))
-                except Exception as e:
-                    bt.logging.error(f"Error getting lighthouse score: {e}")
-                    self.send_response(404)
-                    self.end_headers()
-                    self.wfile.write(b"Not Found")
-            else:
-                self.send_response(404)
-                self.end_headers()
-                self.wfile.write(b"Not Found")
-
-        def do_OPTIONS(self):
-            # Handle preflight requests
-            self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS') 
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-            self.end_headers()
-
-    def run_server(port=8000):
-        global httpd
-        server_address = ('', port)
-        httpd = HTTPServer(server_address, CustomHandler)
-        bt.logging.info(f"Starting server on port {port}...")
-        httpd.serve_forever()
-    
-    server_thread = threading.Thread(target=run_server, args=(port,), daemon=True)
-    server_thread.start()
-    
+def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
     def get_lighthouse_score_from_subprocess(url):
         bt.logging.info(f"Getting lighthouse score from {url}...")
         try:
@@ -93,24 +38,16 @@ def get_lighthouse_score(htmls: List[str], port: int = LIGHTHOUSE_SERVER_PORT) -
                 'seo': 0
             }
 
-    time.sleep(1)  # Give the server time to start
-    bt.logging.info(f"Getting lighthouse scores from {port}...")
+    bt.logging.info(f"Getting lighthouse scores from localhost:{LIGHTHOUSE_SERVER_PORT}...")
     scores = []
     for i in range(len(htmls)):
-        url = f"http://localhost:{port}/lighthouse_score/{i}"
+        file_name = f"{uuid.uuid4()}.html"
+        with open(f"{LIGHTHOUSE_SERVER_WORK_DIR}/{file_name}", "w") as f:
+            f.write(htmls[i])
+
+        url = f"http://localhost:{LIGHTHOUSE_SERVER_PORT}/lighthouse_score/{file_name}"
         scores.append(get_lighthouse_score_from_subprocess(url))
 
-    bt.logging.info("Shutting down server...")
-    if httpd:
-        httpd.shutdown()
-    server_thread.join(timeout=10)
+        os.remove(f"{LIGHTHOUSE_SERVER_WORK_DIR}/{file_name}")
 
-    if server_thread.is_alive():
-        bt.logging.error("Server did not shut down properly.")
-    else:
-        bt.logging.info("Server stopped successfully.")
-    
     return scores
-
-    
-    

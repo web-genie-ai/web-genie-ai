@@ -4,7 +4,6 @@ from math import sqrt
 from difflib import SequenceMatcher
 from scipy.optimize import linear_sum_assignment
 from skimage.metrics import structural_similarity as ssim
-import cv2
 
 from webgenie.rewards.visual_reward.common.extract_html_elements import HTMLElement
 from webgenie.rewards.visual_reward.common.similarity import (

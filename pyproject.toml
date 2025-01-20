@@ -20,7 +20,6 @@ dependencies = [
     "matplotlib-inline==0.1.7",
     "nltk",
     "openai",
-    "opencv-python==4.10.0.84",
     "peft",
     "pip-chill==1.0.3",
     "playwright==1.49.1",
