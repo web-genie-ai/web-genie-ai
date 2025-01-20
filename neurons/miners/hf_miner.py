@@ -1,31 +1,30 @@
 import bittensor as bt
-import os
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.helpers.images import base64_to_image
 
 from webgenie.utils.gpus import get_gpu_info
-total_memory_mb, _, _ = get_gpu_info()
 
-if total_memory_mb is None:
-    raise ValueError("No GPU detected. HfMiner requires a GPU.")
+def check_requirements():
+    total_memory_mb, _, _ = get_gpu_info()
 
-bt.logging.info(f"Total memory: {total_memory_mb}")
+    if total_memory_mb is None:
+        raise ValueError("No GPU detected. HfMiner requires a GPU.")
 
-if total_memory_mb < 1024 * 23:
-    raise ValueError("Insufficient GPU memory. HfMiner requires at least 25GB of GPU memory.")
+    bt.logging.info(f"Total memory: {total_memory_mb}")
 
-from neurons.miners.hf_models.websight_finetuned import generate_html_from_image
+    if total_memory_mb < 1024 * 25:
+        raise ValueError("Insufficient GPU memory. HfMiner requires at least 25GB of GPU memory.")
 
-if total_memory_mb > 1024 * 50:
-    from neurons.miners.hf_models.falcon7b import generate_html_from_text
+check_requirements()
 
 class HfMiner:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
  
     async def forward_text(self, synapse: WebgenieTextSynapse) -> WebgenieTextSynapse:  
+        raise Exception("Not Supported yet.")
         try:  
             if total_memory_mb > 1024 * 50:
                 synapse.html = generate_html_from_text(synapse.prompt)

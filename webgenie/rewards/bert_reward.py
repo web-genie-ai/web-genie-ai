@@ -3,16 +3,19 @@ import bittensor as bt
 import numpy as np
 from typing import List
 
-from webgenie.rewards import Reward
-from webgenie.tasks.task import Task
-from webgenie.tasks.solution import Solution
+from webgenie.rewards.reward import Reward
+from webgenie.tasks import (
+    Task,
+    Solution,
+)
+
 
 class BertReward(Reward):
     def __init__(self):
         pass
 
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
-        bt.logging.debug(f"Rewarding task in bert reward")
+        bt.logging.info(f"Rewarding task in bert reward")
         if not task.ground_truth_html:
             raise ValueError(f"Ground truth html is empty")
         

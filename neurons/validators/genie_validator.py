@@ -1,43 +1,58 @@
 import os
 import bittensor as bt
-import asyncio
 import numpy as np
 import random
-from typing import Union, List
+import threading
+import time
+
+from datetime import datetime, timedelta
+from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import (
     MAX_COMPETETION_HISTORY_SIZE, 
     MAX_SYNTHETIC_TASK_SIZE, 
-    MAX_DEBUG_IMAGE_STRING_LENGTH,
     WORK_DIR,
+    LIGHTHOUSE_SERVER_WORK_DIR,
+    TASK_REVEAL_TIME,
+    TASK_REVEAL_TIMEOUT,
+    SESSION_WINDOW_BLOCKS,
+    BLOCK_IN_SECONDS,
 )
-from webgenie.competitions import (
-    ImageTaskAccuracyCompetition, 
-    TextTaskAccuracyCompetition,
-    ImageTaskQualityCompetition,
-    TextTaskQualityCompetition,
-    RESERVED_WEIGHTS
+from webgenie.challenges import (
+    AccuracyChallenge,
+    QualityChallenge,
+    SeoChallenge,
 )
-from webgenie.helpers.htmls import preprocess_html, validate_resources
-from webgenie.protocol import WebgenieImageSynapse, WebgenieTextSynapse
-from webgenie.tasks.solution import Solution
-from webgenie.utils.uids import get_all_available_uids, get_most_available_uid
+from webgenie.helpers.htmls import preprocess_html, is_valid_resources
+from webgenie.helpers.images import image_debug_str
+from webgenie.protocol import (
+    WebgenieImageSynapse, 
+    WebgenieTextSynapse,
+    verify_answer_hash,
+)
+from webgenie.storage import store_results_to_database
+from webgenie.tasks import Solution
+from webgenie.tasks.metric_types import (
+    ACCURACY_METRIC_NAME, 
+    QUALITY_METRIC_NAME,
+    SEO_METRIC_NAME,
+)
+from webgenie.tasks.image_task_generator import ImageTaskGenerator
+from webgenie.utils.uids import get_all_available_uids
+
 
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
         self.config = neuron.config
-        self.competitions = []
+        self.miner_results = []
         self.synthetic_tasks = []
 
-        self.avail_competitions = [
-            (TextTaskAccuracyCompetition(), 0.5),
-            (TextTaskQualityCompetition(), 0.5),
-            (ImageTaskAccuracyCompetition(), 0.5),
-            (ImageTaskQualityCompetition(), 0.5),
+        self.task_generators = [
+            (ImageTaskGenerator(), 1.0),
         ]
-
+        
         self.make_work_dir()
 
     def make_work_dir(self):
@@ -45,114 +60,248 @@ class GenieValidator:
             os.makedirs(WORK_DIR)
             bt.logging.info(f"Created work directory at {WORK_DIR}")
 
+        if not os.path.exists(LIGHTHOUSE_SERVER_WORK_DIR):
+            os.makedirs(LIGHTHOUSE_SERVER_WORK_DIR)
+            bt.logging.info(f"Created lighthouse server work directory at {LIGHTHOUSE_SERVER_WORK_DIR}")
+
     async def query_miners(self):
         try:
-            if len(self.competitions) > MAX_COMPETETION_HISTORY_SIZE:
-                return
-
-            if not self.synthetic_tasks:
-                return
+            with self.neuron.lock:
+                if len(self.miner_results) > MAX_COMPETETION_HISTORY_SIZE:
+                    bt.logging.info(f"Competition history size {len(self.miner_results)} exceeds max size {MAX_COMPETETION_HISTORY_SIZE}, skipping")
+                    return
                 
-            bt.logging.info("querying miners")
+                if not self.synthetic_tasks:
+                    bt.logging.info("No synthetic tasks available, skipping")
+                    return
 
-            task, synapse = self.synthetic_tasks.pop(0)
+                task, synapse = self.synthetic_tasks.pop(0)
+
+            bt.logging.info("querying miners")
             miner_uids = get_all_available_uids(self.neuron)
+            if len(miner_uids) == 0:
+                bt.logging.warning("No miners available")
+                return
             
+            available_challenges_classes = [
+                AccuracyChallenge, 
+                QualityChallenge, 
+                SeoChallenge,
+            ]  
+            
+            with self.neuron.lock:
+                session_number = self.neuron.session_number
+
+            challenge_class = available_challenges_classes[session_number % len(available_challenges_classes)]
+            challenge = challenge_class(task=task, session_number=session_number)
+
+            synapse.competition_type = challenge.competition_type
+
+            bt.logging.debug(f"Querying {len(miner_uids)} miners")
+            
+            query_time = time.time()
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
-                all_synapse_results = await dendrite(
+                all_synapse_hash_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
                     synapse=synapse,
-                    timeout=task.timeout
+                    timeout=task.timeout,
                 )
+         
+            elapsed_time = time.time() - query_time
+            sleep_time_before_reveal = max(0, task.timeout - elapsed_time) + TASK_REVEAL_TIME
+            time.sleep(sleep_time_before_reveal)
 
-            solutions = []
-            for synapse, miner_uid in zip(all_synapse_results, miner_uids):
-                processed_synapse = await self.process_synapse(synapse)
-                if processed_synapse is not None:
-                    solutions.append(Solution(html = processed_synapse.html, miner_uid = miner_uid, process_time = processed_synapse.dendrite.process_time))
+            bt.logging.debug(f"Revealing task {task.task_id}")
             
-            self.competitions.append((task, solutions))
+            async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
+                all_synapse_reveal_results = await dendrite(
+                    axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
+                    synapse=synapse,
+                    timeout=TASK_REVEAL_TIMEOUT,
+                )
+            
+            solutions = []
+            for reveal_synapse, hash_synapse, miner_uid in zip(all_synapse_reveal_results, all_synapse_hash_results, miner_uids):
+                reveal_synapse.html_hash = hash_synapse.html_hash
+                checked_synapse = await self.checked_synapse(reveal_synapse)
+                if checked_synapse is not None:
+                    solutions.append(
+                        Solution(
+                            html = checked_synapse.html, 
+                            miner_uid = miner_uid, 
+                        )
+                    )
+            challenge.solutions = solutions
+
+            bt.logging.info(f"Received {len(solutions)} valid solutions")
+            with self.neuron.lock:
+                self.miner_results.append(challenge)
+
         except Exception as e:
             bt.logging.error(f"Error in query_miners: {e}")
             raise e
 
     async def score(self):
-        if not self.competitions:
+        with self.neuron.lock:
+            if not self.miner_results:
+                return
+
+            challenge = self.miner_results.pop(0)
+
+        if not challenge.solutions:
             return
-
-        task, solutions = self.competitions.pop(0)
-        if not solutions:
-            return
-
-        best_miner = -1
-        best_reward = 0.0
-
-        competition = task.competition
-        miner_uids = [solution.miner_uid for solution in solutions]
-        rewards = await competition.reward(task, solutions)
-        bt.logging.success(f"Rewards for {miner_uids}: {rewards}")
         
-        for i in range(len(miner_uids)):
-            if rewards[i] > best_reward:
-                best_reward = rewards[i]
-                best_miner = miner_uids[i]
+        with self.neuron.lock:
+            if challenge.session_number != self.neuron.session_number:
+                return
+        
+        bt.logging.info("Scoring")
+        solutions = challenge.solutions
+        miner_uids = [solution.miner_uid for solution in solutions]
 
-        if best_miner == -1:
-            return
-    
-        self.neuron.update_scores([RESERVED_WEIGHTS[competition.name]], [best_miner])
-        self.neuron.step += 1
+        aggregated_scores, scores = await challenge.calculate_scores()
+        
+        bt.logging.success(f"Task Source: {challenge.task.src}")
+        bt.logging.success(f"Competition Type: {challenge.competition_type}")
+        bt.logging.success(f"Scores: {scores}")
+        bt.logging.success(f"Final scores for {miner_uids}: {aggregated_scores}")
+        
+        with self.neuron.lock:
+            current_block = self.neuron.block
+            session_number = self.neuron.session_number
+            session_start_block = session_number * SESSION_WINDOW_BLOCKS
+            session_start_datetime = (
+                datetime.now() - 
+                timedelta(
+                    seconds=(current_block - session_start_block) * BLOCK_IN_SECONDS
+                )
+            )
+            payload = {
+                "validator": {
+                    "hotkey": self.neuron.metagraph.axons[self.neuron.uid].hotkey,
+                    "coldkey": self.neuron.metagraph.axons[self.neuron.uid].coldkey,
+                },
+                "miners": [
+                    {
+                        "coldkey": self.neuron.metagraph.axons[miner_uids[i]].coldkey,
+                        "hotkey": self.neuron.metagraph.axons[miner_uids[i]].hotkey,
+                    } for i in range(len(miner_uids))
+                ],
+                "solutions": [
+                    {
+                        "miner_answer": { "html": solution.html },
+                    } for solution in solutions
+                ],
+                "scores": [
+                    {
+                        "aggregated_score": aggregated_scores[i],
+                        "accuracy": scores[ACCURACY_METRIC_NAME][i],
+                        "seo": scores[SEO_METRIC_NAME][i],
+                        "code_quality": scores[QUALITY_METRIC_NAME][i],
+                    } for i in range(len(miner_uids))
+                ],
+                "challenge": {
+                    "task": challenge.task.ground_truth_html,
+                    "competition_type": challenge.competition_type,
+                    "session_number": challenge.session_number,
+                },
+                "session_start_datetime": session_start_datetime,
+            }
+
+        bt.logging.info(f"Storing results to database: {payload}")
+        store_results_to_database(payload)
+         
+        self.neuron.score_manager.update_scores(
+            aggregated_scores, 
+            miner_uids, 
+            challenge.session_number,
+        )
 
     async def synthensize_task(self):
         try:
-            if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
-                return
+            with self.neuron.lock:
+                if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
+                    bt.logging.info(f"Synthetic task size {len(self.synthetic_tasks)} exceeds max size {MAX_SYNTHETIC_TASK_SIZE}, skipping")
+                    return
 
-            bt.logging.debug(f"Synthensize task")
+            bt.logging.info(f"Synthensize task")
             
-            competition, _ = random.choices(
-                self.avail_competitions,
-                weights=[weight for _, weight in self.avail_competitions]
+            task_generator, _ = random.choices(
+                self.task_generators,
+                weights=[weight for _, weight in self.task_generators],
             )[0]
             
-            task, synapse = await competition.generate_task()
-            self.synthetic_tasks.append((task, synapse))
+            task, synapse = await task_generator.generate_task()
+            with self.neuron.lock:
+                self.synthetic_tasks.append((task, synapse))
+
+            bt.logging.success(f"Successfully generated task for {task.src}")
+        
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
 
     async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
         if isinstance(synapse, WebgenieTextSynapse):
             bt.logging.debug(f"Organic text forward: {synapse.prompt}")
+            bt.logging.info("Not supported yet.")
+            synapse.html = "Not supported yet."
+            return synapse
         else:
-            bt.logging.debug(f"Organic image forward: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}...")
+            bt.logging.debug(f"Organic image forward: {image_debug_str(synapse.base64_image)}...")
 
-        best_miner_uid = get_most_available_uid(self.neuron)
+        all_miner_uids = get_all_available_uids(self.neuron)
         try:
-            axon = self.neuron.metagraph.axons[best_miner_uid]
+            if not all_miner_uids:
+                raise Exception("No miners available")
+            
+            query_time = time.time()
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 responses = await dendrite(
-                    axons=[axon],
+                    axons=[self.neuron.metagraph.axons[uid] for uid in all_miner_uids],
                     synapse=synapse,
                     timeout=synapse.timeout,
                 )
 
-            processed_synapse = await self.process_synapse(responses[0])
-            if processed_synapse is None:
-                raise Exception(f"No valid solution received")
- 
-            return processed_synapse
+            elapsed_time = time.time() - query_time
+            sleep_time_before_reveal = max(0, synapse.timeout - elapsed_time) + TASK_REVEAL_TIME
+            time.sleep(sleep_time_before_reveal)
+
+            async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
+                responses = await dendrite(
+                    axons=[self.neuron.metagraph.axons[uid] for uid in all_miner_uids],
+                    synapse=synapse,
+                    timeout=TASK_REVEAL_TIMEOUT,
+                )
+
+            # Sort miner UIDs and responses by incentive scores
+            incentives = self.neuron.metagraph.I[all_miner_uids]
+            sorted_indices = np.argsort(-incentives)  # Negative for descending order
+            all_miner_uids = [all_miner_uids[i] for i in sorted_indices]
+            
+            responses = [responses[i] for i in sorted_indices]
+            for response in responses:
+                checked_synapse = await self.checked_synapse(response)
+                if checked_synapse is None:
+                    continue
+                return checked_synapse
+            
+            raise Exception(f"No valid solution received")
         except Exception as e:
             bt.logging.error(f"[forward_organic_synapse] Error querying dendrite: {e}")
             synapse.html = f"Error: {e}"
             return synapse
     
-    async def process_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
+    async def checked_synapse(self, synapse: bt.Synapse) -> bt.Synapse:
         if synapse.dendrite.status_code == 200:
+            if not verify_answer_hash(synapse):
+                bt.logging.warning(f"Invalid answer hash: {synapse.html_hash}")
+                return None
+
             html = preprocess_html(synapse.html)
-            if not html:
+            if not is_valid_resources(html):
+                bt.logging.warning(f"Invalid resources: {html}")
                 return None
-            if not validate_resources(html):
-                return None
+
             synapse.html = html
             return synapse
         return None

@@ -1,7 +1,23 @@
 import random
 import bittensor as bt
 import numpy as np
-from typing import List
+from typing import List, Tuple
+
+
+def is_validator(metagraph: "bt.metagraph.Metagraph", uid: int, vpermit_tao_limit: int) -> bool:
+    return metagraph.S[uid] >= vpermit_tao_limit
+
+
+def get_validator_index(self, uid: int) -> Tuple[int, int]:
+    validator_uids = []
+    for uid in range(self.metagraph.n.item()):
+        if is_validator(self.metagraph, uid, self.config.neuron.vpermit_tao_limit):
+            validator_uids.append(uid)  
+    validator_uids.sort(key=lambda uid: self.metagraph.S[uid], reverse=True)
+    try:
+        return validator_uids.index(uid), len(validator_uids)
+    except ValueError:
+        return -1, len(validator_uids)
 
 
 def check_uid_availability(
@@ -45,7 +61,7 @@ def get_most_available_uid(self, exclude: List[int] = None) -> int:
             if uid_is_not_excluded:
                 candidate_uids.append(uid)
     
-    return candidate_uids[np.argmax(self.metagraph.S[candidate_uids])]
+    return candidate_uids[np.argmax(self.metagraph.I[candidate_uids])]
 
 def get_all_available_uids(
     self, exclude: List[int] = None

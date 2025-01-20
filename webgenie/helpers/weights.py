@@ -4,7 +4,15 @@ import wandb
 
 import webgenie
 
+from webgenie.constants import (
+    WANDB_API_KEY,
+    WANDB_PROJECT_NAME,
+    WANDB_ENTITY_NAME,
+)
+
+
 wandb_on = False
+
 
 def init_wandb(self):
     try:
@@ -14,15 +22,15 @@ def init_wandb(self):
             return
 
         wandb_on = True
-        wandb.login(key=os.getenv("WANDB_API_KEY"))
+        wandb.login(key=WANDB_API_KEY)
 
         run_name = f"{self.config.neuron.name}-{self.uid}"
         run = wandb.init(
             project=webgenie.PROJECT_NAME, 
-            entity=os.getenv("WANDB_ENTITY_NAME"), 
+            entity=WANDB_ENTITY_NAME, 
             name=run_name,
             config=self.config,
-            reinit=True
+            reinit=True,
         )
 
         signature = self.wallet.hotkey.sign(run.id.encode()).hex()
@@ -33,6 +41,8 @@ def init_wandb(self):
     except Exception as e:
         bt.logging.error(f"Error initializing wandb: {e}")
         raise e
+
+
 
 def log_wandb(data: dict):
     try:

@@ -50,7 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
-
+*.db
 # Translations
 *.mo
 *.pot
@@ -180,12 +180,15 @@ wandb/
 # work dir
 work/
 work_save/
+tests/work/
 *.png
 
 # scripts
 run_miner.sh
-run_miner_2.sh
+run_miner2.sh
 run_validator.sh
 
 # developer doc
 developer_doc.md
+
+debug_images/

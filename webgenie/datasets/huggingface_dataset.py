@@ -1,21 +1,18 @@
 # https://huggingface.co/datasets/SALT-NLP/Design2Code_human_eval_pairwise
 
 import bittensor as bt
-import os
 import random
 from datasets import load_dataset
-
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 from webgenie.datasets.dataset import Dataset, DatasetEntry
-from webgenie.helpers.llms import call_llm
+from webgenie.helpers.llms import openai_call
 from webgenie.prompts import PROMPT_MAKE_HTML_COMPLEX
+
 
 class HTMLResponse(BaseModel):
     complex_html: str = Field(description="the complex html code")
+
 
 class HuggingfaceDataset(Dataset):
     def __init__(self , **kwargs):
@@ -25,18 +22,17 @@ class HuggingfaceDataset(Dataset):
 
         self.dataset = load_dataset(dataset_name, split=split)
         self.html_column = html_column
-        self.output_parser = JsonOutputParser(pydantic_object=HTMLResponse)
 
     async def _make_html_complex(self, html: str)->str:
         bt.logging.info("Making HTML complex")
-        response = await call_llm(
-            template=[
-                ("system", PROMPT_MAKE_HTML_COMPLEX),
+        response = await openai_call(
+            messages = [
+                {"role": "system", "content": PROMPT_MAKE_HTML_COMPLEX},
+                {"role": "user", "content": html},
             ],
-            params={"html": html, "instructions": self.output_parser.get_format_instructions()},
-            output_parser=self.output_parser
+            response_format = HTMLResponse,
         )
-        return response["complex_html"]
+        return response.complex_html
 
     async def generate_context(self)->DatasetEntry:
         try:

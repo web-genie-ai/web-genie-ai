@@ -81,7 +81,7 @@ def add_args(cls, parser):
         "--neuron.epoch_length",
         type=int,
         help="The default epoch length (how often we set weights, measured in 12 second blocks).",
-        default=100,
+        default=25,
     )
 
     parser.add_argument(
@@ -239,7 +239,7 @@ def add_validator_args(cls, parser):
         "--neuron.vpermit_tao_limit",
         type=int,
         help="The maximum number of TAO allowed to query a validator with a vpermit.",
-        default=4096,
+        default=5096,
     )
 
     parser.add_argument(

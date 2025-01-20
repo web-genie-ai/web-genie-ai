@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 from typing import List
 
-from webgenie.tasks import Task
-from webgenie.tasks.solution import Solution
+from webgenie.tasks import Task, Solution
+
 
 class Reward(ABC):
     @abstractmethod

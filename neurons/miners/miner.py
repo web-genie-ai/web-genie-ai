@@ -24,11 +24,22 @@ import typing
 
 import bittensor as bt
 from webgenie.base.miner import BaseMinerNeuron
-from webgenie.constants import MAX_DEBUG_IMAGE_STRING_LENGTH
+from webgenie.constants import (
+    TASK_REVEAL_TIME,
+    IMAGE_TASK_TIMEOUT,
+    TEXT_TASK_TIMEOUT,
+)
+from webgenie.helpers.images import image_debug_str
 from webgenie.helpers.weights import init_wandb
-from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
+from webgenie.protocol import (
+    WebgenieTextSynapse, 
+    WebgenieImageSynapse,
+    add_answer_hash,
+    hide_secret_info,
+)
 
 from neurons.miners.openai_miner import OpenaiMiner
+
 
 class Miner(BaseMinerNeuron):
     """
@@ -45,10 +56,6 @@ class Miner(BaseMinerNeuron):
         # Attach determiners which functions are called when servicing a request.
         bt.logging.info(f"Attaching forward function to miner axon.")
         self.axon.attach(
-            forward_fn=self.forward_text,
-            blacklist_fn=self.blacklist_text,
-            priority_fn=self.priority_text,
-        ).attach(
             forward_fn = self.forward_image,
             blacklist_fn=self.blacklist_image,
             priority_fn=self.priority_image,
@@ -56,28 +63,45 @@ class Miner(BaseMinerNeuron):
 
         self.genie_miner = OpenaiMiner(self)
 
+        self.task_state: typing.Dict[str, typing.Dict[str, typing.Any]] = {}
+        
         init_wandb(self)
         
-    async def forward_text(
-        self, synapse: WebgenieTextSynapse
-    ) -> WebgenieTextSynapse:
-        bt.logging.debug(f"Miner text forward called with prompt: {synapse.prompt}")
-        return await self.genie_miner.forward_text(synapse)
-
     async def forward_image(
         self, synapse: WebgenieImageSynapse
     ) -> WebgenieImageSynapse:
-        bt.logging.debug(f"Miner image forward called with image: {synapse.base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]}...")
-        return await self.genie_miner.forward_image(synapse)
+        bt.logging.debug(f"Miner image forward called with image: {image_debug_str(synapse.base64_image)}...")
+        
+        if synapse.task_id not in self.task_state:
+            bt.logging.debug(f"Task {synapse.task_id} is not calculated yet.")
+            create_time = time.time()
+            synapse = await self.genie_miner.forward_image(synapse)
+            
+            nonce = add_answer_hash(synapse, synapse.html)
+            self.task_state[synapse.task_id] = {
+                "html": synapse.html,
+                "nonce": nonce,
+                "create_time": create_time
+            }
+            
+            hide_secret_info(synapse)
+            return synapse
+        else:
+            DELTA = 10
+            create_time = self.task_state[synapse.task_id]["create_time"]
+            if time.time() - create_time >= TASK_REVEAL_TIME + IMAGE_TASK_TIMEOUT - DELTA:
+                bt.logging.debug(f"Task {synapse.task_id} is ready to reveal.")
+                synapse.html = self.task_state[synapse.task_id]["html"]
+                synapse.nonce = self.task_state[synapse.task_id]["nonce"]        
+                del self.task_state[synapse.task_id]
+                return synapse
+            else:
+                bt.logging.warning(f"Task {synapse.task_id} is not ready to reveal yet.")
+                return synapse
 
-    async  def blacklist_text(self, synapse: WebgenieTextSynapse) -> typing.Tuple[bool, str]:
-        return await self.blacklist(synapse)
     
     async def blacklist_image(self, synapse: WebgenieImageSynapse) -> typing.Tuple[bool, str]:
         return await self.blacklist(synapse)
-    
-    async def priority_text(self, synapse: WebgenieTextSynapse) -> float:
-        return await self.priority(synapse)
     
     async def priority_image(self, synapse: WebgenieImageSynapse) -> float:
         return await self.priority(synapse)
