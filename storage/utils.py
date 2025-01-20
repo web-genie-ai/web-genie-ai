@@ -1,3 +1,5 @@
+from bittensor import Wallet
+from io import BufferedReader
 from database import Session as DBSession
 from models import Neuron, LeaderboardSession, Competition, Challenge, Judgement, EvaluationType, TaskSolution, SolutionEvaluation
 from datetime import datetime
@@ -5,6 +7,10 @@ import logging
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+import json
+import time
+import requests
+
 # Setup basic configuration for logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -126,6 +132,130 @@ def store_results_to_database(results: dict):
         for eval_type, score_value in score.items():
             evaluation_type_id = create_evaluation_type(eval_type)
             create_solution_evaluation(solution_id, evaluation_type_id, judgement_id, score_value)
+
+def get_session_data(session_number: int):
+    try:
+        competition = session.query(Competition).join(LeaderboardSession).filter(
+            LeaderboardSession.id == session_number
+        ).first()
+
+        if not competition:
+            return {}
+        
+        # Constructing the payload
+        payload = {
+            "external_id": competition.id,
+            "name": competition.name,
+            "leaderboard_sessions": []
+        }
+
+        for leaderboard_session in competition.sessions:
+            session_data = {
+                "external_id": leaderboard_session.id,
+                "created_at": leaderboard_session.created_at.isoformat(),
+                "challenges": []
+            }
+
+            for challenge in leaderboard_session.challenges:
+                challenge_data = {
+                    "external_id": challenge.id,
+                    "ground_truth_html": challenge.ground_truth_html,
+                    "task_solutions": []
+                }
+
+                for task_solution in challenge.solutions:
+                    solution_data = {
+                        "external_id": task_solution.id,
+                        "created_at": task_solution.created_at.isoformat(),
+                        "miner_answer": task_solution.miner_answer,
+                        "solution_evaluations": []
+                    }
+
+                    # Retrieve evaluations for the task solution
+                    for evaluation in task_solution.solution_scores:
+                        judgement = session.query(Judgement).get(evaluation.judgement_id)
+                        miner_neuron = session.query(Neuron).get(judgement.miner_id)
+                        validator_neuron = session.query(Neuron).get(judgement.validator_id)
+
+                        evaluation_data = {
+                            "external_id": evaluation.id,
+                            "judgement": {
+                                "external_id": judgement.id,
+                                "miner": miner_neuron.hotkey,  # Assuming hotkey is used as identifier
+                                "validator": validator_neuron.hotkey
+                            },
+                            "evaluation_type": {
+                                "external_id": evaluation.score_type_id,
+                                "name": session.query(EvaluationType).get(evaluation.score_type_id).name
+                            },
+                            "value": evaluation.value
+                        }
+
+                        solution_data["solution_evaluations"].append(evaluation_data)
+
+                    challenge_data["task_solutions"].append(solution_data)
+
+                session_data["challenges"].append(challenge_data)
+
+            payload["leaderboard_sessions"].append(session_data)
+
+        return payload
+    except SQLAlchemyError as e:
+        logging.error(f"An error occurred while fetching neuron: {e}")
+        return None
+    finally:
+        session.close()  
+
+def make_signed_request(
+    wallet: Wallet,
+    url: str,
+    subnet_id: int,
+    payload: dict,
+    method: str = 'POST',
+    file_path: str | None = None,
+    subnet_chain: str = 'mainnet',
+) -> requests.Response:
+    headers = {
+        'Realm': subnet_chain,
+        'SubnetID': str(subnet_id),
+        'Nonce': str(time.time()),
+        'Hotkey': wallet.hotkey.ss58_address,
+    }
+
+    file_content = b""
+    files = None
+    if file_path:
+        # TODO: start context for opening file
+        opened_file = open(file_path, "rb")
+        files = {"file": opened_file}
+        file = files.get("file")
+
+        if isinstance(file, BufferedReader):
+            file_content = file.read()
+            file.seek(0)
+
+    headers_str = json.dumps(headers, sort_keys=True)
+    data_to_sign = f"{method}{url}{headers_str}{file_content.decode(errors='ignore')}".encode()
+    signature = wallet.hotkey.sign(
+        data_to_sign,
+    ).hex()
+    headers["Signature"] = signature
+
+    response = requests.request(method, url, headers=headers, files=files, json=payload, timeout=5)
+    return response
+
+def test_send_payload(session_number: int) -> None:
+    wallet = Wallet()
+    session_data = get_session_data(session_number)
+    response = make_signed_request(
+        wallet=wallet,
+        url="https://webgenie-collector.bactensor.io/api/competitions/",
+        subnet_id=12,
+        method="POST",
+        payload=session_data,
+    )
+    if not response.ok:
+        print(response.json())
 
 if __name__ == "__main__":
     neuron_id = add_neuron("5GKH9FPPnWSUoeeTJp19wVtd84XqFW4pyK2ijV2GsFbhTrP1", "5F4tQyWrhfGVcNhoqeiNsR6KjD4wMZ2kfhLj4oHYuyHbZAc3")
