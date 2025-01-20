@@ -15,22 +15,21 @@ load_dotenv(find_dotenv(filename=".env.validator"))
 from typing import Tuple, Union
 
 from webgenie.base.validator import BaseValidatorNeuron
-from webgenie.constants import API_HOTKEY
+from webgenie.constants import (
+    API_HOTKEY,
+    MAX_COUNT_VALIDATORS,
+    BLOCK_IN_SECONDS,
+    SESSION_WINDOW_BLOCKS,
+    QUERING_WINDOW_BLOCKS,
+    WEIGHT_SETTING_WINDOW_BLOCKS
+)
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.utils.uids import get_validator_index
 
 from neurons.validators.genie_validator import GenieValidator
 from neurons.validators.score_manager import ScoreManager
 
-
-MAX_COUNT_VALIDATORS = 1
-
-BLOCK_IN_SECONDS = 12
-TEMPO_BLOCKS = 360
-SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 3
-
-QUERING_WINDOW_BLOCKS = 10
-WEIGHT_SETTING_WINDOW_BLOCKS = 50 # 50 blocks = 10 minutes 
+ 
 
 
 class Validator(BaseValidatorNeuron):
