@@ -101,10 +101,10 @@ class ScoreManager:
         """
         Sets the validator weights to the metagraph hotkeys based on the scores it has received from the miners. The weights determine the trust and incentive level the validator assigns to miner nodes on the network.
         """
-        if not self.neuron.should_set_weights():
-            return
         
         with self.neuron.lock:
+            if not self.neuron.should_set_weights():
+                return
             current_session_number = self.neuron.session_number
             
         if current_session_number != self.last_send_stats_collector_session_number:
