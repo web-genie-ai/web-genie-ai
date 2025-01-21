@@ -65,11 +65,15 @@ async def calculate_clip_score(predict_html_path_list, original_html_path):
     
     results = []
     for predict_html_path in predict_html_path_list:
-        predict_img_path = predict_html_path.replace(HTML_EXTENSION, f"_inpainted{IMAGE_EXTENSION}")
-        await inpaint_image(predict_html_path, predict_img_path)
-        predict_embedding_vector = calculate_embedding_vector(predict_img_path, model, preprocess, device)
+        try:
+            predict_img_path = predict_html_path.replace(HTML_EXTENSION, f"_inpainted{IMAGE_EXTENSION}")
+            await inpaint_image(predict_html_path, predict_img_path)
+            predict_embedding_vector = calculate_embedding_vector(predict_img_path, model, preprocess, device)
 
-        score = (original_embedding_vector @ predict_embedding_vector.T).item()
-        results.append(score)
-    
+            score = (original_embedding_vector @ predict_embedding_vector.T).item()
+            results.append(score)
+        except Exception as e:
+            bt.logging.error(f"Error calculating clip score for {predict_html_path}: {e}")
+            results.append(0)
+
     return results
