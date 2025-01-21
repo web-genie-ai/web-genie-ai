@@ -44,7 +44,7 @@ install_dependencies() {
         echo "Updating system packages..."
         sudo apt update
         echo "Installing required packages..."
-        sudo apt install --assume-yes make git curl python3-pip python3-venv
+        sudo apt install --assume-yes make curl python3-pip
         # Install Node.js and npm
         curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
         sudo apt install --assume-yes nodejs
@@ -53,15 +53,11 @@ install_dependencies() {
         echo "npm version: $(npm --version)"
         # Install PM2 globally
         npm install pm2 -g
-        git clone https://github.com/web-genie-ai/web-genie-ai.git
-        cd web-genie-ai
         
-        # Create and activate virtual environment
-        python3 -m venv .venv
-        source .venv/bin/activate
-        
-        # Install uv package manager
+        # Install uv package manager and add to PATH
         curl -LsSf https://astral.sh/uv/install.sh | sh
+        export PATH="$HOME/.cargo/bin:$PATH"
+        echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
         echo "Installing dependencies..."
         uv sync
 
@@ -72,6 +68,9 @@ install_dependencies() {
         sudo gdebi -n google-chrome-stable_current_amd64.deb
         rm google-chrome-stable_current_amd64.deb
         
+        # Create and activate virtual environment
+        source .venv/bin/activate
+
         # Install Playwright and its dependencies
         playwright install-deps
         playwright install
