@@ -43,6 +43,7 @@ def parse_rgb_string(rgb_str: str) -> tuple[int, int, int]:
         bt.logging.error(f"Error parsing rgb string: {e}")
         return (0, 0, 0)
 
+
 async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
     if os.path.exists(file_path):
         url = f"file:///{os.path.abspath(file_path)}"
