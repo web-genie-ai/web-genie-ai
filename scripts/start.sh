@@ -53,8 +53,8 @@ export PYTHONPATH="."
 # Set netuid based on network type
 NETUID=$([ "$NETWORK" == "finney" ] && echo "54" || echo "214")
 if [[ "$NEURON_TYPE" == "validator" ]]; then
-    pm2 start "uv run neurons/validators/validator.py --netuid $NETUID --subtensor.network $NETWORK --wallet.name $COLDKEY --wallet.hotkey $HOTKEY --logging.debug --axon.port $AXON_PORT" --name webgenie_validator
+    pm2 start "$HOME/.local/bin/uv run neurons/validators/validator.py --netuid $NETUID --subtensor.network $NETWORK --wallet.name $COLDKEY --wallet.hotkey $HOTKEY --logging.debug --axon.port $AXON_PORT" --name webgenie_validator
     pm2 start --name auto_update scripts/auto_update.sh
 else
-    pm2 start "uv run neurons/miners/miner.py --netuid $NETUID --subtensor.network $NETWORK --wallet.name $COLDKEY --wallet.hotkey $HOTKEY --logging.debug --axon.port $AXON_PORT" --name $PROCESS_NAME
+    pm2 start "$HOME/.local/bin/uv run neurons/miners/miner.py --netuid $NETUID --subtensor.network $NETWORK --wallet.name $COLDKEY --wallet.hotkey $HOTKEY --logging.debug --axon.port $AXON_PORT" --name $PROCESS_NAME
 fi
