@@ -101,7 +101,8 @@ WANDB_PROJECT_NAME = os.getenv("WANDB_PROJECT_NAME")
 WANDB_ENTITY_NAME = os.getenv("WANDB_ENTITY_NAME")
 
 # vpermit tao limit
-VPERMIT_TAO_LIMIT = bt.Balance(float(os.getenv("VPERMIT_TAO_LIMIT", 4096)))
+#VPERMIT_TAO_LIMIT = bt.Balance(float(os.getenv("VPERMIT_TAO_LIMIT", 4096)))
+VPERMIT_TAO_LIMIT = float(os.getenv("VPERMIT_TAO_LIMIT", 4096))
 
 # axon off
 AXON_OFF = os.getenv("AXON_OFF", "False").lower() == "true"
