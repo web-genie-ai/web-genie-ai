@@ -2,7 +2,11 @@ import bittensor as bt
 import os
 from PIL import Image
 
-from webgenie.constants import DEFAULT_LOAD_TIME, CHROME_HTML_LOAD_TIME
+from webgenie.constants import (
+    DEFAULT_LOAD_TIME, 
+    CHROME_HTML_LOAD_TIME, 
+    JAVASCRIPT_RUNNING_TIME,
+)
 from webgenie.rewards.visual_reward.common.browser import web_player
 
 
@@ -20,7 +24,10 @@ async def take_screenshot(url, output_file_path, load_time = DEFAULT_LOAD_TIME, 
     try:
         page = await web_player["browser"].new_page()
         await page.goto(url, timeout=CHROME_HTML_LOAD_TIME)
-        await page.wait_for_timeout(load_time)
+
+        await page.wait_for_load_state('networkidle')
+        await page.wait_for_timeout(JAVASCRIPT_RUNNING_TIME)
+        
         await page.screenshot(
             path=output_file_path, 
             full_page=True, 
