@@ -186,7 +186,7 @@ class Validator(BaseValidatorNeuron):
                     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
                     continue
                 
-                QUERY_MINERS_TIMEOUT = 60 * 15
+                QUERY_MINERS_TIMEOUT = 60 * 15 # 15 minutes
                 self.query_miners_event_loop.run_until_complete(
                     asyncio.wait_for(
                         self.genie_validator.query_miners(),
@@ -206,7 +206,7 @@ class Validator(BaseValidatorNeuron):
                 with self.lock:
                     self.sync()
 
-                SCORE_TIMEOUT = 60 * 60 * 2
+                SCORE_TIMEOUT = 60 * 60 * 2 # 2 hours
                 self.score_event_loop.run_until_complete(
                     asyncio.wait_for(
                         self.genie_validator.score(),
@@ -226,7 +226,7 @@ class Validator(BaseValidatorNeuron):
                 with self.lock:
                     self.sync()
                 
-                SYNTHETIC_TASK_TIMEOUT = 60 * 15
+                SYNTHETIC_TASK_TIMEOUT = 60 * 15 # 15 minutes
                 self.synthensize_task_event_loop.run_until_complete(
                     asyncio.wait_for(
                         self.genie_validator.synthensize_task(),
@@ -312,12 +312,12 @@ class Validator(BaseValidatorNeuron):
             self.query_miners_thread.join(5)
             self.score_thread.join(5)
             self.set_weights_thread.join(5)
+            stop_lighthouse_server()
 
             self.synthensize_task_thread = None
             self.query_miners_thread = None
             self.score_thread = None
             self.set_weights_thread = None
-            stop_lighthouse_server()
             bt.logging.info("Stopped background threads")
 
     def __enter__(self):
