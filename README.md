@@ -36,11 +36,11 @@ The primary purpose of WebGenieAI is to:
 
 ## Incentive Mechanism v1
 
-The WebGenieAI subnet incentivizes miners and validators to ensure high-quality outputs. Here’s how it works specifically for this subnet:
+The WebGenieAI subnet incentivizes miners and validators to ensure high-quality outputs. Here's how it works specifically for this subnet:
 
 - Task Assignment: Subnet miners are assigned tasks related to generating and improving machine learning models based on various prompts (text and image).
 - Evaluation: Validators evaluate the outputs produced by miners. The evaluation criteria include accuracy, code quality, and performance metrics.
-- Ranking and Rewarding: Validators rank the miners according to their performance. The Bittensor blockchain’s Yuma Consensus mechanism determines the TAO rewards distribution based on these rankings.
+- Ranking and Rewarding: Validators rank the miners according to their performance. The Bittensor blockchain's Yuma Consensus mechanism determines the TAO rewards distribution based on these rankings.
 
 ![Webgenie Subnet workflow](docs/webgenie-workflow.png "WebGenieAI workflow")
 
@@ -88,9 +88,9 @@ The WebGenieAI subnet incentivizes miners and validators to ensure high-quality 
 - ### Unsupervised Evaluation of Model by Round-Trip Correctness (Ref: [[2]](#references))
     We draw inspiration from a software testing technique known as property-based testing. It allows defining properties that must hold between inputs and outputs of a program (e.g., all items in the input list must also appear in the output list) Round-trip correctness is one such property (e.g., compressing and subsequently decompressing data must yield the original data).
 
-    Consider two forms of data X and Y, such as text prompt and HTML and two (probabilistic) models whose task is to “translate” from one form of data to the other, i.e., a forward model M : X → Y and a backward model M<sup>-1</sup>: Y → X. These models could be a single LLM prompted differently.
+    Consider two forms of data X and Y, such as text prompt and HTML and two (probabilistic) models whose task is to "translate" from one form of data to the other, i.e., a forward model M : X → Y and a backward model M<sup>-1</sup>: Y → X. These models could be a single LLM prompted differently.
 
-    The central idea for unsupervised evaluation is the concept of round-trip correctness (RTC). Intuitively, for a “good” forward and backward model we expect ̂x =M<sup>-1</sup> M(x) to be semantically equivalent to x. For example, we can describe the HTML code with text prompt in the forward pass and then generate back the code from the text prompt. To compute RTC we need some function sim(x, ̂x) that estimates the semantic equivalence between the original x and each predicted sample ̂x. Such functions may include discrete or continuous metrics such as exact match, BLEU and so on.
+    The central idea for unsupervised evaluation is the concept of round-trip correctness (RTC). Intuitively, for a "good" forward and backward model we expect ̂x =M<sup>-1</sup> M(x) to be semantically equivalent to x. For example, we can describe the HTML code with text prompt in the forward pass and then generate back the code from the text prompt. To compute RTC we need some function sim(x, ̂x) that estimates the semantic equivalence between the original x and each predicted sample ̂x. Such functions may include discrete or continuous metrics such as exact match, BLEU and so on.
 
 - ### Supervised Evaluation of Model by CodeBERTScore 
     Let x is prompt, y is the ground truth html, ̂y is the generated html.
@@ -128,6 +128,10 @@ cd web-genie-ai
 
 ```bash
 bash scripts/requirements.sh
+```
+
+Configure your Bittensor wallets and environment variables before proceeding:
+```bash
 bash scripts/start.sh
 ```
 
