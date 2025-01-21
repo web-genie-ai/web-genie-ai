@@ -70,6 +70,7 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
         with open(screenshot_path, "rb") as f:
             screenshot = Image.open(f)
             W, H = screenshot.size
+
         bt.logging.info(f"Extracted screenshot from {file_path}")
         async def add_element(node, has_children):
             # Combine all necessary evaluations into one to reduce overhead
@@ -139,7 +140,10 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
                 children = await current_node.query_selector_all(':scope > *')
                 for child in children:
                     stack.append(child)
-                await add_element(current_node, bool(children))
+                try:
+                    await add_element(current_node, bool(children))
+                except Exception as e:
+                    bt.logging.error(f"Error adding element: {e}")
                 # Dispose the node when done
                 await current_node.dispose()
             
