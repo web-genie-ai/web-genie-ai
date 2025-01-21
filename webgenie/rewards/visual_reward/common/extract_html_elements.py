@@ -66,13 +66,16 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
         await page.wait_for_load_state("networkidle")
         await page.wait_for_timeout(JAVASCRIPT_RUNNING_TIME)
         
-        await page.screenshot(
-            path=screenshot_path, 
-            full_page=True, 
-            animations="disabled", 
-            timeout=CHROME_HTML_LOAD_TIME,
-        )
-        
+        if not os.path.exists(screenshot_path):
+            await page.screenshot(
+                path=screenshot_path, 
+                full_page=True, 
+                animations="disabled", 
+                timeout=CHROME_HTML_LOAD_TIME,
+            )
+        else:
+            bt.logging.info(f"Screenshot already exists for {file_path}")
+            
         bt.logging.info(f"Extracting html elements from {file_path}")
         with open(screenshot_path, "rb") as f:
             screenshot = Image.open(f)
