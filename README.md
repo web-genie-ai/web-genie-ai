@@ -124,7 +124,7 @@ git clone https://github.com/web-genie-ai/web-genie-ai.git
 cd web-genie-ai
 ```
 
-#### 1) Running miners and validators with script files
+#### 1) Running miners and validators using bash files
 
 ```bash
 bash scripts/requirements.sh
