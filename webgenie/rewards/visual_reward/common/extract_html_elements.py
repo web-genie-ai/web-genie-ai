@@ -133,13 +133,15 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
                 )
         
         async def traverse(node):
-            children = await node.query_selector_all(':scope > *')
-            has_children = False
-            for child in children:
-                await traverse(child)
-                has_children = True
-            
-            await add_element(node, has_children)
+            stack = [node]
+            while stack:
+                current_node = stack.pop()
+                children = await current_node.query_selector_all(':scope > *')
+                for child in children:
+                    stack.append(child)
+                await add_element(current_node, bool(children))
+                # Dispose the node when done
+                await current_node.dispose()
             
         await traverse(await page.query_selector('body'))
         await page.close()
