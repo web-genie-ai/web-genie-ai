@@ -118,7 +118,14 @@ The WebGenieAI subnet incentivizes miners and validators to ensure high-quality 
 - See [Running on Testnet](docs/running_on_testnet.md) for instructions on how to run the subnet on testnet.
 - See [Running on Mainnet](docs/running_on_mainnet.md) for instructions on how to run the subnet on mainnet.
 
-#### Scripts for running miners and validators
+#### 1) Running miners and validators with script files
+
+```bash
+bash scripts/requirements.sh
+bash scripts/start.sh
+```
+
+#### 2) Scripts for running miners and validators manually
 ```bash
 npm install pm2 -g
 git clone https://github.com/web-genie-ai/web-genie-ai.git
