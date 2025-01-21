@@ -127,7 +127,7 @@ cd web-genie-ai
 #### 1) Running miners and validators using bash files
 
 ```bash
-bash scripts/requirements.sh
+bash scripts/install_requirements.sh
 ```
 
 Configure your Bittensor wallets and environment variables before proceeding:
