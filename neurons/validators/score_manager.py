@@ -17,11 +17,13 @@ from webgenie.storage import send_challenge_to_stats_collector
 class ScoreManager:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
-        self.scoring_session_number = 0
+        
+        self.should_save = False
+        
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
         self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        self.scoring_session_number = 0
         self.session_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        self.should_save = False
         self.last_send_stats_collector_session_number = -1
 
     def load_scores(self):
@@ -32,12 +34,14 @@ class ScoreManager:
             self.hotkeys = state["hotkeys"]
             self.scoring_session_number = state["scoring_session_number"]
             self.session_accumulated_scores = state["tempo_accumulated_scores"]
+            self.last_send_stats_collector_session_number = state["last_send_stats_collector_session_number"]
         except Exception as e:
             bt.logging.warning(f"Error loading scores: {e}")
             self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
             self.scoring_session_number = 0
             self.session_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+            self.last_send_stats_collector_session_number = -1
 
     def save_scores(self):
         if not self.should_save:
@@ -51,6 +55,7 @@ class ScoreManager:
             hotkeys=self.hotkeys,
             scoring_session_number=self.scoring_session_number,
             tempo_accumulated_scores=self.session_accumulated_scores,
+            last_send_stats_collector_session_number=self.last_send_stats_collector_session_number,
         )
     
     def set_new_hotkeys(self, new_hotkeys: List[str]):
