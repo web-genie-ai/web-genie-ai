@@ -56,8 +56,9 @@ install_dependencies() {
         
         # Install uv package manager and add to PATH
         curl -LsSf https://astral.sh/uv/install.sh | sh
-        export PATH="$HOME/.cargo/bin:$PATH"
-        echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
+        export PATH="$HOME/.local/bin:$PATH"
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+        source "$HOME/.local/bin/env"
         echo "Installing dependencies..."
         uv sync
 
