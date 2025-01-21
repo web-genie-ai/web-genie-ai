@@ -7,7 +7,11 @@ from pydantic import BaseModel, Field
 from typing import Any
 from skimage import io, color
 
-from webgenie.constants import DEFAULT_LOAD_TIME, CHROME_HTML_LOAD_TIME
+from webgenie.constants import (
+    DEFAULT_LOAD_TIME, 
+    CHROME_HTML_LOAD_TIME,
+    JAVASCRIPT_RUNNING_TIME,
+)
 from webgenie.rewards.visual_reward.common.browser import web_player
 from webgenie.rewards.visual_reward.common.sift import extract_sift_from_roi
 
@@ -43,6 +47,7 @@ def parse_rgb_string(rgb_str: str) -> tuple[int, int, int]:
         bt.logging.error(f"Error parsing rgb string: {e}")
         return (0, 0, 0)
 
+
 async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
     if os.path.exists(file_path):
         url = f"file:///{os.path.abspath(file_path)}"
@@ -57,19 +62,25 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
         page = await web_player["browser"].new_page()
 
         await page.goto(url, timeout=CHROME_HTML_LOAD_TIME)
+
         await page.wait_for_load_state("networkidle")
-        await page.wait_for_timeout(1000)
-        await page.screenshot(
-            path=screenshot_path, 
-            full_page=True, 
-            animations="disabled", 
-            timeout=CHROME_HTML_LOAD_TIME,
-        )
+        await page.wait_for_timeout(JAVASCRIPT_RUNNING_TIME)
         
+        if not os.path.exists(screenshot_path):
+            await page.screenshot(
+                path=screenshot_path, 
+                full_page=True, 
+                animations="disabled", 
+                timeout=CHROME_HTML_LOAD_TIME,
+            )
+        else:
+            bt.logging.info(f"Screenshot already exists for {file_path}")
+            
         bt.logging.info(f"Extracting html elements from {file_path}")
         with open(screenshot_path, "rb") as f:
             screenshot = Image.open(f)
             W, H = screenshot.size
+
         bt.logging.info(f"Extracted screenshot from {file_path}")
         async def add_element(node, has_children):
             # Combine all necessary evaluations into one to reduce overhead
@@ -139,7 +150,10 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
                 children = await current_node.query_selector_all(':scope > *')
                 for child in children:
                     stack.append(child)
-                await add_element(current_node, bool(children))
+                try:
+                    await add_element(current_node, bool(children))
+                except Exception as e:
+                    bt.logging.error(f"Error adding element: {e}")
                 # Dispose the node when done
                 await current_node.dispose()
             
@@ -164,7 +178,7 @@ def preprocess_html_elements(html_path, html_elements):
         try:
             element.avg_color = np.mean(color_image[y:y+h, x:x+w], axis=(0, 1))
         except Exception as e:
-            bt.logging.error(f"Error extracting html elements from {html_path}: {e}")
+            bt.logging.error(f"Error calculating avg color of html elements from {html_path}: {e}")
             element.avg_color = (0, 0, 0)
 
     gray_image = color.rgb2gray(color_image)
@@ -174,6 +188,6 @@ def preprocess_html_elements(html_path, html_elements):
         try:
             element.keypoints, element.descriptors = extract_sift_from_roi(gray_image, (x, y, w, h))   
         except Exception as e:
-            bt.logging.error(f"Error extracting html elements from {html_path}: {e}")
+            bt.logging.error(f"Error extracting sift from html elements from {html_path}: {e}")
             element.keypoints = None
             element.descriptors = None

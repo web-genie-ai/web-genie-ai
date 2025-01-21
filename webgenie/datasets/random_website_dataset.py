@@ -11,7 +11,11 @@ from urllib.parse import urljoin
 from typing import Optional
 
 from webgenie.datasets.dataset import Dataset, DatasetEntry
-from webgenie.constants import GROUND_TRUTH_HTML_LOAD_TIME, CHROME_HTML_LOAD_TIME
+from webgenie.constants import (
+    GROUND_TRUTH_HTML_LOAD_TIME, 
+    CHROME_HTML_LOAD_TIME,
+    JAVASCRIPT_RUNNING_TIME,
+)
 
 class RandomWebsiteDataset(Dataset):
     def __init__(self , **kwargs):
@@ -47,7 +51,7 @@ class RandomWebsiteDataset(Dataset):
                 # await page.wait_for_timeout(GROUND_TRUTH_HTML_LOAD_TIME)
                 
                 await page.wait_for_load_state('networkidle')
-                await page.wait_for_timeout(1000)
+                await page.wait_for_timeout(JAVASCRIPT_RUNNING_TIME)
                 
                 rendered_html = await page.content()  # Get the rendered HTML
                 

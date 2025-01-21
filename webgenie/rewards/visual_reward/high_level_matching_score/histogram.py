@@ -41,10 +41,14 @@ async def histogram_matching_score(predict_html_path_list, original_html_path):
     
     results = []
     for predict_html_path in predict_html_path_list:
-        predict_img_path = predict_html_path.replace(HTML_EXTENSION, IMAGE_EXTENSION)
-        await take_screenshot(predict_html_path, predict_img_path)
-        predict_hist = compute_grayscale_histogram(predict_img_path)
-        similarity = compare_histograms(original_hist, predict_hist)
-        results.append(similarity)
+        try:
+            predict_img_path = predict_html_path.replace(HTML_EXTENSION, IMAGE_EXTENSION)
+            await take_screenshot(predict_html_path, predict_img_path)
+            predict_hist = compute_grayscale_histogram(predict_img_path)
+            similarity = compare_histograms(original_hist, predict_hist)
+            results.append(similarity)
+        except Exception as e:
+            bt.logging.error(f"Error calculating histogram score for {predict_html_path}: {e}")
+            results.append(0)
 
     return results

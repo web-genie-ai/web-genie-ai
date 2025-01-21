@@ -52,6 +52,11 @@ class VisualReward(Reward):
 
         scores = high_level_scores * 0.3 + low_level_scores * 0.7
         await stop_browser()
+        
+        for html_path in miner_html_paths:
+            os.remove(html_path)
+        os.remove(original_html_path)
+
         return scores
     
     def sync_reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:

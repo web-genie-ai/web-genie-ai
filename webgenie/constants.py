@@ -82,6 +82,8 @@ QUERING_WINDOW_BLOCKS = 10
 # weight setting window blocks
 WEIGHT_SETTING_WINDOW_BLOCKS = 50 # 50 blocks = 10 minutes
 
+JAVASCRIPT_RUNNING_TIME = 1000
+
 # llm model id
 LLM_MODEL_ID = os.getenv("LLM_MODEL_ID")
 

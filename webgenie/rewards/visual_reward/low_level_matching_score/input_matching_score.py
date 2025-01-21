@@ -1,3 +1,4 @@
+import bittensor as bt
 import asyncio
 import numpy as np
 from math import sqrt
@@ -33,16 +34,19 @@ def create_cost_matrix(predicted_elements, original_elements):
 
 
 def calculate_input_matching_similarity(predicted_elements, original_elements):
-    cost_matrix = create_cost_matrix(predicted_elements, original_elements)
-    row_ind, col_ind = linear_sum_assignment(cost_matrix)
-    similarity_sum = 0
-    for i , j in zip(row_ind, col_ind):
-        similarity_sum += calculate_cost(predicted_elements[i], original_elements[j])
-    
-    total_count = max(len(predicted_elements), len(original_elements))
-    if total_count == 0:
-        return 1
+    try:
+        cost_matrix = create_cost_matrix(predicted_elements, original_elements)
+        row_ind, col_ind = linear_sum_assignment(cost_matrix)
+        similarity_sum = 0
+        for i , j in zip(row_ind, col_ind):
+            similarity_sum += calculate_cost(predicted_elements[i], original_elements[j])
+        
+        total_count = max(len(predicted_elements), len(original_elements))
+        if total_count == 0:
+            return 1
 
-    return similarity_sum / total_count
-
+        return similarity_sum / total_count
+    except Exception as e:
+        bt.logging.error(f"Error calculating input matching score: {e}")
+        return 0
 
