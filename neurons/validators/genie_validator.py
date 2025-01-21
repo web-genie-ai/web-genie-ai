@@ -199,12 +199,13 @@ class GenieValidator:
 
         bt.logging.info(f"Storing results to database: {payload}")
         store_results_to_database(payload)
-         
-        self.neuron.score_manager.update_scores(
-            aggregated_scores, 
-            miner_uids, 
-            challenge.session_number,
-        )
+
+        with self.neuron.lock:
+            self.neuron.score_manager.update_scores(
+                aggregated_scores, 
+                miner_uids, 
+                challenge.session_number,
+            )
 
     async def synthensize_task(self):
         try:
