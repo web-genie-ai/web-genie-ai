@@ -41,7 +41,7 @@ class Validator(BaseValidatorNeuron):
     """
     
     @property
-    def session_number(self):
+    def session(self):
         return self.block // SESSION_WINDOW_BLOCKS
 
     def __init__(self, config=None):

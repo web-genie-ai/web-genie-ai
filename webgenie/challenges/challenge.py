@@ -20,7 +20,7 @@ class Challenge(BaseModel):
     task: Optional[Task] = Field(default=None, description="The task to be solved")
     solutions: List[Solution] = Field(default=[], description="The solutions to the task")
     competition_type: str = Field(default="", description="The type of competition")
-    session_number: int = Field(default=0, description="The session number")
+    session: int = Field(default=0, description="The session number")
 
     async def calculate_scores(self) -> dict[str, np.ndarray]:
         pass

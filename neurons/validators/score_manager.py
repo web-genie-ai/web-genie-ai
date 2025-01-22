@@ -10,7 +10,7 @@ from webgenie.base.utils.weight_utils import (
     convert_weights_and_uids_for_emit,
 ) 
 from webgenie.base.neuron import BaseNeuron
-from webgenie.constants import CONSIDERING_SESSION_NUMBER
+from webgenie.constants import CONSIDERING_SESSION_COUNTS
 from webgenie.storage import send_challenge_to_stats_collector
 
 
@@ -22,9 +22,9 @@ class ScoreManager:
         self.should_save = False
         
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
-        self.scoring_session_number = -1
+        self.scoring_session = -1
         self.session_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        self.last_send_stats_collector_session_number = -1
+        self.last_send_stats_collector_session = -1
         self.winners = []
 
     def load_scores(self):
@@ -36,16 +36,16 @@ class ScoreManager:
                 "hotkeys",
                 copy.deepcopy(self.neuron.metagraph.hotkeys)
             )
-            self.scoring_session_number = state.get(
-                "scoring_session_number", 
+            self.scoring_session = state.get(
+                "scoring_session", 
                 -1
             )
             self.session_accumulated_scores = state.get(
                 "tempo_accumulated_scores",
                 np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             )
-            self.last_send_stats_collector_session_number = state.get(
-                "last_send_stats_collector_session_number",
+            self.last_send_stats_collector_session = state.get(
+                "last_send_stats_collector_session",
                 -1
             )
             self.winners = state.get(
@@ -64,9 +64,9 @@ class ScoreManager:
         np.savez(
             self.neuron.config.neuron.full_path + "/state.npz",
             hotkeys=self.hotkeys,
-            scoring_session_number=self.scoring_session_number,
+            scoring_session=self.scoring_session,
             tempo_accumulated_scores=self.session_accumulated_scores,
-            last_send_stats_collector_session_number=self.last_send_stats_collector_session_number,
+            last_send_stats_collector_session=self.last_send_stats_collector_session,
             winners=self.winners,
         )
     
@@ -91,12 +91,12 @@ class ScoreManager:
         self.hotkeys = copy.deepcopy(new_hotkeys)
         self.should_save = True
 
-    def update_scores(self, rewards: np.ndarray, uids: List[int], session_number: int):
-        if self.scoring_session_number != session_number:
+    def update_scores(self, rewards: np.ndarray, uids: List[int], session: int):
+        if self.scoring_session != session:
             # This is a new session, reset the scores and winners.
-            self.scoring_session_number = session_number
+            self.scoring_session = session
             self.session_accumulated_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-            if len(self.winners) > CONSIDERING_SESSION_NUMBER:
+            if len(self.winners) > CONSIDERING_SESSION_COUNTS:
                 self.winners.pop(0)
             self.winners.append(-1)
 
@@ -118,12 +118,12 @@ class ScoreManager:
         with self.lock:
             if not self.neuron.should_set_weights():
                 return
-            current_session_number = self.neuron.session_number
+            current_session = self.neuron.session
 
-        if current_session_number != self.last_send_stats_collector_session_number:
+        if current_session != self.last_send_stats_collector_session:
             try:
-                send_challenge_to_stats_collector(self.neuron.wallet, current_session_number)
-                self.last_send_stats_collector_session_number = current_session_number
+                send_challenge_to_stats_collector(self.neuron.wallet, current_session)
+                self.last_send_stats_collector_session = current_session
             except Exception as e:
                 bt.logging.error(f"Error sending challenge to stats collector: {e}")
         
