@@ -100,11 +100,14 @@ class ScoreManager:
                 self.winners.pop(0)
             self.winners.append(-1)
 
+        if not self.winners:
+            self.winners.append(-1)
+
         # Update accumulated scores and track best performer
         self.session_accumulated_scores[uids] += rewards
+        bt.logging.info(f"Updated scores: {self.session_accumulated_scores}")
         self.winners[-1] = np.argmax(self.session_accumulated_scores)
-
-        bt.logging.debug(f"Updated scores: {self.session_accumulated_scores}")
+        bt.logging.info(f"Updated winners: {self.winners}")
         self.should_save = True
     
     def set_weights(self):
@@ -118,15 +121,18 @@ class ScoreManager:
             current_session_number = self.neuron.session_number
 
         if current_session_number != self.last_send_stats_collector_session_number:
-            send_challenge_to_stats_collector(self.neuron.wallet, current_session_number)
-            self.last_send_stats_collector_session_number = current_session_number
+            try:
+                send_challenge_to_stats_collector(self.neuron.wallet, current_session_number)
+                self.last_send_stats_collector_session_number = current_session_number
+            except Exception as e:
+                bt.logging.error(f"Error sending challenge to stats collector: {e}")
         
         with self.lock:
             scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             for winner in self.winners:
                 scores[winner] += 1
 
-        
+
         # Calculate the average reward for each uid across non-zero values.
         # Replace any NaN values with 0.
         # Compute the norm of the scores
