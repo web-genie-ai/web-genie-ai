@@ -75,7 +75,7 @@ TEMPO_BLOCKS = 360
 SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 3
 
 # considering session number
-CONSIDERING_SESSION_NUMBER = 8
+CONSIDERING_SESSION_COUNTS = 8
 
 # querying window blocks
 QUERING_WINDOW_BLOCKS = 10
@@ -102,8 +102,7 @@ WANDB_PROJECT_NAME = os.getenv("WANDB_PROJECT_NAME")
 WANDB_ENTITY_NAME = os.getenv("WANDB_ENTITY_NAME")
 
 # vpermit tao limit
-#VPERMIT_TAO_LIMIT = bt.Balance(float(os.getenv("VPERMIT_TAO_LIMIT", 4096)))
-VPERMIT_TAO_LIMIT = float(os.getenv("VPERMIT_TAO_LIMIT", 4096))
+VPERMIT_TAO_LIMIT = 1000
 
 # axon off
 AXON_OFF = os.getenv("AXON_OFF", "False").lower() == "true"

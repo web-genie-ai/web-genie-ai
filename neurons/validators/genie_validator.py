@@ -83,10 +83,10 @@ class GenieValidator:
             ]  
             
             with self.lock:
-                session_number = self.neuron.session_number
+                session = self.neuron.session
 
-            challenge_class = available_challenges_classes[session_number % len(available_challenges_classes)]
-            challenge = challenge_class(task=task, session_number=session_number)
+            challenge_class = available_challenges_classes[session % len(available_challenges_classes)]
+            challenge = challenge_class(task=task, session=session)
 
             synapse.competition_type = challenge.competition_type
 
@@ -147,15 +147,15 @@ class GenieValidator:
             return
         
         with self.lock:
-            if challenge.session_number != self.neuron.session_number:
+            if challenge.session != self.neuron.session:
                 bt.logging.info(
-                    f"Session number mismatch: {challenge.session_number} != {self.neuron.session_number}"
+                    f"Session number mismatch: {challenge.session} != {self.neuron.session}"
                     f"This is the previous session's challenge, skipping"
                 )
                 return
         
         bt.logging.info(
-            f"Scoring - Session number: {challenge.session_number}, "
+            f"Scoring - Session number: {challenge.session}, "
             f"Competition type: {challenge.competition_type}, "
             f"Task source: {challenge.task.src}"
         )
@@ -173,13 +173,13 @@ class GenieValidator:
             self.neuron.score_manager.update_scores(
                 aggregated_scores, 
                 miner_uids, 
-                challenge.session_number,
+                challenge.session,
             )
 
         with self.lock:
             current_block = self.neuron.block
-            session_number = self.neuron.session_number
-            session_start_block = session_number * SESSION_WINDOW_BLOCKS
+            session = self.neuron.session
+            session_start_block = session * SESSION_WINDOW_BLOCKS
             session_start_datetime = (
                 datetime.now() - 
                 timedelta(
@@ -213,7 +213,7 @@ class GenieValidator:
                 "challenge": {
                     "task": challenge.task.ground_truth_html,
                     "competition_type": challenge.competition_type,
-                    "session_number": challenge.session_number,
+                    "session": challenge.session,
                 },
                 "session_start_datetime": session_start_datetime,
             }
