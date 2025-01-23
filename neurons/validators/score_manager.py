@@ -95,6 +95,30 @@ class ScoreManager:
             self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # Update accumulated scores and track best performer
         self.total_scores[uids] += rewards
+        # Create a rich table to display total scores
+  
+        total_scores_table = Table(
+            title=f"Total Scores This Session-{session}",
+            show_header=True,
+            header_style="bold magenta", 
+            title_style="bold blue",
+            border_style="blue"
+        )
+        total_scores_table.add_column("UID", justify="right", style="cyan", header_style="bold cyan")
+        total_scores_table.add_column("Total Score", justify="right", style="green")
+        
+        # Add rows for non-zero scores, sorted by score
+        scored_uids = [(uid, score) for uid, score in enumerate(self.total_scores) if score > 0]
+        scored_uids.sort(key=lambda x: x[1], reverse=True)
+        
+        for uid, score in scored_uids:
+            total_scores_table.add_row(
+                str(uid),
+                f"{score:.4f}"
+            )
+
+        console = Console()
+        console.print(total_scores_table)
         self.winners[session] = (np.argmax(self.total_scores), competition_type)
         for session_number in self.winners:
             if session_number < session - CONSIDERING_SESSION_COUNTS:
@@ -130,6 +154,7 @@ class ScoreManager:
 
         if current_session != self.last_send_stats_collector_session:
             try:
+                bt.logging.info(f"Sending challenge to stats collector for session {current_session}")
                 send_challenge_to_stats_collector(self.neuron.wallet, current_session)
                 self.last_send_stats_collector_session = current_session
             except Exception as e:

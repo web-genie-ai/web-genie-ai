@@ -248,6 +248,7 @@ def make_signed_request(
 
 def send_challenge_to_stats_collector(wallet: "bt.Wallet", session_number: int) -> None:
     session_data = get_session_data(session_number)
+    bt.logging.info(f"Sending challenge to stats collector for session {session_data}")
     response = make_signed_request(
         wallet=wallet,
         url="https://webgenie-collector.bactensor.io/api/competitions/",
