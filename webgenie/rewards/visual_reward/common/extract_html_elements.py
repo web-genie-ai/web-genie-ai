@@ -152,7 +152,7 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
                 try:
                     await add_element(current_node, bool(children))
                 except Exception as e:
-                    bt.logging.warning(f"Error adding element: {e}")
+                    #bt.logging.warning(f"Error adding element: {e}")
                 # Dispose the node when done
                 await current_node.dispose()
             
@@ -177,7 +177,7 @@ def preprocess_html_elements(html_path, html_elements):
         try:
             element.avg_color = np.mean(color_image[y:y+h, x:x+w], axis=(0, 1))
         except Exception as e:
-            bt.logging.warning(f"Error calculating avg color of html elements from {html_path}: {e}")
+            #bt.logging.warning(f"Error calculating avg color of html elements from {html_path}: {e}")
             element.avg_color = (0, 0, 0)
 
     gray_image = color.rgb2gray(color_image)
@@ -187,6 +187,6 @@ def preprocess_html_elements(html_path, html_elements):
         try:
             element.keypoints, element.descriptors = extract_sift_from_roi(gray_image, (x, y, w, h))   
         except Exception as e:
-            bt.logging.warning(f"Error extracting sift from html elements from {html_path}: {e}")
+            #bt.logging.warning(f"Error extracting sift from html elements from {html_path}: {e}")
             element.keypoints = None
             element.descriptors = None
