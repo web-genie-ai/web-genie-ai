@@ -134,10 +134,10 @@ def store_results_to_database(results: dict):
             evaluation_type_id = create_evaluation_type(eval_type)
             create_solution_evaluation(solution_id, evaluation_type_id, judgement_id, score_value)
 
-def get_session_data(session: int):
+def get_session_data(session_number: int):
     try:
         competition = session.query(Competition).join(LeaderboardSession).filter(
-            LeaderboardSession.id == session
+            LeaderboardSession.id == session_number
         ).first()
 
         if not competition:
