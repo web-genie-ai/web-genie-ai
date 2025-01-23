@@ -52,16 +52,16 @@ def get_neuron_id(hotkey: str):
     finally:
         session.close()  # Ensure the session is closed
 
-def create_leaderboard_session(session: int, created_at: datetime, competition_id: int):
+def create_leaderboard_session(session_number: int, created_at: datetime, competition_id: int):
     # Check if the session with the given id already exists
-    existing_session = session.query(LeaderboardSession).filter_by(id=session).first()
+    existing_session = session.query(LeaderboardSession).filter_by(id=session_number).first()
     
     if existing_session:
-        bt.logging.info(f"Session with id {session} already exists. Skipping creation.")
+        bt.logging.info(f"Session with id {session_number} already exists. Skipping creation.")
         return existing_session.id  # Return the existing session id
 
     return create_record(session, LeaderboardSession,
-                         id=session,
+                         id=session_number,
                          created_at=created_at, competition_id=competition_id)
 
 def create_competition(name: str):
@@ -111,13 +111,13 @@ def store_results_to_database(results: dict):
     scores = results["scores"]
     challenge = results["challenge"]
 
-    session = challenge["session"]
+    session_number = challenge["session_number"]
     session_start_datetime = results["session_start_datetime"]
     ground_truth_html = challenge["task"]
     competition_type = challenge["competition_type"]
 
     competition_id = create_competition(competition_type)
-    session_id = create_leaderboard_session(session, session_start_datetime, competition_id)
+    session_id = create_leaderboard_session(session_number, session_start_datetime, competition_id)
     challenge_id = create_challenge(session_id, ground_truth_html)
     
     # Iterate over miner_uids to store TaskSolution data
@@ -151,7 +151,7 @@ def get_session_data(session_number: int):
         }
 
         for leaderboard_session in competition.sessions:
-            if leaderboard_session.id != session:
+            if leaderboard_session.id != session_number:
                 continue  # Skip sessions that do not match the session number
             
             session_data = {
@@ -248,8 +248,8 @@ def make_signed_request(
     response = requests.request(method, url, headers=headers, files=files, json=payload, timeout=5)
     return response
 
-def send_challenge_to_stats_collector(wallet: "bt.Wallet", session: int) -> None:
-    session_data = get_session_data(session)
+def send_challenge_to_stats_collector(wallet: "bt.Wallet", session_number: int) -> None:
+    session_data = get_session_data(session_number)
     response = make_signed_request(
         wallet=wallet,
         url="https://webgenie-collector.bactensor.io/api/competitions/",

@@ -32,8 +32,8 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
                 }
                 return scores
             else:
-                bt.logging.error(f"Stderr from lighthouse: {result.stderr}")
-                raise Exception(f"Stderr from lighthouse: {result.stderr}")
+                bt.logging.error(f"Stderr from lighthouse: {result.stderr}, returncode: {result.returncode}")
+                raise Exception(f"Stderr from lighthouse: {result.stderr}, returncode: {result.returncode}")
         except Exception as e:
             bt.logging.error(f"Error running Lighthouse: {e}")
             return {

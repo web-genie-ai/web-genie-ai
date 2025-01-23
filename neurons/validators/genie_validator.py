@@ -112,7 +112,7 @@ class GenieValidator:
                     synapse=synapse,
                     timeout=TASK_REVEAL_TIMEOUT,
                 )
-            
+
             solutions = []
             for reveal_synapse, hash_synapse, miner_uid in zip(all_synapse_reveal_results, all_synapse_hash_results, miner_uids):
                 reveal_synapse.html_hash = hash_synapse.html_hash
@@ -137,13 +137,13 @@ class GenieValidator:
     async def score(self):
         with self.lock:
             if not self.miner_results:
-                bt.logging.info("No miner results to score")
+                # No miner results to score
                 return
 
             challenge = self.miner_results.pop(0)
 
         if not challenge.solutions:
-            bt.logging.info("No solutions to score")
+            # No solutions to score
             return
         
         with self.lock:
@@ -227,10 +227,7 @@ class GenieValidator:
         try:
             with self.lock:
                 if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
-                    bt.logging.info(
-                        f"Synthetic task size {len(self.synthetic_tasks)} exceeds "
-                        f"max size {MAX_SYNTHETIC_TASK_SIZE}, skipping"
-                    )
+                    # synthetic_tasks is full, skipping
                     return
 
             bt.logging.info(f"Synthensize task")
