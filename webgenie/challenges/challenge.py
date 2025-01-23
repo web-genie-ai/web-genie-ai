@@ -55,3 +55,9 @@ class QualityChallenge(Challenge):
         quality_scores = scores[QUALITY_METRIC_NAME]
         aggregated_scores = np.where(accuracy_scores > 0.7, quality_scores, 0)
         return aggregated_scores, scores
+
+RESERVED_WEIGHTS = {
+    ACCURACY_COMPETITION_TYPE: 50,
+    SEO_COMPETITION_TYPE: 30,
+    QUALITY_COMPETITION_TYPE: 20,
+}

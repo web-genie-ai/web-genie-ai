@@ -6,6 +6,8 @@ import threading
 import time
 
 from datetime import datetime, timedelta
+from rich.console import Console
+from rich.table import Table
 from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
@@ -112,7 +114,7 @@ class GenieValidator:
                     synapse=synapse,
                     timeout=TASK_REVEAL_TIMEOUT,
                 )
-            
+
             solutions = []
             for reveal_synapse, hash_synapse, miner_uid in zip(all_synapse_reveal_results, all_synapse_hash_results, miner_uids):
                 reveal_synapse.html_hash = hash_synapse.html_hash
@@ -137,13 +139,13 @@ class GenieValidator:
     async def score(self):
         with self.lock:
             if not self.miner_results:
-                bt.logging.info("No miner results to score")
+                # No miner results to score
                 return
 
             challenge = self.miner_results.pop(0)
 
         if not challenge.solutions:
-            bt.logging.info("No solutions to score")
+            # No solutions to score
             return
         
         with self.lock:
@@ -153,27 +155,47 @@ class GenieValidator:
                     f"This is the previous session's challenge, skipping"
                 )
                 return
-        
-        bt.logging.info(
-            f"Scoring - Session number: {challenge.session}, "
-            f"Competition type: {challenge.competition_type}, "
-            f"Task source: {challenge.task.src}"
-        )
-        
+                
         solutions = challenge.solutions
         miner_uids = [solution.miner_uid for solution in solutions]
         aggregated_scores, scores = await challenge.calculate_scores()
         
-        bt.logging.success(f"Task Source: {challenge.task.src}")
-        bt.logging.success(f"Competition Type: {challenge.competition_type}")
-        bt.logging.success(f"Scores: {scores}")
-        bt.logging.success(f"Final scores for {miner_uids}: {aggregated_scores}")
+        # Create a rich table to display the scoring results
+        table = Table(
+            title=f"Scoring Results - Session {challenge.session} - {challenge.competition_type} - {challenge.task.src}",
+            show_header=True,
+            header_style="bold magenta",
+            title_style="bold blue",
+            border_style="blue"
+        )
+        table.add_column(
+            "Miner UID",
+            justify="right",
+            style="cyan",
+            header_style="bold cyan"
+        )
+        table.add_column("Aggregated Score", justify="right", style="green")
+        table.add_column("Accuracy", justify="right")
+        table.add_column("SEO", justify="right") 
+        table.add_column("Code Quality", justify="right")
+
+        for i, miner_uid in enumerate(miner_uids):
+            table.add_row(
+                str(miner_uid),
+                f"{aggregated_scores[i]:.4f}",
+                f"{scores[ACCURACY_METRIC_NAME][i]:.4f}",
+                f"{scores[SEO_METRIC_NAME][i]:.4f}",
+                f"{scores[QUALITY_METRIC_NAME][i]:.4f}"
+            )
+
+        console = Console()
+        console.print(table)
         
         with self.lock:
             self.neuron.score_manager.update_scores(
                 aggregated_scores, 
                 miner_uids, 
-                challenge.session,
+                challenge,
             )
 
         with self.lock:
@@ -213,13 +235,12 @@ class GenieValidator:
                 "challenge": {
                     "task": challenge.task.ground_truth_html,
                     "competition_type": challenge.competition_type,
-                    "session": challenge.session,
+                    "session_number": challenge.session,
                 },
                 "session_start_datetime": session_start_datetime,
             }
 
         try:
-            bt.logging.info(f"Storing results to database: {payload}")
             store_results_to_database(payload)
         except Exception as e:
             bt.logging.error(f"Error storing results to database: {e}")
@@ -228,10 +249,7 @@ class GenieValidator:
         try:
             with self.lock:
                 if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
-                    bt.logging.info(
-                        f"Synthetic task size {len(self.synthetic_tasks)} exceeds "
-                        f"max size {MAX_SYNTHETIC_TASK_SIZE}, skipping"
-                    )
+                    # synthetic_tasks is full, skipping
                     return
 
             bt.logging.info(f"Synthensize task")

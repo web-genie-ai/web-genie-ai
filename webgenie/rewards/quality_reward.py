@@ -20,14 +20,18 @@ class ScoreResponse(BaseModel):
 class QualityReward(Reward):
 
     async def _get_score(self, solution: Solution) -> float:
-        response = await openai_call(
-            messages = [
-                {"role": "system", "content": PROMPT_QUALITY.format(html=solution.html)},
-            ],
-            response_format = ScoreResponse,
-            deterministic=True,
-        )
-        return response.score / 100
+        try:
+            response = await openai_call(
+                messages = [
+                    {"role": "system", "content": PROMPT_QUALITY.format(html=solution.html)},
+                ],
+                response_format = ScoreResponse,
+                deterministic=True,
+            )
+            return response.score / 100
+        except Exception as e:
+            bt.logging.error(f"Error getting quality score: {e}")
+            return 0
 
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
         bt.logging.info(f"Rewarding task in quality reward")

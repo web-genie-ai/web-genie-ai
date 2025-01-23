@@ -35,12 +35,11 @@ def check_uid_availability(
         bool: True if uid is available, False otherwise
     """
     # Filter non serving axons.
-    if not metagraph.axons[uid].is_serving:
-        return False
+    # if not metagraph.axons[uid].is_serving:
+    #     return False
     # Filter validator permit > 1024 stake.
-    if metagraph.validator_permit[uid]:
-        if metagraph.S[uid] > VPERMIT_TAO_LIMIT:
-            return False
+    if metagraph.S[uid] > VPERMIT_TAO_LIMIT:
+        return False
     # Available otherwise.
     return True
 

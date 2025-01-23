@@ -35,6 +35,6 @@ async def openai_call(messages, response_format, deterministic=False, retries=3)
                 )
             return completion.choices[0].message.parsed
         except Exception as e:
-            bt.logging.error(f"Error calling OpenAI: {e}")
+            bt.logging.warning(f"Error calling OpenAI: {e}")
             continue
     raise Exception("Failed to call OpenAI")
