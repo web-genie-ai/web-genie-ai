@@ -6,6 +6,8 @@ import threading
 import time
 
 from datetime import datetime, timedelta
+from rich.console import Console
+from rich.table import Table
 from typing import Union
 
 from webgenie.base.neuron import BaseNeuron
@@ -164,10 +166,36 @@ class GenieValidator:
         miner_uids = [solution.miner_uid for solution in solutions]
         aggregated_scores, scores = await challenge.calculate_scores()
         
-        bt.logging.success(f"Task Source: {challenge.task.src}")
-        bt.logging.success(f"Competition Type: {challenge.competition_type}")
-        bt.logging.success(f"Scores: {scores}")
-        bt.logging.success(f"Final scores for {miner_uids}: {aggregated_scores}")
+        # Create a rich table to display the scoring results
+        table = Table(
+            title=f"Scoring Results - Session {challenge.session} - {challenge.competition_type} - {challenge.task.src}",
+            show_header=True,
+            header_style="bold magenta",
+            title_style="bold blue",
+            border_style="blue"
+        )
+        table.add_column(
+            "Miner UID",
+            justify="right",
+            style="cyan",
+            header_style="bold cyan"
+        )
+        table.add_column("Aggregated Score", justify="right", style="green")
+        table.add_column("Accuracy", justify="right")
+        table.add_column("SEO", justify="right") 
+        table.add_column("Code Quality", justify="right")
+
+        for i, miner_uid in enumerate(miner_uids):
+            table.add_row(
+                str(miner_uid),
+                f"{aggregated_scores[i]:.4f}",
+                f"{scores[ACCURACY_METRIC_NAME][i]:.4f}",
+                f"{scores[SEO_METRIC_NAME][i]:.4f}",
+                f"{scores[QUALITY_METRIC_NAME][i]:.4f}"
+            )
+
+        console = Console()
+        console.print(table)
         
         with self.lock:
             self.neuron.score_manager.update_scores(
