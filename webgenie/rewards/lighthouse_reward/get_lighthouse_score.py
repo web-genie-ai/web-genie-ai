@@ -18,7 +18,7 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
     def get_lighthouse_score_from_subprocess(url):
         bt.logging.info(f"Getting lighthouse score from {url}...")
         try:
-            command = f"lighthouse {url} --output=json --chrome-flags='--headless --no-sandbox --disable-gpu' --quiet --verbose"
+            command = f"lighthouse {url} --output=json --chrome-flags='--headless --no-sandbox' --quiet"
             output = os.popen(command).read()
             loaded_json = json.loads(output)
             scores = {
