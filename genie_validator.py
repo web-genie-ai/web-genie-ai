@@ -173,7 +173,7 @@ class GenieValidator:
             self.neuron.score_manager.update_scores(
                 aggregated_scores, 
                 miner_uids, 
-                challenge,
+                challenge.session,
             )
 
         with self.lock:

@@ -110,15 +110,21 @@ def store_results_to_database(results: dict):
     solutions = results["solutions"]
     scores = results["scores"]
     challenge = results["challenge"]
-
+    bt.logging.info(f"Storing challenge to database: {challenge}")
     session_number = challenge["session_number"]
+    bt.logging.info(f"Storing session_number to database: {session_number}")
     session_start_datetime = results["session_start_datetime"]
+    bt.logging.info(f"Storing session_start_datetime to database: {session_start_datetime}")
     ground_truth_html = challenge["task"]
+    bt.logging.info(f"Storing ground_truth_html to database: {ground_truth_html}")
     competition_type = challenge["competition_type"]
-
+    bt.logging.info(f"Storing competition_type to database: {competition_type}")
     competition_id = create_competition(competition_type)
+    bt.logging.info(f"Storing competition_id to database: {competition_id}")
     session_id = create_leaderboard_session(session_number, session_start_datetime, competition_id)
+    bt.logging.info(f"Storing session_id to database: {session_id}")
     challenge_id = create_challenge(session_id, ground_truth_html)
+    bt.logging.info(f"Storing challenge_id to database: {challenge_id}")
     
     # Iterate over miner_uids to store TaskSolution data
     for miner, solution, score in zip(miners, solutions, scores):

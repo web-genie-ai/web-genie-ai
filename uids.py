@@ -70,11 +70,13 @@ def get_all_available_uids(
     self, exclude: List[int] = None
 ) -> np.ndarray:
     avail_uids = []
+    bt.logging.debug(f"Number of neurons: {self.metagraph.n.item()}")
     for uid in range(self.metagraph.n.item()):
         uid_is_available = check_uid_availability(self.metagraph, uid) 
         uid_is_not_excluded = exclude is None or uid not in exclude
         if uid_is_available and uid_is_not_excluded:
             avail_uids.append(uid)
+    bt.logging.debug(f"Number of available neurons: {len(avail_uids)}")
     return np.array(avail_uids)
 
 

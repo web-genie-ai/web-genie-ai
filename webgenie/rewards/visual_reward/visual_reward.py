@@ -52,11 +52,25 @@ class VisualReward(Reward):
 
         scores = high_level_scores * 0.3 + low_level_scores * 0.7
         await stop_browser()
-        
-        for html_path in miner_html_paths:
-            os.remove(html_path)
-        os.remove(original_html_path)
 
+        # Clean up files
+        for miner_html_path in miner_html_paths:
+            inpainted_png_path = miner_html_path.replace(".html", "_inpainted.png")
+            erased_html_path = miner_html_path.replace(".html", "_erased.html")
+            png_path = miner_html_path.replace(".html", ".png")
+            os.remove(miner_html_path)
+            os.remove(inpainted_png_path)
+            os.remove(erased_html_path)
+            os.remove(png_path)
+            
+        inpainted_png_path = original_html_path.replace(".html", "_inpainted.png")
+        erased_html_path = original_html_path.replace(".html", "_erased.html")
+        png_path = original_html_path.replace(".html", ".png")
+        os.remove(original_html_path)
+        os.remove(inpainted_png_path)
+        os.remove(erased_html_path)
+        os.remove(png_path)
+        
         return scores
     
     def sync_reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:
