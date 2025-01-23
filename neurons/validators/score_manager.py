@@ -1,8 +1,9 @@
 import bittensor as bt
 import copy
 import numpy as np
-import pickle
 
+from rich.console import Console
+from rich.table import Table
 from typing import List
 
 from webgenie.base.neuron import BaseNeuron
@@ -93,19 +94,34 @@ class ScoreManager:
             self.current_session = session
             self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # Update accumulated scores and track best performer
-        bt.logging.info(f"Updating scores for uids: {uids}")
-        bt.logging.info(f"Rewards: {rewards}")
-        bt.logging.info(f"Total scores: {self.total_scores}")
         self.total_scores[uids] += rewards
-        bt.logging.info("Updating winners table")
-        print(np.argmax(self.total_scores), competition_type)
-        print(self.winners)
         self.winners[session] = (np.argmax(self.total_scores), competition_type)
-        bt.logging.info(f"Winners: {self.winners}")
         for session_number in self.winners:
             if session_number < session - CONSIDERING_SESSION_COUNTS:
                 self.winners.pop(session_number)
-        bt.logging.info(f"Winners: {self.winners}")
+ 
+        # Create a rich table to display the winners
+        table = Table(
+            title="Winners by Session",
+            show_header=True,
+            header_style="bold magenta",
+            title_style="bold blue",
+            border_style="blue"
+        )
+        table.add_column("Session", justify="right", style="cyan", header_style="bold cyan")
+        table.add_column("Winner UID", justify="right", style="green")
+        table.add_column("Competition Type", justify="left")
+        # Add rows sorted by session number
+        for session_number in sorted(self.winners.keys()):
+            winner_uid, competition_type = self.winners[session_number]
+            table.add_row(
+                str(session_number),
+                str(winner_uid),
+                str(competition_type),
+            )
+
+        console = Console()
+        console.print(table)
         self.should_save = True
 
     def send_challenge_to_stats_collector(self):

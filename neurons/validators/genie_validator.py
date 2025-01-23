@@ -155,13 +155,7 @@ class GenieValidator:
                     f"This is the previous session's challenge, skipping"
                 )
                 return
-        
-        bt.logging.info(
-            f"Scoring - Session number: {challenge.session}, "
-            f"Competition type: {challenge.competition_type}, "
-            f"Task source: {challenge.task.src}"
-        )
-        
+                
         solutions = challenge.solutions
         miner_uids = [solution.miner_uid for solution in solutions]
         aggregated_scores, scores = await challenge.calculate_scores()
