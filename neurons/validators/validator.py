@@ -15,6 +15,10 @@ load_dotenv(find_dotenv(filename=".env.validator"))
 from typing import Tuple, Union
 
 from webgenie.base.validator import BaseValidatorNeuron
+from webgenie.base.utils.weight_utils import (
+    process_weights_for_netuid,
+    convert_weights_and_uids_for_emit,
+) 
 from webgenie.constants import (
     API_HOTKEY,
     BLOCK_IN_SECONDS,
@@ -89,6 +93,60 @@ class Validator(BaseValidatorNeuron):
             "Metagraph updated, re-syncing hotkeys, dendrite pool and moving averages"
         )
         self.score_manager.set_new_hotkeys(self.metagraph.hotkeys)
+
+    def set_weights(self):
+        if not self.should_set_weights():
+            return
+
+        self.score_manager.send_challenge_to_stats_collector()
+
+        scores = self.score_manager.get_scores()
+        # Calculate the average reward for each uid across non-zero values.
+        # Replace any NaN values with 0.
+        # Compute the norm of the scores
+        norm = np.linalg.norm(scores, ord=1, axis=0, keepdims=True)
+
+        # Check if the norm is zero or contains NaN values
+        if np.any(norm == 0) or np.isnan(norm).any():
+            norm = np.ones_like(norm)  # Avoid division by zero or NaN
+
+        # Compute raw_weights safely
+        raw_weights = scores / norm
+        
+        # Process the raw weights to final_weights via subtensor limitations.
+        (
+            processed_weight_uids,
+            processed_weights,
+        ) = process_weights_for_netuid(
+            uids=self.metagraph.uids,
+            weights=raw_weights,
+            netuid=self.config.netuid,
+            subtensor=self.subtensor,
+            metagraph=self.metagraph,
+        )
+
+        # Convert to uint16 weights and uids.
+        (
+            uint_uids,
+            uint_weights,
+        ) = convert_weights_and_uids_for_emit(
+            uids=processed_weight_uids, weights=processed_weights
+        )
+        # Set the weights on chain via our subtensor connection.
+        result, msg = self.subtensor.set_weights(
+            wallet=self.wallet,
+            netuid=self.config.netuid,
+            uids=uint_uids,
+            weights=uint_weights,
+            wait_for_finalization=False,
+            wait_for_inclusion=False,
+            version_key=self.spec_version,
+        )
+        if result is True:
+            bt.logging.success("set_weights on chain successfully!")
+        else:
+            bt.logging.error("set_weights failed", msg)
+                
 
     def save_state(self):
         """Saves the state of the validator to a file."""
@@ -272,7 +330,7 @@ class Validator(BaseValidatorNeuron):
                     current_block <= set_weights_end_block):
                     
                     bt.logging.info(f"Trying to set weights at block {current_block}")
-                    self.score_manager.set_weights()
+                    self.set_weights()
                 else:
                     # Sleep until next weight setting window
                     sleep_blocks = set_weights_start_block - current_block
