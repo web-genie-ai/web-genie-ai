@@ -146,7 +146,6 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
             stack = [node]
             while stack:
                 current_node = stack.pop()
-                bt.logging.info(f"Traversing node: {current_node}")
                 children = await current_node.query_selector_all(':scope > *')
                 for child in children:
                     stack.append(child)

@@ -219,7 +219,6 @@ class GenieValidator:
             }
 
         try:
-            bt.logging.info(f"Storing results to database: {payload}")
             store_results_to_database(payload)
         except Exception as e:
             bt.logging.error(f"Error storing results to database: {e}")
