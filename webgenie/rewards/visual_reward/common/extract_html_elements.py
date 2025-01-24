@@ -73,15 +73,11 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
                 animations="disabled", 
                 timeout=CHROME_HTML_LOAD_TIME,
             )
-        else:
-            bt.logging.info(f"Screenshot already exists for {file_path}")
             
-        bt.logging.info(f"Extracting html elements from {file_path}")
         with open(screenshot_path, "rb") as f:
             screenshot = Image.open(f)
             W, H = screenshot.size
 
-        bt.logging.info(f"Extracted screenshot from {file_path}")
         async def add_element(node, has_children):
             # Combine all necessary evaluations into one to reduce overhead
             rendered_data = await node.evaluate("""
@@ -159,11 +155,9 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
             
         await traverse(await page.query_selector('body'))
         await page.close()
-        bt.logging.info(f"Extracted html elements from {file_path}")
         preprocess_html_elements(file_path, button_elements)
         preprocess_html_elements(file_path, input_elements)
         preprocess_html_elements(file_path, anchor_elements)    
-        bt.logging.info(f"Preprocessed html elements from {file_path}")
     except Exception as e:
         bt.logging.error(f"Error extracting html elements from {file_path}: {e}")
     return text_elements, button_elements, input_elements, anchor_elements
