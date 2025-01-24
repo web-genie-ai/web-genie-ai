@@ -26,4 +26,6 @@ def base64_to_image(base64_str: str) -> Image.Image:
 
 
 def image_debug_str(base64_image: str) -> str:
-    return base64_image[:MAX_DEBUG_IMAGE_STRING_LENGTH]
+    from_offset = 300
+    to_offset = MAX_DEBUG_IMAGE_STRING_LENGTH + from_offset
+    return base64_image[from_offset:to_offset]
