@@ -89,7 +89,7 @@ def create_evaluation_type(name: str):
     # Check if the competition with the given name already exists
     existing_evaluation_type = session.query(EvaluationType).filter_by(name=name).first()
     if existing_evaluation_type:
-        #bt.logging.info(f"Evaluation type with name {name} already exists. Skipping creation.")
+        bt.logging.info(f"Evaluation type with name {name} already exists. Skipping creation.")
         return existing_evaluation_type.id  # Return the existing evaluation type id
 
     return create_record(session, EvaluationType, name=name)
@@ -257,4 +257,6 @@ def send_challenge_to_stats_collector(wallet: "bt.Wallet", session_number: int) 
         payload=session_data,
     )
     if not response.ok:
-        print(response.json())
+        bt.logging.error(response.json())
+    else:
+        bt.logging.success(response.json())
