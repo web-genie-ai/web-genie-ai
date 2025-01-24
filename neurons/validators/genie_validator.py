@@ -20,6 +20,7 @@ from webgenie.constants import (
     TASK_REVEAL_TIMEOUT,
     SESSION_WINDOW_BLOCKS,
     BLOCK_IN_SECONDS,
+    __VERSION__,
 )
 from webgenie.challenges import (
     AccuracyChallenge,
@@ -91,6 +92,7 @@ class GenieValidator:
             challenge = challenge_class(task=task, session=session)
 
             synapse.competition_type = challenge.competition_type
+            synapse.VERSION = __VERSION__
 
             bt.logging.debug(f"Querying {len(miner_uids)} miners")
             
@@ -278,6 +280,7 @@ class GenieValidator:
         else:
             bt.logging.debug(f"Organic image forward: {image_debug_str(synapse.base64_image)}...")
 
+        synapse.VERSION = __VERSION__
         all_miner_uids = get_all_available_uids(self.neuron)
         try:
             if not all_miner_uids:

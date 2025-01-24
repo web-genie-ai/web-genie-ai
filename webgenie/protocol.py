@@ -6,7 +6,6 @@ import hashlib
 import pydantic
 import random
 
-from webgenie.constants import __VERSION__
 
 class WebgenieTextSynapse(bt.Synapse):
     """
@@ -36,7 +35,7 @@ class WebgenieImageSynapse(bt.Synapse):
     A protocol for the webgenie image task.
     """
     VERSION: str = pydantic.Field(
-        __VERSION__,
+        "NONE",
         title="Version",
         description="The version of the protocol.",
     )
