@@ -243,7 +243,7 @@ def make_signed_request(
     ).hex()
     headers["Signature"] = signature
 
-    response = requests.request(method, url, headers=headers, files=files, json=payload, timeout=5)
+    response = requests.request(method, url, headers=headers, files=files, json=payload, timeout=30)
     return response
 
 def send_challenge_to_stats_collector(wallet: "bt.Wallet", session_number: int) -> None:
