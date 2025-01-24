@@ -110,3 +110,9 @@ AXON_OFF = os.getenv("AXON_OFF", "False").lower() == "true"
 # neuron epoch length
 NEURON_EPOCH_LENGTH = int(os.getenv("NEURON_EPOCH_LENGTH", 25))
 
+
+# Change this value when updating your code base.
+# Define the version of the webgenie.
+__VERSION__ = "1.0.0"
+
+WANDB_PROJECT_NAME = f"webgenie-{__VERSION__}"
