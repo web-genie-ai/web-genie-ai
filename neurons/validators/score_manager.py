@@ -30,12 +30,11 @@ class ScoreManager:
             bt.logging.info(f"Loading scores from {self.state_path}")
             data = np.load(self.state_path, allow_pickle=True)
 
-            self.hotkeys = data["hotkeys"]
-            self.current_session = data["current_session"]
-            self.total_scores = data["total_scores"]
+            self.hotkeys = data.get("hotkeys", copy.deepcopy(self.neuron.metagraph.hotkeys))
+            self.current_session = data.get("current_session", -1)
+            self.total_scores = data.get("total_scores", np.zeros(self.neuron.metagraph.n, dtype=np.float32))
             self.last_set_weights_session = data.get("last_set_weights_session", -1)
-            self.winners = dict(data["winners"].item())
-            bt.logging.info(f"Winners: {self.winners}")
+            self.winners = dict(data.get("winners", {}).item())
         except Exception as e:
             bt.logging.error(f"Error loading state: {e}")
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
