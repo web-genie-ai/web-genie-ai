@@ -14,8 +14,8 @@ def check_requirements():
 
     bt.logging.info(f"Total memory: {total_memory_mb}")
 
-    if total_memory_mb < 1024 * 25:
-        raise ValueError("Insufficient GPU memory. HfMiner requires at least 25GB of GPU memory.")
+    if total_memory_mb < 1024 * 24:
+        raise ValueError("Insufficient GPU memory. HfMiner requires at least 24GB of GPU memory.")
 
 check_requirements()
 
