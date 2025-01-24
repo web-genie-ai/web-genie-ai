@@ -6,6 +6,7 @@ import os
 import asyncio
 import multiprocessing
 import numpy as np
+import shutil
 import uuid
 from datetime import datetime
 from typing import List
@@ -52,25 +53,6 @@ class VisualReward(Reward):
 
         scores = high_level_scores * 0.3 + low_level_scores * 0.7
         await stop_browser()
-
-        # Clean up files
-        for miner_html_path in miner_html_paths:
-            inpainted_png_path = miner_html_path.replace(".html", "_inpainted.png")
-            erased_html_path = miner_html_path.replace(".html", "_erased.html")
-            png_path = miner_html_path.replace(".html", ".png")
-            os.remove(miner_html_path)
-            os.remove(inpainted_png_path)
-            os.remove(erased_html_path)
-            os.remove(png_path)
-            
-        inpainted_png_path = original_html_path.replace(".html", "_inpainted.png")
-        erased_html_path = original_html_path.replace(".html", "_erased.html")
-        png_path = original_html_path.replace(".html", ".png")
-        os.remove(original_html_path)
-        os.remove(inpainted_png_path)
-        os.remove(erased_html_path)
-        os.remove(png_path)
-        
         return scores
     
     def sync_reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:
@@ -115,4 +97,10 @@ class VisualReward(Reward):
                 chunk_scores.extend(future.get())
                 
             scores = np.array(chunk_scores)
+        # Clean up work directory and its contents
+        try:
+            shutil.rmtree(current_work_dir)
+        except Exception as e:
+            bt.logging.warning(f"Error cleaning up work directory: {e}")
+        
         return scores
