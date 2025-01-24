@@ -24,6 +24,7 @@ import traceback
 import bittensor as bt
 
 from webgenie.base.neuron import BaseNeuron
+from webgenie.constants import NEURON_EPOCH_LENGTH
 from webgenie.utils.config import add_miner_args
 
 from typing import Union
@@ -107,7 +108,7 @@ class BaseMinerNeuron(BaseNeuron):
             while not self.should_exit:
                 while (
                     self.block - self.metagraph.last_update[self.uid]
-                    < self.config.neuron.epoch_length
+                    < NEURON_EPOCH_LENGTH
                 ):
                     # Wait before checking again.
                     time.sleep(1)

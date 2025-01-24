@@ -107,3 +107,6 @@ VPERMIT_TAO_LIMIT = 1000
 # axon off
 AXON_OFF = os.getenv("AXON_OFF", "False").lower() == "true"
 
+# neuron epoch length
+NEURON_EPOCH_LENGTH = int(os.getenv("NEURON_EPOCH_LENGTH", 25))
+

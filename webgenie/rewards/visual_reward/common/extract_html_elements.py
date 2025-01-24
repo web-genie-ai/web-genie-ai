@@ -153,6 +153,7 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
                     await add_element(current_node, bool(children))
                 except Exception as e:
                     #bt.logging.warning(f"Error adding element: {e}")
+                    pass
                 # Dispose the node when done
                 await current_node.dispose()
             
