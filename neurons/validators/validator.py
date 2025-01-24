@@ -11,7 +11,8 @@ import time
 
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv(filename=".env.validator"))
-    
+from rich.table import Table
+from rich.console import Console
 from typing import Tuple, Union
 
 from webgenie.base.validator import BaseValidatorNeuron
@@ -94,6 +95,31 @@ class Validator(BaseValidatorNeuron):
         )
         self.score_manager.set_new_hotkeys(self.metagraph.hotkeys)
 
+    def print_weights(self, raw_weights: np.ndarray):
+        weights_table = Table(
+            title="Raw Weights (Sorted)",
+            show_header=True,
+            header_style="bold magenta",
+            title_style="bold blue", 
+            border_style="blue"
+        )
+        weights_table.add_column("UID", justify="right", style="cyan", header_style="bold cyan")
+        weights_table.add_column("Weight", justify="right", style="green")
+
+        # Create list of (uid, weight) tuples and sort by weight descending
+        uid_weights = [(uid, weight) for uid, weight in enumerate(raw_weights) if weight > 0]
+        uid_weights.sort(key=lambda x: x[1], reverse=True)
+
+        # Add rows to table
+        for uid, weight in uid_weights:
+            weights_table.add_row(
+                str(uid),
+                f"{weight:.4f}"
+            )
+
+        console = Console()
+        console.print(weights_table)
+
     def set_weights(self):
         if not self.should_set_weights():
             return
@@ -112,7 +138,9 @@ class Validator(BaseValidatorNeuron):
 
         # Compute raw_weights safely
         raw_weights = scores / norm
-        
+
+        self.print_weights(raw_weights)
+
         with self.lock:
             # Process the raw weights to final_weights via subtensor limitations.
             (
