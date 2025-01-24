@@ -15,8 +15,10 @@
 # THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-from dotenv import load_dotenv, find_dotenv
-load_dotenv(find_dotenv(filename=".env.miner"))
+from dotenv import load_dotenv
+
+load_dotenv(".env.miner")
+load_dotenv(".env")
 
 import time
 

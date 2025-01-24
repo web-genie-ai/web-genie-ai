@@ -109,7 +109,6 @@ class GenieValidator:
             time.sleep(sleep_time_before_reveal)
 
             bt.logging.debug(f"Revealing task {task.task_id}")
-            
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
                 all_synapse_reveal_results = await dendrite(
                     axons = [self.neuron.metagraph.axons[uid] for uid in miner_uids],
@@ -158,7 +157,7 @@ class GenieValidator:
                 )
                 return
             
-        bt.logging.info(f"Scoring challenge {challenge.session} {challenge.competition_type} {challenge.task.src}")
+        bt.logging.info(f"Scoring session, {challenge.session}, {challenge.competition_type}, {challenge.task.src}")
         solutions = challenge.solutions
         miner_uids = [solution.miner_uid for solution in solutions]
         aggregated_scores, scores = await challenge.calculate_scores()

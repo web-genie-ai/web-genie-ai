@@ -9,8 +9,10 @@ import numpy as np
 import threading
 import time
 
-from dotenv import load_dotenv, find_dotenv
-load_dotenv(find_dotenv(filename=".env.validator"))
+from dotenv import load_dotenv
+load_dotenv(".env.validator")
+load_dotenv(".env")
+
 from rich.table import Table
 from rich.console import Console
 from typing import Tuple, Union
