@@ -79,7 +79,7 @@ class Miner(BaseMinerNeuron):
             create_time = time.time()
             synapse = await self.genie_miner.forward_image(synapse)
             
-            nonce = add_answer_hash(synapse, synapse.html)
+            nonce = add_answer_hash(synapse, self.uid, synapse.html)
             self.task_state[synapse.task_id] = {
                 "html": synapse.html,
                 "nonce": nonce,
