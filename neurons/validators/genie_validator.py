@@ -327,7 +327,7 @@ class GenieValidator:
 
             html = preprocess_html(synapse.html)
             if not html or not is_valid_resources(html):
-                bt.logging.warning(f"Invalid html or resources: {html}")
+                bt.logging.warning(f"Invalid html or resources")
                 return None
 
             synapse.html = html
