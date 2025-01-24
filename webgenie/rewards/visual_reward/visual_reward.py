@@ -6,6 +6,7 @@ import os
 import asyncio
 import multiprocessing
 import numpy as np
+import shutil
 import uuid
 from datetime import datetime
 from typing import List
@@ -24,7 +25,6 @@ class VisualReward(Reward):
 
     async def reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:
         await start_browser()
-        bt.logging.info(f"Rewarding image task in visual reward")
         
         original_html_path = f"{current_work_dir}/original_{uuid.uuid4()}.html"
         with open(original_html_path, "w") as f:
@@ -52,25 +52,6 @@ class VisualReward(Reward):
 
         scores = high_level_scores * 0.3 + low_level_scores * 0.7
         await stop_browser()
-
-        # Clean up files
-        for miner_html_path in miner_html_paths:
-            inpainted_png_path = miner_html_path.replace(".html", "_inpainted.png")
-            erased_html_path = miner_html_path.replace(".html", "_erased.html")
-            png_path = miner_html_path.replace(".html", ".png")
-            os.remove(miner_html_path)
-            os.remove(inpainted_png_path)
-            os.remove(erased_html_path)
-            os.remove(png_path)
-            
-        inpainted_png_path = original_html_path.replace(".html", "_inpainted.png")
-        erased_html_path = original_html_path.replace(".html", "_erased.html")
-        png_path = original_html_path.replace(".html", ".png")
-        os.remove(original_html_path)
-        os.remove(inpainted_png_path)
-        os.remove(erased_html_path)
-        os.remove(png_path)
-        
         return scores
     
     def sync_reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:
@@ -92,6 +73,8 @@ class VisualReward(Reward):
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
         if not isinstance(task, ImageTask):
             raise ValueError(f"Task is not a ImageTask: {type(task)}")
+
+        bt.logging.info(f"Rewarding image task in visual reward")
 
         timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
         current_work_dir = f"{WORK_DIR}/task_{timestamp}_{task.task_id}"
@@ -115,4 +98,10 @@ class VisualReward(Reward):
                 chunk_scores.extend(future.get())
                 
             scores = np.array(chunk_scores)
+        # Clean up work directory and its contents
+        try:
+            shutil.rmtree(current_work_dir)
+        except Exception as e:
+            bt.logging.warning(f"Error cleaning up work directory: {e}")
+        
         return scores

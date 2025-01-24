@@ -5,8 +5,8 @@ import bittensor as bt
 import hashlib
 import pydantic
 import random
-import uuid
 
+from webgenie.constants import __VERSION__
 
 class WebgenieTextSynapse(bt.Synapse):
     """
@@ -35,6 +35,12 @@ class WebgenieImageSynapse(bt.Synapse):
     """
     A protocol for the webgenie image task.
     """
+    # VERSION: str = pydantic.Field(
+    #     __VERSION__,
+    #     title="Version",
+    #     description="The version of the protocol.",
+    # )
+
     task_id: str = pydantic.Field(
         "",
         title="Task ID",

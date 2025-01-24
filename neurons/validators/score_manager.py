@@ -9,7 +9,6 @@ from typing import List
 from webgenie.base.neuron import BaseNeuron
 from webgenie.challenges.challenge import Challenge, RESERVED_WEIGHTS
 from webgenie.constants import CONSIDERING_SESSION_COUNTS
-from webgenie.storage import send_challenge_to_stats_collector
 
 
 class ScoreManager:
@@ -23,7 +22,7 @@ class ScoreManager:
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
         self.current_session = -1
         self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        self.last_send_stats_collector_session = -1
+        self.last_set_weights_session = -1
         self.winners = {}
 
     def load_scores(self):
@@ -31,18 +30,17 @@ class ScoreManager:
             bt.logging.info(f"Loading scores from {self.state_path}")
             data = np.load(self.state_path, allow_pickle=True)
 
-            self.hotkeys = data["hotkeys"]
-            self.current_session = data["current_session"]
-            self.total_scores = data["total_scores"]
-            self.last_send_stats_collector_session = data["last_send_stats_collector_session"]
-            self.winners = dict(data["winners"].item())
-            bt.logging.info(f"Winners: {self.winners}")
+            self.hotkeys = data.get("hotkeys", copy.deepcopy(self.neuron.metagraph.hotkeys))
+            self.current_session = data.get("current_session", -1)
+            self.total_scores = data.get("total_scores", np.zeros(self.neuron.metagraph.n, dtype=np.float32))
+            self.last_set_weights_session = data.get("last_set_weights_session", -1)
+            self.winners = dict(data.get("winners", {}).item())
         except Exception as e:
             bt.logging.error(f"Error loading state: {e}")
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
             self.current_session = -1
             self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-            self.last_send_stats_collector_session = -1
+            self.last_set_weights_session = -1
             self.winners = {}
 
     def save_scores(self):
@@ -56,7 +54,7 @@ class ScoreManager:
                 hotkeys=self.hotkeys, 
                 current_session=self.current_session, 
                 total_scores=self.total_scores, 
-                last_send_stats_collector_session=self.last_send_stats_collector_session, 
+                last_set_weights_session=self.last_set_weights_session,
                 winners=self.winners,
                 allow_pickle=True,
             )
@@ -121,7 +119,7 @@ class ScoreManager:
         console.print(total_scores_table)
         self.winners[session] = (np.argmax(self.total_scores), competition_type)
         for session_number in self.winners:
-            if session_number < session - CONSIDERING_SESSION_COUNTS:
+            if session_number < session - CONSIDERING_SESSION_COUNTS * 2:
                 self.winners.pop(session_number)
  
         # Create a rich table to display the winners
@@ -147,24 +145,15 @@ class ScoreManager:
         console = Console()
         console.print(table)
         self.should_save = True
-
-    def send_challenge_to_stats_collector(self):
-        with self.lock:
-            current_session = self.neuron.session
-
-        if current_session != self.last_send_stats_collector_session:
-            try:
-                bt.logging.info(f"Sending challenge to stats collector for session {current_session}")
-                send_challenge_to_stats_collector(self.neuron.wallet, current_session)
-                self.last_send_stats_collector_session = current_session
-            except Exception as e:
-                bt.logging.error(f"Error sending challenge to stats collector: {e}")
         
-    def get_scores(self):
+    def get_scores(self, session_upto: int):
         scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         with self.lock:
             for session_number in self.winners:
+                if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
+                    session_number > session_upto):
+                    continue
+                
                 winner, competition_type = self.winners[session_number]
                 scores[winner] += RESERVED_WEIGHTS[competition_type]
-
         return scores

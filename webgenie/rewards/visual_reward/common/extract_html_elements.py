@@ -73,15 +73,11 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
                 animations="disabled", 
                 timeout=CHROME_HTML_LOAD_TIME,
             )
-        else:
-            bt.logging.info(f"Screenshot already exists for {file_path}")
             
-        bt.logging.info(f"Extracting html elements from {file_path}")
         with open(screenshot_path, "rb") as f:
             screenshot = Image.open(f)
             W, H = screenshot.size
 
-        bt.logging.info(f"Extracted screenshot from {file_path}")
         async def add_element(node, has_children):
             # Combine all necessary evaluations into one to reduce overhead
             rendered_data = await node.evaluate("""
@@ -152,17 +148,16 @@ async def extract_html_elements(file_path, load_time = DEFAULT_LOAD_TIME):
                 try:
                     await add_element(current_node, bool(children))
                 except Exception as e:
-                    bt.logging.warning(f"Error adding element: {e}")
+                    #bt.logging.warning(f"Error adding element: {e}")
+                    pass
                 # Dispose the node when done
                 await current_node.dispose()
             
         await traverse(await page.query_selector('body'))
         await page.close()
-        bt.logging.info(f"Extracted html elements from {file_path}")
         preprocess_html_elements(file_path, button_elements)
         preprocess_html_elements(file_path, input_elements)
         preprocess_html_elements(file_path, anchor_elements)    
-        bt.logging.info(f"Preprocessed html elements from {file_path}")
     except Exception as e:
         bt.logging.error(f"Error extracting html elements from {file_path}: {e}")
     return text_elements, button_elements, input_elements, anchor_elements
@@ -177,7 +172,7 @@ def preprocess_html_elements(html_path, html_elements):
         try:
             element.avg_color = np.mean(color_image[y:y+h, x:x+w], axis=(0, 1))
         except Exception as e:
-            bt.logging.warning(f"Error calculating avg color of html elements from {html_path}: {e}")
+            #bt.logging.warning(f"Error calculating avg color of html elements from {html_path}: {e}")
             element.avg_color = (0, 0, 0)
 
     gray_image = color.rgb2gray(color_image)
@@ -187,6 +182,6 @@ def preprocess_html_elements(html_path, html_elements):
         try:
             element.keypoints, element.descriptors = extract_sift_from_roi(gray_image, (x, y, w, h))   
         except Exception as e:
-            bt.logging.warning(f"Error extracting sift from html elements from {html_path}: {e}")
+            #bt.logging.warning(f"Error extracting sift from html elements from {html_path}: {e}")
             element.keypoints = None
             element.descriptors = None

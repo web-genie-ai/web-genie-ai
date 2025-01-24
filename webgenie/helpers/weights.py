@@ -26,7 +26,7 @@ def init_wandb(self):
 
         run_name = f"{self.config.neuron.name}-{self.uid}"
         run = wandb.init(
-            project=webgenie.PROJECT_NAME, 
+            project=WANDB_PROJECT_NAME, 
             entity=WANDB_ENTITY_NAME, 
             name=run_name,
             config=self.config,

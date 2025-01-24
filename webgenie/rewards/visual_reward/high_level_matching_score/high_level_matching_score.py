@@ -7,8 +7,7 @@ from webgenie.rewards.visual_reward.high_level_matching_score.histogram import h
 
 
 async def high_level_matching_score(predict_html_path_list, original_html_path):
-    bt.logging.info(f"Calculating high level matching score.")
-
+    
     clip_score = await calculate_clip_score(predict_html_path_list, original_html_path)
     histogram_score = await histogram_matching_score(predict_html_path_list, original_html_path)
 

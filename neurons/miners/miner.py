@@ -70,6 +70,8 @@ class Miner(BaseMinerNeuron):
     async def forward_image(
         self, synapse: WebgenieImageSynapse
     ) -> WebgenieImageSynapse:
+        validator_uid = self.metagraph.hotkeys.index(synapse.dendrite.hotkey)
+        bt.logging.debug(f"Validator {validator_uid}'s repo version: {synapse.VERSION}")
         bt.logging.debug(f"Miner image forward called with image: {image_debug_str(synapse.base64_image)}...")
         
         if synapse.task_id not in self.task_state:

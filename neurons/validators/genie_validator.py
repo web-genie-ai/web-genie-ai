@@ -155,7 +155,8 @@ class GenieValidator:
                     f"This is the previous session's challenge, skipping"
                 )
                 return
-                
+            
+        bt.logging.info(f"Scoring challenge {challenge.session} {challenge.competition_type} {challenge.task.src}")
         solutions = challenge.solutions
         miner_uids = [solution.miner_uid for solution in solutions]
         aggregated_scores, scores = await challenge.calculate_scores()
@@ -327,7 +328,7 @@ class GenieValidator:
 
             html = preprocess_html(synapse.html)
             if not html or not is_valid_resources(html):
-                bt.logging.warning(f"Invalid html or resources: {html}")
+                bt.logging.warning(f"Invalid html or resources")
                 return None
 
             synapse.html = html
