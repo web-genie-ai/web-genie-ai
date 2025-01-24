@@ -34,7 +34,6 @@ def compare_histograms(hist1, hist2):
 
 
 async def histogram_matching_score(predict_html_path_list, original_html_path):
-    bt.logging.info(f"Calculating histogram score.")
     original_img_path = original_html_path.replace(HTML_EXTENSION, IMAGE_EXTENSION)
     await take_screenshot(original_html_path, original_img_path)
     original_hist = compute_grayscale_histogram(original_img_path)

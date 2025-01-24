@@ -16,7 +16,6 @@ from webgenie.constants import (
 
 def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
     def get_lighthouse_score_from_subprocess(url):
-        bt.logging.info(f"Getting lighthouse score from {url}...")
         try:
             command = f"lighthouse {url} --output=json --chrome-flags='--headless --no-sandbox' --quiet"
             output = os.popen(command).read()
@@ -53,7 +52,6 @@ def get_lighthouse_score(htmls: List[str]) -> List[Dict[str, float]]:
                 'seo': 0
             }
 
-    bt.logging.info(f"Getting lighthouse scores from localhost:{LIGHTHOUSE_SERVER_PORT}...")
     scores = []
     
     for i in range(len(htmls)):

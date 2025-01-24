@@ -55,8 +55,7 @@ def calculate_embedding_vector(image_path, model, preprocess, device):
     
 
 async def calculate_clip_score(predict_html_path_list, original_html_path):
-    bt.logging.info(f"Calculating clip score.")
-
+    
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load("ViT-B/32", device=device)
     original_img_path = original_html_path.replace(HTML_EXTENSION, f"_inpainted{IMAGE_EXTENSION}")
