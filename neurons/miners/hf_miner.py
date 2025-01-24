@@ -3,8 +3,10 @@ import bittensor as bt
 from webgenie.base.neuron import BaseNeuron
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.helpers.images import base64_to_image
-
 from webgenie.utils.gpus import get_gpu_info
+
+from neurons.miners.hf_models.websight_finetuned import generate_html_from_image
+
 
 def check_requirements():
     total_memory_mb, _, _ = get_gpu_info()
@@ -43,6 +45,6 @@ class HfMiner:
             bt.logging.debug(f"Generated HTML: {synapse.html}")
             return synapse
         except Exception as e:
-            bt.logging.error(f"Error in OpenaiMiner forward_image: {e}")
-            synapse.html = f"Error in OpenaiMiner forward_image: {e}"
+            bt.logging.error(f"Error in HfMiner forward_image: {e}")
+            synapse.html = f"Error in HfMiner forward_image: {e}"
             return synapse
