@@ -11,7 +11,6 @@ from webgenie.rewards.visual_reward.common.browser import web_player
 
 
 async def take_screenshot(url, output_file_path, load_time = DEFAULT_LOAD_TIME, overwrite = False):
-    bt.logging.info(f"Taking screenshot from {url} to {output_file_path}.")
     if os.path.exists(url):
         url = f"file:///{os.path.abspath(url)}"
 
