@@ -92,6 +92,9 @@ LLM_API_KEY = os.getenv("LLM_API_KEY")
 # llm model url
 LLM_MODEL_URL = os.getenv("LLM_MODEL_URL")
 
+# wandb off
+WANDB_OFF = os.getenv("WANDB_OFF", "False").lower() == "true"
+
 # wandb api key
 WANDB_API_KEY = os.getenv("WANDB_API_KEY")
 
