@@ -25,7 +25,6 @@ class VisualReward(Reward):
 
     async def reward_worker(self, task: Task, solutions: List[Solution], current_work_dir: str) -> np.ndarray:
         await start_browser()
-        bt.logging.info(f"Rewarding image task in visual reward")
         
         original_html_path = f"{current_work_dir}/original_{uuid.uuid4()}.html"
         with open(original_html_path, "w") as f:
@@ -74,6 +73,8 @@ class VisualReward(Reward):
     async def reward(self, task: Task, solutions: List[Solution]) -> np.ndarray:
         if not isinstance(task, ImageTask):
             raise ValueError(f"Task is not a ImageTask: {type(task)}")
+
+        bt.logging.info(f"Rewarding image task in visual reward")
 
         timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
         current_work_dir = f"{WORK_DIR}/task_{timestamp}_{task.task_id}"
