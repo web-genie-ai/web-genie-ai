@@ -23,10 +23,9 @@ import bittensor as bt
 from abc import ABC, abstractmethod
 
 # Sync calls set weights and also resyncs the metagraph.
-from webgenie.constants import NEURON_EPOCH_LENGTH
+from webgenie.constants import NEURON_EPOCH_LENGTH, SPEC_VERSION
 from webgenie.utils.config import check_config, add_args, config
 from webgenie.utils.misc import ttl_get_block
-from webgenie import __spec_version__ as spec_version
 from webgenie.mock import MockSubtensor, MockMetagraph
 
 
@@ -54,7 +53,7 @@ class BaseNeuron(ABC):
     subtensor: "bt.subtensor"
     wallet: "bt.wallet"
     metagraph: "bt.metagraph"
-    spec_version: int = spec_version
+    spec_version: int = SPEC_VERSION
 
     @property
     def block(self):

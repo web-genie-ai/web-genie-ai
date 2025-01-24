@@ -115,4 +115,10 @@ NEURON_EPOCH_LENGTH = int(os.getenv("NEURON_EPOCH_LENGTH", 25))
 # Define the version of the webgenie.
 __VERSION__ = "1.0.0"
 
+SPEC_VERSION = (
+    (1000 * int(__VERSION__.split(".")[0]))
+    + (10 * int(__VERSION__.split(".")[1]))
+    + (1 * int(__VERSION__.split(".")[2]))
+)
+
 WANDB_PROJECT_NAME = f"webgenie-{__VERSION__}"

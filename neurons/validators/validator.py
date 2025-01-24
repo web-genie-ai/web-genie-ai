@@ -66,7 +66,7 @@ class Validator(BaseValidatorNeuron):
         self.query_miners_thread: Union[threading.Thread, None] = None
         self.score_thread: Union[threading.Thread, None] = None
         self.sync_thread: Union[threading.Thread, None] = None
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
         
         self.genie_validator = GenieValidator(neuron=self)
         self.score_manager = ScoreManager(neuron=self)
@@ -335,7 +335,7 @@ class Validator(BaseValidatorNeuron):
             try:
                 with self.lock:
                     self.sync()
-                    self.set_weights()
+                self.set_weights()
             except Exception as e:
                 bt.logging.error(f"Error during sync: {str(e)}")
             if self.should_exit:
