@@ -35,11 +35,11 @@ class WebgenieImageSynapse(bt.Synapse):
     """
     A protocol for the webgenie image task.
     """
-    # VERSION: str = pydantic.Field(
-    #     __VERSION__,
-    #     title="Version",
-    #     description="The version of the protocol.",
-    # )
+    VERSION: str = pydantic.Field(
+        __VERSION__,
+        title="Version",
+        description="The version of the protocol.",
+    )
 
     task_id: str = pydantic.Field(
         "",
