@@ -117,7 +117,12 @@ class ScoreManager:
 
         console = Console()
         console.print(total_scores_table)
-        self.winners[session] = (np.argmax(self.total_scores), competition_type)
+
+        if np.max(self.total_scores) > 0:
+            self.winners[session] = (np.argmax(self.total_scores), competition_type)
+        else:
+            self.winners[session] = (-1, competition_type)
+
         for session_number in self.winners:
             if session_number < session - CONSIDERING_SESSION_COUNTS * 2:
                 self.winners.pop(session_number)
@@ -155,5 +160,7 @@ class ScoreManager:
                     continue
                 
                 winner, competition_type = self.winners[session_number]
+                if winner == -1:
+                    continue
                 scores[winner] += RESERVED_WEIGHTS[competition_type]
         return scores
