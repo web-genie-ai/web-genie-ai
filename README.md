@@ -114,57 +114,8 @@ The WebGenieAI subnet incentivizes miners and validators to ensure high-quality 
 
 ## Installation
 
-- See [Running on Staging](docs/running_on_staging.md) for instructions on how to run the subnet on staging.
-- See [Running on Testnet](docs/running_on_testnet.md) for instructions on how to run the subnet on testnet.
-- See [Running on Mainnet](docs/running_on_mainnet.md) for instructions on how to run the subnet on mainnet.
-
-Clone the web-genie-ai repository:
-```bash
-git clone https://github.com/web-genie-ai/web-genie-ai.git
-cd web-genie-ai
-```
-
-#### 1) Running miners and validators using bash files
-
-```bash
-bash scripts/install_requirements.sh
-```
-
-Configure your Bittensor wallets and environment variables before proceeding:
-```bash
-bash scripts/start.sh
-```
-
-#### 2) Scripts for running miners and validators manually
-```bash
-npm install pm2 -g
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-Install the packages in a new terminal:
-```bash
-uv sync
-```
-- miner
-```bash
-export PYTHONPATH="."
-pm2 start "uv run neurons/miners/miner.py --netuid [54 | 214] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --axon.port [axon_port]" --name webgenie_miner
-```
-- validator
-```bash
-npm install -g lighthouse
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo dpkg -i google-chrome-stable_current_amd64.deb
-sudo apt-get install -f
-source .venv/bin/activate
-playwright install-deps
-playwright install
-export PYTHONPATH="."
-pm2 start "uv run neurons/validators/validator.py --netuid [54 | 214] --subtensor.network [finney | test] --wallet.name [coldkey_name] --wallet.hotkey [hotkey_name] --logging.debug --neuron.axon_port [axon_port]" --name webgenie_validator
-```
-- running auto_update script for validators
-```bash
-pm2 start --name auto_update auto_update.sh
-```
+- See [Validator](docs/validator.md) for instructions on how to run a validator.
+- See [Miner](docs/miner.md) for instructions on how to run a miner.
 
 ## Roadmap
 
