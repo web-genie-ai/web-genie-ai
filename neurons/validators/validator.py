@@ -183,7 +183,6 @@ class Validator(BaseValidatorNeuron):
                 send_challenge_to_stats_collector(self.wallet, current_session-1)
             except Exception as e:
                 bt.logging.error(f"Error sending challenge to stats collector: {e}")
-            self.score_manager.last_send_stats_collector_session = current_session - 1
 
             bt.logging.success("set_weights on chain successfully!")
         else:

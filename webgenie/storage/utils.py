@@ -243,12 +243,15 @@ def make_signed_request(
     ).hex()
     headers["Signature"] = signature
 
-    response = requests.request(method, url, headers=headers, files=files, json=payload, timeout=30)
+    response = requests.request(method, url, headers=headers, files=files, json=payload, timeout=120)
     return response
 
 def send_challenge_to_stats_collector(wallet: "bt.Wallet", session_number: int) -> None:
     session_data = get_session_data(session_number)
-    bt.logging.info(f"Sending challenge to stats collector for session {session_data}")
+    if not session_data:
+        bt.logging.warning(f"No session data found for session {session_number}")
+        return
+    bt.logging.info(f"Sending challenge to stats collector for session {session_number}")
     response = make_signed_request(
         wallet=wallet,
         url="https://webgenie-collector.bactensor.io/api/competitions/",
