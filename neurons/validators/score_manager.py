@@ -16,8 +16,6 @@ class ScoreManager:
         self.neuron = neuron
         self.state_path = self.neuron.config.neuron.full_path + "/state.npz"
         self.lock = neuron.lock
-        
-        self.should_save = False
 
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
         self.current_session = -1
@@ -44,9 +42,6 @@ class ScoreManager:
             self.winners = {}
 
     def save_scores(self):
-        if not self.should_save:
-            return
-
         try:
             bt.logging.info(f"Saving scores to {self.state_path}")
             np.savez(
@@ -81,7 +76,8 @@ class ScoreManager:
 
         # Update the hotkeys.
         self.hotkeys = copy.deepcopy(new_hotkeys)
-        self.should_save = True
+        with self.lock:
+            self.save_scores()
 
     def update_scores(self, rewards: np.ndarray, uids: List[int], challenge: Challenge):
         bt.logging.info("Updating scores")
@@ -149,7 +145,8 @@ class ScoreManager:
 
         console = Console()
         console.print(table)
-        self.should_save = True
+        with self.lock:
+            self.save_scores()
         
     def get_scores(self, session_upto: int):
         scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)

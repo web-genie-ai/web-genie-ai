@@ -18,3 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.2] - 2025-01-25
 ### Fixed
 - Fixed an issue that happens in selecting winners when the total scores are all 0.
+
+## [1.0.3] - 2025-01-26
+### Fixed
+- Fixed an issue with saving the validator state, specifically the session number when the validator last set weights.

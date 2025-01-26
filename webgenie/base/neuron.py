@@ -118,9 +118,6 @@ class BaseNeuron(ABC):
         if self.should_sync_metagraph():
             self.resync_metagraph()
 
-        # Always save state.
-        self.save_state()
-
     def check_registered(self):
         # --- Check for registration.
         if not self.subtensor.is_hotkey_registered(
