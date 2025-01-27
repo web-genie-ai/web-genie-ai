@@ -129,7 +129,7 @@ The WebGenieAI subnet incentivizes miners and validators to ensure high-quality 
 
 ### Phase 2: Upgrade (Q1 2025)
 - [x] Launch on mainnet
-- [ ] Build a leaderboard to track miner performance and progress
+- [x] Build a leaderboard to track miner performance and progress
 - [ ] Upgrade front-end application to v2
     - Online IDE like code sandbox and auto-deployment with one click
 - [ ] Upgrade incentive mechanism to v2
