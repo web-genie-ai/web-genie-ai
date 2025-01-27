@@ -177,7 +177,8 @@ class Validator(BaseValidatorNeuron):
             )
         if result is True:
             self.score_manager.last_set_weights_session = current_session - 1
-            
+            with self.lock:
+                self.score_manager.save_scores()
             try:
                 bt.logging.info(f"Sending challenge to stats collector for session {current_session-1}")
                 send_challenge_to_stats_collector(self.wallet, current_session-1)
@@ -187,11 +188,6 @@ class Validator(BaseValidatorNeuron):
             bt.logging.success("set_weights on chain successfully!")
         else:
             bt.logging.error("set_weights failed", msg)
-                
-
-    def save_state(self):
-        """Saves the state of the validator to a file."""
-        self.score_manager.save_scores()
         
     def load_state(self):
         """Loads the state of the validator from a file."""
