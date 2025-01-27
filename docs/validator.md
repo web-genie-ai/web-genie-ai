@@ -41,10 +41,6 @@ Follow the steps below to configure and run the Validator.
        ```bash
        bash scripts/start.sh
        ```
-   - **Through Auto Update Script**
-     ```bash
-     pm2 start --name auto_update auto_update.sh
-     ```
 
 ---
 
@@ -59,7 +55,7 @@ Follow the steps below to configure and run the Validator.
 - **Common Issues**
   - Missing or incorrect `.env` variables.
   - If nodejs version is below v20, you may encounter issues with lighthouse score.
-  - If your lighthouse fastapi server is not running, for example port binding error, you may encounter issues with lighthouse score.
+  - If your lighthouse fastapi server(default port 5000) is not running, for example port binding error, you may encounter issues with lighthouse score.
 
 - **Contact Support**
   - For assistance, please reach out to the WebGenieAI team.<br />
