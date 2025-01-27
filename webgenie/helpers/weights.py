@@ -6,6 +6,7 @@ from webgenie.constants import (
     WANDB_API_KEY,
     WANDB_PROJECT_NAME,
     WANDB_ENTITY_NAME,
+    __VERSION__,
 )
 
 
@@ -14,7 +15,7 @@ def init_wandb(self):
         if WANDB_OFF:
             return
         wandb.login(key=WANDB_API_KEY)
-        run_name = f"{self.config.neuron.name}-{self.uid}"
+        run_name = f"{self.config.neuron.name}-{self.uid}--{__VERSION__}"
         run = wandb.init(
             project=WANDB_PROJECT_NAME, 
             entity=WANDB_ENTITY_NAME, 

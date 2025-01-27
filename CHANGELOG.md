@@ -22,3 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.3] - 2025-01-26
 ### Fixed
 - Fixed an issue with saving the validator state, specifically the session number when the validator last set weights.
+
+## [1.0.4] - 2025-01-27
+### Changed
+- Changed the wandb run name to include the version.
+
