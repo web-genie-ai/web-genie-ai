@@ -27,3 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Changed the wandb run name to include the version.
 
+## [1.0.5] - 2025-01-27
+### Fixed
+- Fixed an issue with dictionary's size change during iteration.

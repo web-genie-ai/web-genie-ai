@@ -119,7 +119,8 @@ class ScoreManager:
         else:
             self.winners[session] = (-1, competition_type)
 
-        for session_number in self.winners:
+        # Remove old winners
+        for session_number in list(self.winners.keys()):
             if session_number < session - CONSIDERING_SESSION_COUNTS * 2:
                 self.winners.pop(session_number)
  
