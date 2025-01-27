@@ -75,7 +75,7 @@ WANDB_OFF = os.getenv("WANDB_OFF", "False").lower() == "true" # wandb off
 
 WANDB_API_KEY = os.getenv("WANDB_API_KEY") # wandb api key
 
-WANDB_PROJECT_NAME = f"webgenie-{__VERSION__}" # wandb project name
+WANDB_PROJECT_NAME = f"webgenie" # wandb project name
 
 WANDB_ENTITY_NAME = os.getenv("WANDB_ENTITY_NAME") # wandb entity name
 
