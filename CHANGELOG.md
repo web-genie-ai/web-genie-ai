@@ -30,3 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.5] - 2025-01-27
 ### Fixed
 - Fixed an issue with dictionary's size change during iteration.
+
+## [1.0.6] - 2025-01-29
+### Added
+- Added an organic task.

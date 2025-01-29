@@ -244,40 +244,6 @@ class Validator(BaseValidatorNeuron):
         while True:
             time.sleep(1)
             try:
-                validator_index, validator_count = get_validator_index(self, self.uid)
-                if validator_index == -1:
-                    bt.logging.error(f"No enough stake for the validator.")
-                    continue
-                
-                bt.logging.info(f"Validator index: {validator_index}, Validator count: {validator_count}")
-                # Calculate query period blocks
-                with self.lock:
-                    current_block = self.block
-
-                all_validator_query_period_blocks = validator_count * QUERING_WINDOW_BLOCKS
-                # Calculate query period blocks
-                start_period_block = (
-                    (current_block // all_validator_query_period_blocks) * 
-                    all_validator_query_period_blocks + 
-                    validator_index * QUERING_WINDOW_BLOCKS
-                )
-                end_period_block = start_period_block + QUERING_WINDOW_BLOCKS / 2
-                bt.logging.info(f"Query window - "
-                                f"Start: {start_period_block}, "
-                                f"End: {end_period_block}, "
-                                f"Current: {current_block}")
-                # Sleep if outside query window
-                if current_block < start_period_block:
-                    sleep_blocks = start_period_block - current_block
-                    bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
-                    time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
-                    continue
-                elif current_block > end_period_block:
-                    sleep_blocks = (start_period_block - current_block + all_validator_query_period_blocks)
-                    bt.logging.info(f"Sleeping for {sleep_blocks} blocks before querying miners")
-                    time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
-                    continue
-                
                 QUERY_MINERS_TIMEOUT = 60 * 15 # 15 minutes
                 self.query_miners_event_loop.run_until_complete(
                     asyncio.wait_for(
