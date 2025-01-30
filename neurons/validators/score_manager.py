@@ -86,7 +86,7 @@ class ScoreManager:
         if self.current_session != session:
             # This is a new session, reset the scores and winners.
             self.current_session = session
-        #    self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+            self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # Update accumulated scores and track best performer
         self.total_scores[uids] += rewards
         # Create a rich table to display total scores
