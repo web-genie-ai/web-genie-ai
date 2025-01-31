@@ -248,7 +248,7 @@ class Validator(BaseValidatorNeuron):
                 if validator_index == -1:
                     bt.logging.error(f"No enough stake for the validator.")
                     continue
-                
+
                 bt.logging.info(f"Validator index: {validator_index}, Validator count: {validator_count}")
                 # Calculate query period blocks
                 with self.lock:
@@ -278,7 +278,7 @@ class Validator(BaseValidatorNeuron):
                     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
                     continue
                 
-                QUERY_MINERS_TIMEOUT = 60 * 15 # 15 minutes
+                QUERY_MINERS_TIMEOUT = 60 * 15
                 self.query_miners_event_loop.run_until_complete(
                     asyncio.wait_for(
                         self.genie_validator.query_miners(),
