@@ -150,16 +150,16 @@ class ScoreManager:
             self.save_scores()
         
     def get_scores(self, session_upto: int):
-        return self.total_scores
-        # scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        # with self.lock:
-        #     for session_number in self.winners:
-        #         if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
-        #             session_number > session_upto):
-        #             continue
+        #return self.total_scores
+        scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        with self.lock:
+            for session_number in self.winners:
+                if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
+                    session_number > session_upto):
+                    continue
                 
-        #         winner, competition_type = self.winners[session_number]
-        #         if winner == -1:
-        #             continue
-        #         scores[winner] += RESERVED_WEIGHTS[competition_type]
-        # return scores
+                winner, competition_type = self.winners[session_number]
+                if winner == -1:
+                    continue
+                scores[winner] += RESERVED_WEIGHTS[competition_type]
+        return scores

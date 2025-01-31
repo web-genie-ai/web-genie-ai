@@ -3,7 +3,7 @@ import os
 
 # Change this value when updating your code base.
 # Define the version of the webgenie.
-__VERSION__ = "1.0.8" # version
+__VERSION__ = "1.0.9" # version
 
 SPEC_VERSION = (
     (1000 * int(__VERSION__.split(".")[0]))
@@ -57,7 +57,7 @@ BLOCK_IN_SECONDS = 12 # block in seconds
 
 TEMPO_BLOCKS = 360 # tempo blocks
 
-SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 3 # session window blocks
+SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 5 # session window blocks
 
 CONSIDERING_SESSION_COUNTS = 8
 
