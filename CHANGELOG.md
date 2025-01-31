@@ -42,3 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.8] - 2025-01-29
 ### Changed
 - Set weights to zero in the new session.
+
+## [1.0.9] - 2025-01-30
+### Changed
+- Set weights based on the winner-take-all strategy.
