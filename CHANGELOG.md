@@ -46,3 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.9] - 2025-01-30
 ### Changed
 - Set weights based on the winner-take-all strategy.
+
+## [1.0.10] - 2025-01-31
+### Changed
+- Query miners without splitting the query window.
