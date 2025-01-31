@@ -8,7 +8,7 @@ from typing import List
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.challenges.challenge import Challenge, RESERVED_WEIGHTS
-from webgenie.constants import CONSIDERING_SESSION_COUNTS
+from webgenie.constants import CONSIDERING_SESSION_COUNTS, __STATE_VERSION__
 
 
 class ScoreManager:
@@ -28,11 +28,27 @@ class ScoreManager:
             bt.logging.info(f"Loading scores from {self.state_path}")
             data = np.load(self.state_path, allow_pickle=True)
 
-            self.hotkeys = data.get("hotkeys", copy.deepcopy(self.neuron.metagraph.hotkeys))
-            self.current_session = data.get("current_session", -1)
-            self.total_scores = data.get("total_scores", np.zeros(self.neuron.metagraph.n, dtype=np.float32))
-            self.last_set_weights_session = data.get("last_set_weights_session", -1)
-            self.winners = dict(data.get("winners", {}).item())
+            self.hotkeys = data.get(
+                f"hotkeys", 
+                copy.deepcopy(self.neuron.metagraph.hotkeys)
+            )
+            
+            self.current_session = data.get(
+                f"current_session", 
+                -1
+            )
+            
+            self.last_set_weights_session = data.get(
+                f"last_set_weights_session", 
+                -1
+            )
+
+            self.total_scores = data.get(
+                f"total_scores_{__STATE_VERSION__}", 
+                np.zeros(self.neuron.metagraph.n, dtype=np.float32),
+            )
+            
+            self.winners = dict(data.get(f"winners_{__STATE_VERSION__}", {}).item())
         except Exception as e:
             bt.logging.error(f"Error loading state: {e}")
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
@@ -45,12 +61,12 @@ class ScoreManager:
         try:
             bt.logging.info(f"Saving scores to {self.state_path}")
             np.savez(
-                self.state_path, 
-                hotkeys=self.hotkeys, 
-                current_session=self.current_session, 
-                total_scores=self.total_scores, 
+                self.state_path,
+                hotkeys=self.hotkeys,
+                **{f"current_session": self.current_session},
                 last_set_weights_session=self.last_set_weights_session,
-                winners=self.winners,
+                **{f"total_scores_{__STATE_VERSION__}": self.total_scores},
+                **{f"winners_{__STATE_VERSION__}": self.winners},
                 allow_pickle=True,
             )
             self.should_save = False
