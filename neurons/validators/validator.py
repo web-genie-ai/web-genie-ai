@@ -221,9 +221,9 @@ class Validator(BaseValidatorNeuron):
         """Serve axon to enable external connections."""
         bt.logging.info("serving ip to chain...")
         try:
-            kill_process_on_port(self.config.neuron.axon_port)
-            time.sleep(1)
-            
+            bt.logging.info(f"Killing process on port {self.config.axon.port}")
+            kill_process_on_port(self.config.axon.port)
+
             self.axon = bt.axon(wallet=self.wallet, config=self.config)
             self.axon.attach(
                 forward_fn = self.organic_forward_text,
@@ -238,7 +238,7 @@ class Validator(BaseValidatorNeuron):
                 subtensor=self.subtensor,
             )
             self.axon.start()
-            bt.logging.info(f"Validator running in organic mode on port {self.config.neuron.axon_port}")
+            bt.logging.info(f"Validator running in organic mode on port {self.config.axon.port}")
         except Exception as e:
             bt.logging.error(f"Failed to serve Axon with exception: {e}")
 
