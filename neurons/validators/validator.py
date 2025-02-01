@@ -22,6 +22,7 @@ from webgenie.base.utils.weight_utils import (
     process_weights_for_netuid,
     convert_weights_and_uids_for_emit,
 ) 
+from webgenie.helpers.ports import kill_process_on_port
 from webgenie.constants import (
     API_HOTKEY,
     BLOCK_IN_SECONDS,
@@ -220,8 +221,10 @@ class Validator(BaseValidatorNeuron):
         """Serve axon to enable external connections."""
         bt.logging.info("serving ip to chain...")
         try:
-            self.axon = bt.axon(wallet=self.wallet, config=self.config)
+            kill_process_on_port(self.config.neuron.axon_port)
+            time.sleep(1)
             
+            self.axon = bt.axon(wallet=self.wallet, config=self.config)
             self.axon.attach(
                 forward_fn = self.organic_forward_text,
                 blacklist_fn = self.blacklist_text,
