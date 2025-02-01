@@ -3,6 +3,10 @@ import os
 import sys
 import threading
 import uvicorn
+import psutil
+import signal
+import subprocess
+
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -12,7 +16,8 @@ from webgenie.constants import (
     LIGHTHOUSE_SERVER_WORK_DIR,
     LIGHTHOUSE_SERVER_PORT,
 )
-
+from webgenie.helpers.ports import kill_process_on_port
+kill_process_on_port(LIGHTHOUSE_SERVER_PORT)
 
 app = FastAPI()
 static_folder = f"/{LIGHTHOUSE_SERVER_WORK_DIR}"

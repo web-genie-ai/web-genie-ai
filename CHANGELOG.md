@@ -50,3 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.10] - 2025-01-31
 ### Changed
 - Query miners without splitting the query window.
+
+## [1.0.11] - 2025-01-31
+### Changed
+- Kill the process on the port before starting the axon and the lighthouse server.
