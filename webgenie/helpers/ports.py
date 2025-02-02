@@ -43,7 +43,7 @@ def kill_process_on_port(port):
         time.sleep(1)
     except Exception as e:
         bt.logging.error(f"Error killing process on port {port}: {e}")
-        raise Exception(f"Error killing process on port {port}: {e}")
+        #raise Exception(f"Error killing process on port {port}: {e}")
 
     for proc in psutil.process_iter(['pid', 'name']):
         try:
@@ -52,5 +52,5 @@ def kill_process_on_port(port):
                     raise Exception(f"Error killing process on port {port}: {e}")
         except Exception as e:
             bt.logging.error(f"Error killing process on port {port}: {e}")
-            raise Exception(f"Error killing process on port {port}: {e}")
+            #raise Exception(f"Error killing process on port {port}: {e}")
 
