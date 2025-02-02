@@ -60,14 +60,14 @@ class GenieValidator:
         try:
             with self.lock:
                 if len(self.miner_results) > MAX_COMPETETION_HISTORY_SIZE:
-                    bt.logging.info(
-                        f"Competition history size {len(self.miner_results)} "
-                        f"exceeds max size {MAX_COMPETETION_HISTORY_SIZE}, skipping"
-                    )
+                    # bt.logging.info(
+                    #     f"Competition history size {len(self.miner_results)} "
+                    #     f"exceeds max size {MAX_COMPETETION_HISTORY_SIZE}, skipping"
+                    # )
                     return
                 
                 if not self.synthetic_tasks:
-                    bt.logging.info("No synthetic tasks available, skipping")
+                    #bt.logging.info("No synthetic tasks available, skipping")
                     return
 
                 task, synapse = self.synthetic_tasks.pop(0)
