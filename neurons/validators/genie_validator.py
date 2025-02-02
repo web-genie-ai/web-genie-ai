@@ -120,13 +120,14 @@ class GenieValidator:
             for reveal_synapse, hash_synapse, miner_uid in zip(all_synapse_reveal_results, all_synapse_hash_results, miner_uids):
                 reveal_synapse.html_hash = hash_synapse.html_hash
                 checked_synapse = await self.checked_synapse(reveal_synapse, miner_uid)
-                if checked_synapse is not None:
-                    solutions.append(
-                        Solution(
-                            html = checked_synapse.html, 
-                            miner_uid = miner_uid, 
-                        )
+                if checked_synapse is None:
+                    continue
+                solutions.append(
+                    Solution(
+                        html = checked_synapse.html, 
+                        miner_uid = miner_uid, 
                     )
+                )
             challenge.solutions = solutions
 
             bt.logging.info(f"Received {len(solutions)} valid solutions")
@@ -151,7 +152,7 @@ class GenieValidator:
         
         with self.lock:
             if challenge.session != self.neuron.session:
-                bt.logging.info(
+                bt.logging.warning(
                     f"Session number mismatch: {challenge.session} != {self.neuron.session}"
                     f"This is the previous session's challenge, skipping"
                 )
@@ -254,7 +255,7 @@ class GenieValidator:
                     # synthetic_tasks is full, skipping
                     return
 
-            bt.logging.warning(f"Synthensize task")
+            bt.logging.info(f"Synthensizing task...")
             
             task_generator, _ = random.choices(
                 self.task_generators,
