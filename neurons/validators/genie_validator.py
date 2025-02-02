@@ -14,8 +14,6 @@ from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import (
     MAX_COMPETETION_HISTORY_SIZE, 
     MAX_SYNTHETIC_TASK_SIZE, 
-    WORK_DIR,
-    LIGHTHOUSE_SERVER_WORK_DIR,
     TASK_REVEAL_TIME,
     TASK_REVEAL_TIMEOUT,
     SESSION_WINDOW_BLOCKS,
@@ -26,6 +24,7 @@ from webgenie.challenges import (
     AccuracyChallenge,
     QualityChallenge,
     SeoChallenge,
+    BalancedChallenge,
 )
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
@@ -61,14 +60,14 @@ class GenieValidator:
         try:
             with self.lock:
                 if len(self.miner_results) > MAX_COMPETETION_HISTORY_SIZE:
-                    bt.logging.info(
-                        f"Competition history size {len(self.miner_results)} "
-                        f"exceeds max size {MAX_COMPETETION_HISTORY_SIZE}, skipping"
-                    )
+                    # bt.logging.info(
+                    #     f"Competition history size {len(self.miner_results)} "
+                    #     f"exceeds max size {MAX_COMPETETION_HISTORY_SIZE}, skipping"
+                    # )
                     return
                 
                 if not self.synthetic_tasks:
-                    bt.logging.info("No synthetic tasks available, skipping")
+                    #bt.logging.info("No synthetic tasks available, skipping")
                     return
 
                 task, synapse = self.synthetic_tasks.pop(0)
@@ -82,7 +81,8 @@ class GenieValidator:
             available_challenges_classes = [
                 AccuracyChallenge, 
                 QualityChallenge, 
-                SeoChallenge,
+                #SeoChallenge,
+                BalancedChallenge,
             ]  
             
             with self.lock:
@@ -120,13 +120,14 @@ class GenieValidator:
             for reveal_synapse, hash_synapse, miner_uid in zip(all_synapse_reveal_results, all_synapse_hash_results, miner_uids):
                 reveal_synapse.html_hash = hash_synapse.html_hash
                 checked_synapse = await self.checked_synapse(reveal_synapse, miner_uid)
-                if checked_synapse is not None:
-                    solutions.append(
-                        Solution(
-                            html = checked_synapse.html, 
-                            miner_uid = miner_uid, 
-                        )
+                if checked_synapse is None:
+                    continue
+                solutions.append(
+                    Solution(
+                        html = checked_synapse.html, 
+                        miner_uid = miner_uid, 
                     )
+                )
             challenge.solutions = solutions
 
             bt.logging.info(f"Received {len(solutions)} valid solutions")
@@ -151,7 +152,7 @@ class GenieValidator:
         
         with self.lock:
             if challenge.session != self.neuron.session:
-                bt.logging.info(
+                bt.logging.warning(
                     f"Session number mismatch: {challenge.session} != {self.neuron.session}"
                     f"This is the previous session's challenge, skipping"
                 )
@@ -223,7 +224,7 @@ class GenieValidator:
                 ],
                 "solutions": [
                     {
-                        "miner_answer": { "html": solution.html },
+                        "miner_answer": { "html": solution.html[0:100] },
                     } for solution in solutions
                 ],
                 "scores": [
@@ -235,7 +236,7 @@ class GenieValidator:
                     } for i in range(len(miner_uids))
                 ],
                 "challenge": {
-                    "task": challenge.task.ground_truth_html,
+                    "task": challenge.task.ground_truth_html[0:100],
                     "competition_type": challenge.competition_type,
                     "session_number": challenge.session,
                 },
@@ -254,7 +255,7 @@ class GenieValidator:
                     # synthetic_tasks is full, skipping
                     return
 
-            bt.logging.info(f"Synthensize task")
+            bt.logging.info(f"Synthensizing task...")
             
             task_generator, _ = random.choices(
                 self.task_generators,
