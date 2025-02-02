@@ -254,7 +254,7 @@ class GenieValidator:
                     # synthetic_tasks is full, skipping
                     return
 
-            bt.logging.info(f"Synthensize task")
+            bt.logging.warning(f"Synthensize task")
             
             task_generator, _ = random.choices(
                 self.task_generators,
