@@ -14,8 +14,6 @@ from webgenie.base.neuron import BaseNeuron
 from webgenie.constants import (
     MAX_COMPETETION_HISTORY_SIZE, 
     MAX_SYNTHETIC_TASK_SIZE, 
-    WORK_DIR,
-    LIGHTHOUSE_SERVER_WORK_DIR,
     TASK_REVEAL_TIME,
     TASK_REVEAL_TIMEOUT,
     SESSION_WINDOW_BLOCKS,
@@ -26,6 +24,7 @@ from webgenie.challenges import (
     AccuracyChallenge,
     QualityChallenge,
     SeoChallenge,
+    BalancedChallenge,
 )
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
@@ -82,7 +81,8 @@ class GenieValidator:
             available_challenges_classes = [
                 AccuracyChallenge, 
                 QualityChallenge, 
-                SeoChallenge,
+                #SeoChallenge,
+                BalancedChallenge,
             ]  
             
             with self.lock:
