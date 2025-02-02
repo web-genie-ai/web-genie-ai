@@ -60,5 +60,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Install sudo if it is not installed.
 
 ## [1.0.13] - 2025-02-01
+### Added
+- Added a balanced competition type.
 ### Changed
 - Do not raise an exception if the error occurs while killing the process on the port.
+
+
