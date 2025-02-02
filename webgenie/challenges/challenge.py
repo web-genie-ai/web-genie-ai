@@ -6,6 +6,7 @@ from webgenie.challenges.challenge_types import (
     ACCURACY_COMPETITION_TYPE,
     QUALITY_COMPETITION_TYPE,
     SEO_COMPETITION_TYPE,
+    BALANCED_COMPETITION_TYPE,
 )
 from webgenie.tasks.metric_types import (
     ACCURACY_METRIC_NAME, 
@@ -56,8 +57,22 @@ class QualityChallenge(Challenge):
         aggregated_scores = np.where(accuracy_scores > 0.7, quality_scores, 0)
         return aggregated_scores, scores
 
+
+class BalancedChallenge(Challenge):
+    competition_type: str = Field(default=BALANCED_COMPETITION_TYPE, description="The type of competition")
+
+    async def calculate_scores(self) -> dict[str, np.ndarray]:
+        scores = await self.task.generator.calculate_scores(self.task, self.solutions)
+        accuracy_scores = scores[ACCURACY_METRIC_NAME]
+        quality_scores = scores[QUALITY_METRIC_NAME]
+        seo_scores = scores[SEO_METRIC_NAME]
+        aggregated_scores = accuracy_scores * 0.5 + quality_scores * 0.5 + seo_scores * 0.0
+        return aggregated_scores, scores
+
+
 RESERVED_WEIGHTS = {
     ACCURACY_COMPETITION_TYPE: 50,
-    SEO_COMPETITION_TYPE: 30,
+    SEO_COMPETITION_TYPE: 0,
     QUALITY_COMPETITION_TYPE: 20,
+    BALANCED_COMPETITION_TYPE: 30,
 }
