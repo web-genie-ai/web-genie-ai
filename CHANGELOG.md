@@ -65,4 +65,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Do not raise an exception if the error occurs while killing the process on the port.
 
+## [1.0.14] - 2025-02-02
+### Changed
+- Update logging information.
+
+
+
+
 
