@@ -128,7 +128,7 @@ class Validator(BaseValidatorNeuron):
         with self.lock:
             current_session = self.session
             last_set_weights_session = self.score_manager.last_set_weights_session
-            if last_set_weights_session >= current_session - 1:
+            if last_set_weights_session == current_session - 1:
                 return
 
         scores = self.score_manager.get_scores(current_session - 1)
