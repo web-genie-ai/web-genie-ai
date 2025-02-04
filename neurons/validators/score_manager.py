@@ -113,6 +113,7 @@ class ScoreManager:
             self.number_of_tasks = 0
             self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # Update accumulated scores and track best performer
+        self.number_of_tasks += 1
         self.total_scores[uids] += rewards
         # Create a rich table to display total scores
   
