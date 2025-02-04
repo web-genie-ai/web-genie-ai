@@ -3,7 +3,7 @@ import os
 
 # Change this value when updating your code base.
 # Define the version of the webgenie.
-__VERSION__ = "1.0.14" # version
+__VERSION__ = "1.1.0" # version
 
 SPEC_VERSION = (
     (1000 * int(__VERSION__.split(".")[0]))
@@ -13,7 +13,7 @@ SPEC_VERSION = (
 
 __STATE_VERSION__ = "1.0.0" # state version
 
-API_HOTKEY = "5DXDCYTuPfLqQXbxfvvnarG31SdTDtaubqpQrzjrcMgoP9dp" # backend api hotkey
+API_HOTKEY = "5HW7jKgKHfxwkpziTTiVbGwLGQrymZsEFiSpBPhqKQjnAW9S" # backend api hotkey
 
 IMAGE_TASK_TIMEOUT = 72 # image task timeout
 
