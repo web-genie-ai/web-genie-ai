@@ -19,6 +19,7 @@ class ScoreManager:
 
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
         self.current_session = -1
+        self.number_of_tasks = 0
         self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         self.last_set_weights_session = -1
         self.winners = {}
@@ -37,6 +38,11 @@ class ScoreManager:
                 f"current_session", 
                 -1
             )
+
+            self.number_of_tasks = data.get(
+                f"number_of_tasks", 
+                0
+            )
             
             self.last_set_weights_session = data.get(
                 f"last_set_weights_session", 
@@ -48,13 +54,14 @@ class ScoreManager:
                 np.zeros(self.neuron.metagraph.n, dtype=np.float32),
             )
             
-            self.winners = dict(data.get(f"winners_{__STATE_VERSION__}", {}).item())
+            self.winners = dict(data.get(f"winners_{__STATE_VERSION__}", np.array({})).item())
         except Exception as e:
             bt.logging.error(f"Error loading state: {e}")
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
             self.current_session = -1
             self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             self.last_set_weights_session = -1
+            self.number_of_tasks = 0
             self.winners = {}
 
     def save_scores(self):
@@ -65,6 +72,7 @@ class ScoreManager:
                 hotkeys=self.hotkeys,
                 **{f"current_session": self.current_session},
                 last_set_weights_session=self.last_set_weights_session,
+                number_of_tasks=self.number_of_tasks,
                 **{f"total_scores_{__STATE_VERSION__}": self.total_scores},
                 **{f"winners_{__STATE_VERSION__}": self.winners},
                 allow_pickle=True,
@@ -102,13 +110,15 @@ class ScoreManager:
         if self.current_session != session:
             # This is a new session, reset the scores and winners.
             self.current_session = session
+            self.number_of_tasks = 0
             self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # Update accumulated scores and track best performer
+        self.number_of_tasks += 1
         self.total_scores[uids] += rewards
         # Create a rich table to display total scores
   
         total_scores_table = Table(
-            title=f"Total Scores This Session-{session}",
+            title=f"Total Scores - Session:#{session}, Number of Tasks:#{self.number_of_tasks}",
             show_header=True,
             header_style="bold magenta", 
             title_style="bold blue",
@@ -116,6 +126,7 @@ class ScoreManager:
         )
         total_scores_table.add_column("UID", justify="right", style="cyan", header_style="bold cyan")
         total_scores_table.add_column("Total Score", justify="right", style="green")
+        total_scores_table.add_column("Average Score", justify="right", style="yellow")
         
         # Add rows for non-zero scores, sorted by score
         scored_uids = [(uid, score) for uid, score in enumerate(self.total_scores) if score > 0]
@@ -124,14 +135,21 @@ class ScoreManager:
         for uid, score in scored_uids:
             total_scores_table.add_row(
                 str(uid),
-                f"{score:.4f}"
+                f"{score:.4f}",
+                f"{score / self.number_of_tasks:.4f}",
             )
 
         console = Console()
         console.print(total_scores_table)
 
-        if np.max(self.total_scores) > 0:
-            self.winners[session] = (np.argmax(self.total_scores), competition_type)
+        mask = np.ones_like(self.total_scores, dtype=bool)
+        if session-1 in self.winners and self.winners[session-1][0] != -1:
+            mask[self.winners[session-1][0]] = False
+        masked_scores = np.where(mask, self.total_scores, -np.inf)
+        current_winner = np.argmax(masked_scores)
+        
+        if self.total_scores[current_winner] > 0:
+            self.winners[session] = (current_winner, competition_type)
         else:
             self.winners[session] = (-1, competition_type)
 
@@ -168,14 +186,19 @@ class ScoreManager:
     def get_scores(self, session_upto: int):
         #return self.total_scores
         scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        tiny_weight = 1 / 128
+        big_weight = 1.0
         with self.lock:
             for session_number in self.winners:
                 if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
                     session_number > session_upto):
                     continue
                 
-                winner, competition_type = self.winners[session_number]
+                winner, _ = self.winners[session_number]
                 if winner == -1:
                     continue
-                scores[winner] += RESERVED_WEIGHTS[competition_type]
+                if session_number == session_upto:
+                    scores[winner] += big_weight
+                else:
+                    scores[winner] += tiny_weight
         return scores

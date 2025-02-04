@@ -69,7 +69,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Update logging information.
 
-
-
-
-
+## [1.1.0] - 2025-02-03
+### Added
+- Added a new column to the total scores table to show the average score.
+### Changed
+- Only reward the winner of current session.
+- Reward the winners of previous sessions with a tiny weight to prevent deregistration.
+- Changed the scoring mechanism to exclude the previous winner.
