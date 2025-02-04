@@ -83,7 +83,6 @@ class Validator(BaseValidatorNeuron):
             self.serve_axon()
 
     def resync_metagraph(self):
-        """Resyncs the metagraph and updates the hotkeys and moving averages based on the new metagraph."""
         # Copies state of metagraph before syncing.
         previous_metagraph = copy.deepcopy(self.metagraph)
 
@@ -95,7 +94,7 @@ class Validator(BaseValidatorNeuron):
             return
 
         bt.logging.info(
-            "Metagraph updated, re-syncing hotkeys, dendrite pool and moving averages"
+            "Metagraph updated, re-syncing hotkeys, dendrite pool and miner scores"
         )
         self.score_manager.set_new_hotkeys(self.metagraph.hotkeys)
 
