@@ -321,6 +321,7 @@ class GenieValidator:
                 checked_synapse = await self.checked_synapse(reveal_synapse, miner_uid)
                 if checked_synapse is None:
                     continue
+                bt.logging.info(f"Received valid solution from miner {miner_uid}")
                 return checked_synapse
             
             raise Exception(f"No valid solution received")
