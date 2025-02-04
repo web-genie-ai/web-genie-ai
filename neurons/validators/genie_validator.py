@@ -307,7 +307,6 @@ class GenieValidator:
                     timeout=TASK_REVEAL_TIMEOUT,
                 )
             bt.logging.info(f"Received {len(all_synapse_reveal_results)} responses in organic forward")
-
             
             # Sort miner UIDs and responses by incentive scores
             incentives = self.neuron.metagraph.I[all_miner_uids]
