@@ -273,22 +273,23 @@ class GenieValidator:
 
     async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
         if isinstance(synapse, WebgenieTextSynapse):
-            bt.logging.debug(f"Organic text forward: {synapse.prompt}")
+            bt.logging.info(f"Organic text forward: {synapse.prompt}")
             bt.logging.info("Not supported yet.")
             synapse.html = "Not supported yet."
             return synapse
         else:
-            bt.logging.debug(f"Organic image forward: {image_debug_str(synapse.base64_image)}...")
+            bt.logging.info(f"Organic image forward: {image_debug_str(synapse.base64_image)}...")
 
         synapse.VERSION = __VERSION__
         all_miner_uids = get_all_available_uids(self.neuron)
         try:
-            if not all_miner_uids:
+            if len(all_miner_uids) == 0:
                 raise Exception("No miners available")
             
+            bt.logging.info(f"Querying {len(all_miner_uids)} miners in organic forward")
             query_time = time.time()
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
-                responses = await dendrite(
+                all_synapse_hash_results = await dendrite(
                     axons=[self.neuron.metagraph.axons[uid] for uid in all_miner_uids],
                     synapse=synapse,
                     timeout=synapse.timeout,
@@ -296,23 +297,28 @@ class GenieValidator:
 
             elapsed_time = time.time() - query_time
             sleep_time_before_reveal = max(0, synapse.timeout - elapsed_time) + TASK_REVEAL_TIME
-            time.sleep(sleep_time_before_reveal)
 
+            bt.logging.info(f"Revealing task in organic forward")
+            time.sleep(sleep_time_before_reveal)
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
-                responses = await dendrite(
+                all_synapse_reveal_results = await dendrite(
                     axons=[self.neuron.metagraph.axons[uid] for uid in all_miner_uids],
                     synapse=synapse,
                     timeout=TASK_REVEAL_TIMEOUT,
                 )
+            bt.logging.info(f"Received {len(all_synapse_reveal_results)} responses in organic forward")
 
+            
             # Sort miner UIDs and responses by incentive scores
             incentives = self.neuron.metagraph.I[all_miner_uids]
             sorted_indices = np.argsort(-incentives)  # Negative for descending order
             all_miner_uids = [all_miner_uids[i] for i in sorted_indices]
+            all_synapse_reveal_results = [all_synapse_reveal_results[i] for i in sorted_indices]
+            all_synapse_hash_results = [all_synapse_hash_results[i] for i in sorted_indices]
             
-            responses = [responses[i] for i in sorted_indices]
-            for response, miner_uid in zip(responses, all_miner_uids):
-                checked_synapse = await self.checked_synapse(response, miner_uid)
+            for reveal_synapse, hash_synapse, miner_uid in zip(all_synapse_reveal_results, all_synapse_hash_results, all_miner_uids):
+                reveal_synapse.html_hash = hash_synapse.html_hash
+                checked_synapse = await self.checked_synapse(reveal_synapse, miner_uid)
                 if checked_synapse is None:
                     continue
                 return checked_synapse
