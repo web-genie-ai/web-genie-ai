@@ -38,6 +38,11 @@ class ScoreManager:
                 f"current_session", 
                 -1
             )
+
+            self.number_of_tasks = data.get(
+                f"number_of_tasks", 
+                0
+            )
             
             self.last_set_weights_session = data.get(
                 f"last_set_weights_session", 
@@ -49,7 +54,7 @@ class ScoreManager:
                 np.zeros(self.neuron.metagraph.n, dtype=np.float32),
             )
             
-            self.winners = dict(data.get(f"winners_{__STATE_VERSION__}", {}).item())
+            self.winners = dict(data.get(f"winners_{__STATE_VERSION__}", np.array({})).item())
         except Exception as e:
             bt.logging.error(f"Error loading state: {e}")
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
