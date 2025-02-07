@@ -1,6 +1,6 @@
 [project]
 name = "web-genie-ai"
-version = "1.1.0"
+version = "1.1.1"
 description = "The first bittensor subnet for web generation"
 readme = "README.md"
 requires-python = ">=3.12.4"

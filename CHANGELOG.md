@@ -76,3 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Only reward the winner of current session.
 - Reward the winners of previous sessions with a tiny weight to prevent deregistration.
 - Changed the scoring mechanism to exclude the previous winner.
+
+## [1.1.1] - 2025-02-06
+### Changed
+- Changed the scoring mechanism to reward all miners.
