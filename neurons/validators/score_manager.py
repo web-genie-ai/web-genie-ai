@@ -184,21 +184,21 @@ class ScoreManager:
             self.save_scores()
         
     def get_scores(self, session_upto: int):
-        #return self.total_scores
-        scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        tiny_weight = 1 / 128
-        big_weight = 1.0
-        with self.lock:
-            for session_number in self.winners:
-                if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
-                    session_number > session_upto):
-                    continue
+        return np.power(self.total_scores, 3)
+        # scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        # tiny_weight = 1 / 128
+        # big_weight = 1.0
+        # with self.lock:
+        #     for session_number in self.winners:
+        #         if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
+        #             session_number > session_upto):
+        #             continue
                 
-                winner, _ = self.winners[session_number]
-                if winner == -1:
-                    continue
-                if session_number == session_upto:
-                    scores[winner] += big_weight
-                else:
-                    scores[winner] += tiny_weight
-        return scores
+        #         winner, _ = self.winners[session_number]
+        #         if winner == -1:
+        #             continue
+        #         if session_number == session_upto:
+        #             scores[winner] += big_weight
+        #         else:
+        #             scores[winner] += tiny_weight
+        # return scores
