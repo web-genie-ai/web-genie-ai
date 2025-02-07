@@ -31,6 +31,7 @@ class RandomWebsiteDataset(Dataset):
             ddg = DDGS()
             for _ in range(retries):
                 random_words = " ".join(random.sample(self.english_words, 5))
+                random_words = random_words + " official website"
                 results = list(ddg.text(random_words))
                 if results:
                     website_url = random.choice(results)["href"]
