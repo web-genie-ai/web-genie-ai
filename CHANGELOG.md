@@ -84,3 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.2] - 2025-02-07
 ### Fixed
 - Fixed an issue with clearing the scores.
+
+## [1.1.3] - 2025-02-07
+### Changed
+- Only search for official websites.
