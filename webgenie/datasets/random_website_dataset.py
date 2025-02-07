@@ -38,7 +38,7 @@ class RandomWebsiteDataset(Dataset):
                     return website_url
                     
         except Exception as ex:
-            print(f"Failed to get search results from DuckDuckGo: {ex}")
+            bt.logging.error(f"Failed to get search results from DuckDuckGo: {ex}")
         return None
 
     async def get_rendered_html(self, url):
