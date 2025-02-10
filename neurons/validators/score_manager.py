@@ -21,6 +21,7 @@ class ScoreManager:
         self.current_session = -1
         self.number_of_tasks = 0
         self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         self.last_set_weights_session = -1
         self.winners = {}
 
@@ -53,6 +54,11 @@ class ScoreManager:
                 f"total_scores_{__STATE_VERSION__}", 
                 np.zeros(self.neuron.metagraph.n, dtype=np.float32),
             )
+
+            self.scores = data.get(
+                f"scores_{__STATE_VERSION__}", 
+                np.zeros(self.neuron.metagraph.n, dtype=np.float32),
+            )
             
             self.winners = dict(data.get(f"winners_{__STATE_VERSION__}", np.array({})).item())
         except Exception as e:
@@ -60,6 +66,7 @@ class ScoreManager:
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
             self.current_session = -1
             self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+            self.scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             self.last_set_weights_session = -1
             self.number_of_tasks = 0
             self.winners = {}
@@ -74,10 +81,10 @@ class ScoreManager:
                 last_set_weights_session=self.last_set_weights_session,
                 number_of_tasks=self.number_of_tasks,
                 **{f"total_scores_{__STATE_VERSION__}": self.total_scores},
+                **{f"scores_{__STATE_VERSION__}": self.scores},
                 **{f"winners_{__STATE_VERSION__}": self.winners},
                 allow_pickle=True,
             )
-            self.should_save = False
         except Exception as e:
             bt.logging.error(f"Error saving state: {e}")
     
@@ -89,6 +96,7 @@ class ScoreManager:
         for uid, hotkey in enumerate(self.hotkeys):
             if hotkey != new_hotkeys[uid]:
                 self.total_scores[uid] = 0
+                self.scores[uid] = 0
 
         # Check to see if the metagraph has changed size.
         # If so, we need to add new hotkeys and moving averages.
@@ -97,6 +105,11 @@ class ScoreManager:
             min_len = min(len(self.hotkeys), len(self.total_scores))
             new_total_scores[:min_len] = self.total_scores[:min_len]
             self.total_scores = new_total_scores
+
+            new_scores = np.zeros((len(new_hotkeys)))
+            min_len = min(len(self.hotkeys), len(self.scores))
+            new_scores[:min_len] = self.scores[:min_len]
+            self.scores = new_scores
 
         # Update the hotkeys.
         self.hotkeys = copy.deepcopy(new_hotkeys)
@@ -111,6 +124,7 @@ class ScoreManager:
             # This is a new session, reset the scores and winners.
             self.current_session = session
             self.number_of_tasks = 0
+            self.scores = self.total_scores.copy()
             self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # Update accumulated scores and track best performer
         self.number_of_tasks += 1
@@ -184,7 +198,7 @@ class ScoreManager:
             self.save_scores()
         
     def get_scores(self, session_upto: int):
-        return np.power(self.total_scores, 3)
+        return np.power(self.scores, 9)
         # scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # tiny_weight = 1 / 128
         # big_weight = 1.0

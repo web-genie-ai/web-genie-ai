@@ -260,6 +260,6 @@ def send_challenge_to_stats_collector(wallet: "bt.Wallet", session_number: int) 
         payload=session_data,
     )
     if not response.ok:
-        bt.logging.error(response.json())
+        bt.logging.error(f"Failed to send challenge to stats collector | status code: {response.status_code}")
     else:
         bt.logging.success(response.json())

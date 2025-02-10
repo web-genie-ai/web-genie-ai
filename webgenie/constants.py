@@ -3,7 +3,7 @@ import os
 
 # Change this value when updating your code base.
 # Define the version of the webgenie.
-__VERSION__ = "1.1.1" # version
+__VERSION__ = "1.1.3" # version
 
 SPEC_VERSION = (
     (1000 * int(__VERSION__.split(".")[0]))
@@ -11,7 +11,7 @@ SPEC_VERSION = (
     + (1 * int(__VERSION__.split(".")[2]))
 )
 
-__STATE_VERSION__ = "1.0.0" # state version
+__STATE_VERSION__ = "1.0.1" # state version
 
 API_HOTKEY = "5HW7jKgKHfxwkpziTTiVbGwLGQrymZsEFiSpBPhqKQjnAW9S" # backend api hotkey
 
