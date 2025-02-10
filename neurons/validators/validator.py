@@ -179,6 +179,7 @@ class Validator(BaseValidatorNeuron):
             self.score_manager.last_set_weights_session = current_session - 1
             with self.lock:
                 self.score_manager.save_scores()
+                self.score_manager.save_session_result_to_file(current_session-1)
             try:
                 bt.logging.info(f"Sending challenge to stats collector for session {current_session-1}")
                 send_challenge_to_stats_collector(self.wallet, current_session-1)
