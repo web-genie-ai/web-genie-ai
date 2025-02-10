@@ -15,9 +15,10 @@ def init_wandb(self):
         if WANDB_OFF:
             return
         wandb.login(key=WANDB_API_KEY)
-        run_name = f"{self.config.neuron.name}-{self.uid}--{__VERSION__}"
+        project = f"{WANDB_PROJECT_NAME}-{self.config.neuron.name}"
+        run_name = f"{self.config.neuron.name}-{self.uid}-{__VERSION__}"
         run = wandb.init(
-            project=WANDB_PROJECT_NAME, 
+            project=project, 
             entity=WANDB_ENTITY_NAME, 
             name=run_name,
             config=self.config,
