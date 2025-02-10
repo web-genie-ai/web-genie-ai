@@ -88,3 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.3] - 2025-02-07
 ### Changed
 - Only search for official websites.
+
+## [1.1.4] - 2025-02-10
+### Added
+- Save the results of the previous sessions.

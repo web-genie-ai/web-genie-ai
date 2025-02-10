@@ -41,3 +41,12 @@ def log_wandb(data: dict):
     except Exception as e:
         bt.logging.error(f"Error logging to wandb: {e}")
         raise e
+
+def save_file_to_wandb(file_path: str):
+    try:
+        if WANDB_OFF:
+            return
+        wandb.save(file_path)
+    except Exception as e:
+        bt.logging.error(f"Error saving file to wandb: {e}")
+        raise e
