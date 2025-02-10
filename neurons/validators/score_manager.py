@@ -198,7 +198,7 @@ class ScoreManager:
             self.save_scores()
         
     def get_scores(self, session_upto: int):
-        return np.power(self.scores, 3)
+        return np.power(self.scores, 9)
         # scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # tiny_weight = 1 / 128
         # big_weight = 1.0

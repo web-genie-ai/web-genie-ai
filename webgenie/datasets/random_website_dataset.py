@@ -31,13 +31,14 @@ class RandomWebsiteDataset(Dataset):
             ddg = DDGS()
             for _ in range(retries):
                 random_words = " ".join(random.sample(self.english_words, 5))
+                random_words = random_words + " official website"
                 results = list(ddg.text(random_words))
                 if results:
                     website_url = random.choice(results)["href"]
                     return website_url
                     
         except Exception as ex:
-            print(f"Failed to get search results from DuckDuckGo: {ex}")
+            bt.logging.error(f"Failed to get search results from DuckDuckGo: {ex}")
         return None
 
     async def get_rendered_html(self, url):
