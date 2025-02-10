@@ -224,7 +224,7 @@ class GenieValidator:
                 ],
                 "solutions": [
                     {
-                        "miner_answer": { "html": solution.html[0:100] },
+                        "miner_answer": { "html": solution.html},
                     } for solution in solutions
                 ],
                 "scores": [
@@ -236,7 +236,7 @@ class GenieValidator:
                     } for i in range(len(miner_uids))
                 ],
                 "challenge": {
-                    "task": challenge.task.ground_truth_html[0:100],
+                    "task": challenge.task.ground_truth_html,
                     "competition_type": challenge.competition_type,
                     "session_number": challenge.session,
                 },
