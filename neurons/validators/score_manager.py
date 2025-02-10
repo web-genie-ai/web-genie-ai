@@ -56,7 +56,7 @@ class ScoreManager:
             )
             
             self.session_results = dict(
-                data.get(f"session_results_{__STATE_VERSION__}", np.array({})).item()
+                data.get("session_results", np.array({})).item()
             )
         except Exception as e:
             bt.logging.error(f"Error loading state: {e}")
