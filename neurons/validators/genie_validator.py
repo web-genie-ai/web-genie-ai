@@ -293,10 +293,9 @@ class GenieValidator:
             if task_index >= MAX_NUMBER_OF_TASKS_PER_SESSION:
                 return
             
-            bt.logging.info(f"Forwarding task {task_index}")
+            bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
             seed = self.get_seed(session, task_index)
             
-            bt.logging.info(f"Session: {session}, Task index: {task_index}, Seed: {seed}, type: {type(seed)}")
             bt.logging.info(f"Init random with seed: {seed}")
             random.seed(seed)
             
