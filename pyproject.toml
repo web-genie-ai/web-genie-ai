@@ -1,5 +1,6 @@
 [project]
 name = "web-genie-ai"
+dynamic = ["version"]
 description = "The first bittensor subnet for web generation"
 readme = "README.md"
 requires-python = ">=3.12.4"
@@ -43,3 +44,6 @@ repository = "https://github.com/web-genie-ai/web-genie-ai"
 
 [tool.uv.sources]
 clip = {git = "https://github.com/openai/CLIP.git"}
+
+[tool.setuptools]
+packages = ["webgenie"]
