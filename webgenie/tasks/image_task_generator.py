@@ -36,9 +36,9 @@ class ImageTaskGenerator(TaskGenerator):
         super().__init__()
         
         self.datasets = [
-            (RandomWebsiteDataset(), 0.8),
-            (SyntheticDataset(), 0.1),
-            (HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"), 0.1),
+            (RandomWebsiteDataset(), 1),
+            #(SyntheticDataset(), 0.1),
+            #(HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"), 0.1),
         ]
 
         self.metrics = {
