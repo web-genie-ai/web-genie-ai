@@ -32,6 +32,7 @@ class RandomWebsiteDataset(Dataset):
             ddg = DDGS()
             random_words = " ".join(random.sample(self.english_words, 7))
             random_words = random_words + " official website with landing page"
+            bt.logging.info(f"Searching for {random_words}")
             urls = []
             for _ in range(number_of_tries):
                 results = list(ddg.text(random_words))
