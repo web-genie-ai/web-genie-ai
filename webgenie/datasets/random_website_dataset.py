@@ -1,4 +1,5 @@
 import bittensor as bt
+import asyncio
 import nltk
 import random
 
@@ -26,17 +27,23 @@ class RandomWebsiteDataset(Dataset):
         common_words = [word for word, _ in most_common]
         self.english_words = common_words
 
-    async def get_random_website_url(self, retries: int = 3) -> Optional[str]:
+    async def get_random_website_url(self, number_of_tries: int = 10) -> Optional[str]:
         try:
             ddg = DDGS()
-            for _ in range(retries):
-                random_words = " ".join(random.sample(self.english_words, 5))
-                random_words = random_words + " official website"
+            random_words = " ".join(random.sample(self.english_words, 7))
+            random_words = random_words + " official website with landing page"
+            urls = []
+            for _ in range(number_of_tries):
                 results = list(ddg.text(random_words))
-                if results:
-                    website_url = random.choice(results)["href"]
-                    return website_url
-                    
+                if not results:
+                    continue
+                website_url = results[0]["href"]
+                urls.append(website_url)            
+                await asyncio.sleep(1)
+            if urls:
+                url_counts = Counter(urls)
+                most_common_url = url_counts.most_common(1)[0][0]
+                return most_common_url
         except Exception as ex:
             bt.logging.error(f"Failed to get search results from DuckDuckGo: {ex}")
         return None
@@ -151,7 +158,7 @@ class RandomWebsiteDataset(Dataset):
             bt.logging.info(f"Generated website URL: {website_url}")
             return DatasetEntry(
                 src="random_website",
-                topic="random_website",
+                url=f"random_website_{website_url}",
                 ground_truth_html=html,
                 prompt="",
                 base64_image="",

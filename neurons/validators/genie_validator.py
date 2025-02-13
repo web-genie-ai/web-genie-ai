@@ -76,7 +76,6 @@ class GenieValidator:
             if len(miner_uids) == 0:
                 bt.logging.warning("No miners available")
                 return
-            bt.logging.info(f"querying {len(miner_uids)} miners")
 
             available_challenges_classes = [
                 AccuracyChallenge, 
@@ -94,7 +93,7 @@ class GenieValidator:
             synapse.competition_type = challenge.competition_type
             synapse.VERSION = __VERSION__
 
-            bt.logging.debug(f"Querying {len(miner_uids)} miners with task_id: {task.task_id}")
+            bt.logging.info(f"Querying {len(miner_uids)} miners with task_id: {task.task_id}")
             
             query_time = time.time()
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
@@ -299,7 +298,13 @@ class GenieValidator:
             bt.logging.info(f"Init random with seed: {seed}")
             random.seed(seed)
             
-            await self.synthensize_task()
+            while True:
+                try:
+                    await self.synthensize_task()
+                    break
+                except Exception as e:
+                    bt.logging.error(f"Error in synthensize_task: {e}")
+            
             await self.query_miners()
             await self.score()
         except Exception as e:

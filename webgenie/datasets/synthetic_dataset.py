@@ -59,6 +59,7 @@ class SyntheticDataset(Dataset):
 
         return DatasetEntry(
             src="synthetic",
+            url=f"synthetic_{concept}",
             prompt=concept,
             ground_truth_html=ground_truth_html,
         )
