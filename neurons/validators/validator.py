@@ -281,11 +281,18 @@ class Validator(BaseValidatorNeuron):
                 #     time.sleep(sleep_blocks * BLOCK_IN_SECONDS)
                 #     continue
                 
-                QUERY_MINERS_TIMEOUT = 60 * 15
+                # QUERY_MINERS_TIMEOUT = 60 * 15
+                # self.query_miners_event_loop.run_until_complete(
+                #     asyncio.wait_for(
+                #         self.genie_validator.query_miners(),
+                #         timeout=QUERY_MINERS_TIMEOUT
+                #     )
+                # )
+                FORWARD_TIMEOUT = 60 * 60 * 2 # 2 hours
                 self.query_miners_event_loop.run_until_complete(
                     asyncio.wait_for(
-                        self.genie_validator.query_miners(),
-                        timeout=QUERY_MINERS_TIMEOUT
+                        self.genie_validator.forward(),
+                        timeout=FORWARD_TIMEOUT
                     )
                 )
             except Exception as e:
@@ -347,14 +354,14 @@ class Validator(BaseValidatorNeuron):
             self.is_running = True
             self.should_exit = False
             
-            self.synthensize_task_thread = threading.Thread(target=self.synthensize_task_loop, daemon=True)
+            #self.synthensize_task_thread = threading.Thread(target=self.synthensize_task_loop, daemon=True)
             self.query_miners_thread = threading.Thread(target=self.query_miners_loop, daemon=True)
-            self.score_thread = threading.Thread(target=self.score_loop, daemon=True)
+            #self.score_thread = threading.Thread(target=self.score_loop, daemon=True)
             self.sync_thread = threading.Thread(target=self.sync_loop, daemon=True)
 
-            self.synthensize_task_thread.start()
+            #self.synthensize_task_thread.start()
             self.query_miners_thread.start()
-            self.score_thread.start()
+            #self.score_thread.start()
             self.sync_thread.start()        
             start_lighthouse_server_thread()
             bt.logging.info("Started background threads")
@@ -366,15 +373,15 @@ class Validator(BaseValidatorNeuron):
             self.should_exit = True
             self.is_running = False
             
-            self.synthensize_task_thread.join(5)
+            #self.synthensize_task_thread.join(5)
             self.query_miners_thread.join(5)
-            self.score_thread.join(5)
+            #self.score_thread.join(5)
             self.sync_thread.join(5)
             stop_lighthouse_server()
 
-            self.synthensize_task_thread = None
+            #self.synthensize_task_thread = None
             self.query_miners_thread = None
-            self.score_thread = None
+            #self.score_thread = None
             self.sync_thread = None
             bt.logging.info("Stopped background threads")
 

@@ -72,12 +72,12 @@ class GenieValidator:
 
                 task, synapse = self.synthetic_tasks.pop(0)
 
-            bt.logging.info("querying miners")
             miner_uids = get_all_available_uids(self.neuron)
             if len(miner_uids) == 0:
                 bt.logging.warning("No miners available")
                 return
-            
+            bt.logging.info(f"querying {len(miner_uids)} miners")
+
             available_challenges_classes = [
                 AccuracyChallenge, 
                 QualityChallenge, 
@@ -94,7 +94,7 @@ class GenieValidator:
             synapse.competition_type = challenge.competition_type
             synapse.VERSION = __VERSION__
 
-            bt.logging.debug(f"Querying {len(miner_uids)} miners")
+            bt.logging.debug(f"Querying {len(miner_uids)} miners with task_id: {task.task_id}")
             
             query_time = time.time()
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
@@ -270,6 +270,40 @@ class GenieValidator:
         
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
+            
+    
+    def get_seed(self, session: int, task_index: int, hash_cache: dict = {}) -> int:
+        if session not in hash_cache:
+            session_start_block = session * SESSION_WINDOW_BLOCKS
+            subtensor = self.neuron.subtensor
+            block_hash = subtensor.get_block_hash(session_start_block)
+            hash_cache[session] = int(block_hash[-15:], 16)
+        return int(hash_cache[session] + task_index)
+
+    async def forward(self):
+        try:
+            with self.lock:
+                session = self.neuron.session
+                if self.neuron.score_manager.current_session != session:
+                    task_index = 0
+                else:
+                    task_index = self.neuron.score_manager.number_of_tasks
+                    
+            MAX_NUMBER_OF_TASKS_PER_SESSION = 20
+            if task_index >= MAX_NUMBER_OF_TASKS_PER_SESSION:
+                return
+            
+            bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
+            seed = self.get_seed(session, task_index)
+            
+            bt.logging.info(f"Init random with seed: {seed}")
+            random.seed(seed)
+            
+            await self.synthensize_task()
+            await self.query_miners()
+            await self.score()
+        except Exception as e:
+            bt.logging.error(f"Error in forward: {e}")
 
     async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
         if isinstance(synapse, WebgenieTextSynapse):

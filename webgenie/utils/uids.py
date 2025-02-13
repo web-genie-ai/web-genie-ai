@@ -69,12 +69,32 @@ def get_most_available_uid(self, exclude: List[int] = None) -> int:
 def get_all_available_uids(
     self, exclude: List[int] = None
 ) -> np.ndarray:
+    ip_count = {}
+    for uid in range(self.metagraph.n.item()):
+        uid_is_available = check_uid_availability(self.metagraph, uid) 
+        if not uid_is_available:
+            continue
+        uid_is_not_excluded = exclude is None or uid not in exclude
+        if not uid_is_not_excluded:
+            continue
+        ip = self.metagraph.addresses[uid]
+        ip = ip.split(":")[0]
+        ip_count[ip] = ip_count[ip] + 1 if ip in ip_count else 1
+    
     avail_uids = []
     for uid in range(self.metagraph.n.item()):
         uid_is_available = check_uid_availability(self.metagraph, uid) 
+        if not uid_is_available:
+            continue
         uid_is_not_excluded = exclude is None or uid not in exclude
-        if uid_is_available and uid_is_not_excluded:
+        if not uid_is_not_excluded:
+            continue
+        ip = self.metagraph.addresses[uid]
+        ip = ip.split(":")[0]
+        has_too_many_ips = ip_count[ip] > 3
+        if not has_too_many_ips:
             avail_uids.append(uid)
+
     return np.array(avail_uids)
 
 

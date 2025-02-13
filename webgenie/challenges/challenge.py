@@ -43,7 +43,7 @@ class SeoChallenge(Challenge):
         scores = await self.task.generator.calculate_scores(self.task, self.solutions)
         accuracy_scores = scores[ACCURACY_METRIC_NAME]
         seo_scores = scores[SEO_METRIC_NAME]
-        aggregated_scores = np.where(accuracy_scores > 0.7, seo_scores, 0)
+        aggregated_scores = np.where(accuracy_scores > 0.4, seo_scores, 0)
         return aggregated_scores, scores
 
 
@@ -54,9 +54,8 @@ class QualityChallenge(Challenge):
         scores = await self.task.generator.calculate_scores(self.task, self.solutions)
         accuracy_scores = scores[ACCURACY_METRIC_NAME]
         quality_scores = scores[QUALITY_METRIC_NAME]
-        aggregated_scores = np.where(accuracy_scores > 0.7, quality_scores, 0)
+        aggregated_scores = np.where(accuracy_scores > 0.4, quality_scores, 0)
         return aggregated_scores, scores
-
 
 class BalancedChallenge(Challenge):
     competition_type: str = Field(default=BALANCED_COMPETITION_TYPE, description="The type of competition")
