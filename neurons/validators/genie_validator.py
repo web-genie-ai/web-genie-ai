@@ -269,7 +269,7 @@ class GenieValidator:
         
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
-            
+            raise e
     
     def get_seed(self, session: int, task_index: int, hash_cache: dict = {}) -> int:
         if session not in hash_cache:
@@ -303,7 +303,10 @@ class GenieValidator:
                     await self.synthensize_task()
                     break
                 except Exception as e:
-                    bt.logging.error(f"Error in synthensize_task: {e}")
+                    bt.logging.error(
+                        f"Error in synthensize_task: {e}"
+                        f"Retrying..."
+                    )
             
             await self.query_miners()
             await self.score()
