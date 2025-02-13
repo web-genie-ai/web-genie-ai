@@ -299,7 +299,13 @@ class GenieValidator:
             bt.logging.info(f"Init random with seed: {seed}")
             random.seed(seed)
             
-            await self.synthensize_task()
+            while True:
+                try:
+                    await self.synthensize_task()
+                    break
+                except Exception as e:
+                    bt.logging.error(f"Error in synthensize_task: {e}")
+            
             await self.query_miners()
             await self.score()
         except Exception as e:
