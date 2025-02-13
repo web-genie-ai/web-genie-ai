@@ -52,7 +52,7 @@ class ImageTaskGenerator(TaskGenerator):
         
         dataset, _ = random.choices(self.datasets, weights=[weight for _, weight in self.datasets])[0]
         dataset_entry = await dataset.generate_context()
-        bt.logging.debug(f"Generated dataset entry: {dataset_entry.src}")
+        bt.logging.debug(f"Generated dataset entry: {dataset_entry.url}")
 
         ground_truth_html = preprocess_html(dataset_entry.ground_truth_html)
         bt.logging.info(f"Preprocessed ground truth html")
@@ -70,14 +70,16 @@ class ImageTaskGenerator(TaskGenerator):
         if aspect_ratio > 7:  # If height is more than 7x the width
             raise ValueError(f"Image aspect ratio too extreme: {aspect_ratio:.2f}. Height should not exceed 7x width.")
         
-        bt.logging.debug(f"Screenshot generated for {dataset_entry.src}")
+        bt.logging.debug(f"Screenshot generated for {dataset_entry.url}")
         image_task = ImageTask(
-            base64_image=base64_image, 
+            base64_image=base64_image,
             ground_truth_html=ground_truth_html,
-            timeout=IMAGE_TASK_TIMEOUT,
             generator=self,
             src=dataset_entry.src,
+            task_id=str(hash(dataset_entry.url)),
+            timeout=IMAGE_TASK_TIMEOUT,
         )
+        
         return (
             image_task,  
             WebgenieImageSynapse(base64_image=base64_image, task_id=image_task.task_id),
