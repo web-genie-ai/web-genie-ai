@@ -42,7 +42,7 @@ class HuggingfaceDataset(Dataset):
             complex_html = await self._make_html_complex(html)
             return DatasetEntry(
                 src="huggingface",
-                topic="design2code",
+                url=f"design2code_{random_index}",
                 ground_truth_html=complex_html,
                 prompt="",
                 base64_image=""
