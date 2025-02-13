@@ -270,6 +270,40 @@ class GenieValidator:
         
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
+            
+    
+    def get_seed(self, session: int, task_index: int, hash_cache: dict = {}):
+        if session not in hash_cache:
+            session_start_block = session * SESSION_WINDOW_BLOCKS
+            subtensor = self.neuron.subtensor
+            hash_cache[session] = int(
+                subtensor.get_block_hash(session_start_block),
+                16
+            )
+        return hash_cache[session] + task_index
+
+    async def forward(self):
+        try:
+            with self.lock:
+                session = self.neuron.session
+                if self.neuron.score_manager.current_session != session:
+                    task_index = 0
+                else:
+                    task_index = self.neuron.score_manager.number_of_tasks
+            if task_index >= 20:
+                return
+            
+            bt.logging.info(f"Forwarding task {task_index}")
+            seed = self.get_seed(session, task_index)
+            
+            bt.logging.info(f"Init random with seed: {seed}")
+            random.seed(seed)
+            
+            await self.synthensize_task()
+            await self.query_miners()
+            await self.score()
+        except Exception as e:
+            bt.logging.error(f"Error in forward: {e}")
 
     async def organic_forward(self, synapse: Union[WebgenieTextSynapse, WebgenieImageSynapse]):
         if isinstance(synapse, WebgenieTextSynapse):
