@@ -92,3 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.4] - 2025-02-10
 ### Added
 - Save the results of the previous sessions.
+
+## [1.1.5] - 2025-02-12
+### Changed
+- Switched to winner-take-all strategy.

@@ -36,9 +36,9 @@ class ImageTaskGenerator(TaskGenerator):
         super().__init__()
         
         self.datasets = [
-            (RandomWebsiteDataset(), 0.8),
-            (SyntheticDataset(), 0.1),
-            (HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"), 0.1),
+            (RandomWebsiteDataset(), 1),
+            #(SyntheticDataset(), 0.1),
+            #(HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"), 0.1),
         ]
 
         self.metrics = {
@@ -62,7 +62,14 @@ class ImageTaskGenerator(TaskGenerator):
         if is_empty_html(ground_truth_html):
             raise ValueError("Empty ground truth html")
         
-        base64_image = await html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)    
+        base64_image = await html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)   
+        # Check image dimensions ratio
+        image = base64_to_image(base64_image)
+        width, height = image.size
+        aspect_ratio = height / width
+        if aspect_ratio > 7:  # If height is more than 7x the width
+            raise ValueError(f"Image aspect ratio too extreme: {aspect_ratio:.2f}. Height should not exceed 7x width.")
+        
         bt.logging.debug(f"Screenshot generated for {dataset_entry.src}")
         image_task = ImageTask(
             base64_image=base64_image, 

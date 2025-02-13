@@ -1,7 +1,17 @@
 import bittensor as bt
 from io import BufferedReader
 from .database import Session as DBSession
-from .models import Neuron, LeaderboardSession, Competition, Challenge, Judgement, EvaluationType, TaskSolution, SolutionEvaluation
+from .models import (
+    Challenge,
+    Competition,
+    EvaluationType,
+    Judgement,
+    LeaderboardSession,
+    Neuron,
+    SolutionEvaluation,
+    TaskSolution,
+    GeneratedTask
+)
 from datetime import datetime
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
@@ -263,3 +273,20 @@ def send_challenge_to_stats_collector(wallet: "bt.Wallet", session_number: int) 
         bt.logging.error(f"Failed to send challenge to stats collector | status code: {response.status_code}")
     else:
         bt.logging.success(response.json())
+    
+def store_generated_task(seed: int, task_html: str):
+    return create_record(session, GeneratedTask, seed=seed, task_html=task_html)
+
+def get_seed_from_latest_generated_task():
+    return session.query(GeneratedTask).order_by(GeneratedTask.id.desc()).first().seed
+
+def get_generated_task_not_evaluated(last_task_id: int = None):
+    query = session.query(GeneratedTask).filter_by(evaluated=False)
+    if last_task_id:
+        query = query.filter(GeneratedTask.id > last_task_id)
+    return query.first()
+
+def set_generated_task_evaluated(task_id: int):
+    task = session.query(GeneratedTask).filter_by(id=task_id).first()
+    task.evaluated = True
+    session.commit()

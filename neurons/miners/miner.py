@@ -16,20 +16,20 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 from dotenv import load_dotenv
-
 load_dotenv(".env.miner")
 load_dotenv(".env")
 
+import bittensor as bt
 import time
-
+import os
 import typing
 
-import bittensor as bt
 from webgenie.base.miner import BaseMinerNeuron
 from webgenie.constants import (
     TASK_REVEAL_TIME,
     IMAGE_TASK_TIMEOUT,
     TEXT_TASK_TIMEOUT,
+    WORK_DIR,
 )
 from webgenie.helpers.images import image_debug_str
 from webgenie.helpers.weights import init_wandb
@@ -68,21 +68,47 @@ class Miner(BaseMinerNeuron):
         self.task_state: typing.Dict[str, typing.Dict[str, typing.Any]] = {}
         
         init_wandb(self)
-        
+    
+    def get_saved_answer(self, task_id: str) -> str:
+        saved_answer_path = f"{WORK_DIR}/answers/{task_id}.html"
+        if os.path.exists(saved_answer_path):
+            with open(saved_answer_path, "r") as f:
+                return f.read()
+        return None
+    
+    def save_answer(self, task_id: str, html: str):
+        saved_answer_path = f"{WORK_DIR}/answers/{task_id}.html"
+        os.makedirs(os.path.dirname(saved_answer_path), exist_ok=True)
+        with open(saved_answer_path, "w") as f:
+            f.write(html)
+    
     async def forward_image(
         self, synapse: WebgenieImageSynapse
     ) -> WebgenieImageSynapse:
         validator_uid = self.metagraph.hotkeys.index(synapse.dendrite.hotkey)
+        task_hash = f"{synapse.task_id}_{validator_uid}"
+        task_id = synapse.task_id
+            
         bt.logging.debug(f"Validator {validator_uid}'s repo version: {synapse.VERSION}")
         bt.logging.debug(f"Miner image forward called with image: {image_debug_str(synapse.base64_image)}...")
         
-        if synapse.task_id not in self.task_state:
-            bt.logging.debug(f"Task {synapse.task_id} is not calculated yet.")
+        if task_hash not in self.task_state:
+            bt.logging.debug(f"Task {task_hash} is not calculated yet.")
             create_time = time.time()
-            synapse = await self.genie_miner.forward_image(synapse)
             
+            saved_answer = self.get_saved_answer(task_id)
+            if saved_answer is not None:
+                synapse.html = saved_answer
+            else:
+                synapse = await self.genie_miner.forward_image(synapse)
+                saved_answer = self.get_saved_answer(task_id)
+                if saved_answer is not None:
+                    synapse.html = saved_answer
+                else:
+                    self.save_answer(task_id, synapse.html)
+                        
             nonce = add_answer_hash(synapse, self.uid, synapse.html)
-            self.task_state[synapse.task_id] = {
+            self.task_state[task_hash] = {
                 "html": synapse.html,
                 "nonce": nonce,
                 "create_time": create_time
@@ -92,15 +118,15 @@ class Miner(BaseMinerNeuron):
             return synapse
         else:
             DELTA = 10
-            create_time = self.task_state[synapse.task_id]["create_time"]
+            create_time = self.task_state[task_hash]["create_time"]
             if time.time() - create_time >= TASK_REVEAL_TIME + IMAGE_TASK_TIMEOUT - DELTA:
-                bt.logging.debug(f"Task {synapse.task_id} is ready to reveal.")
-                synapse.html = self.task_state[synapse.task_id]["html"]
-                synapse.nonce = self.task_state[synapse.task_id]["nonce"]        
-                del self.task_state[synapse.task_id]
+                bt.logging.debug(f"Task {task_hash} is ready to reveal.")
+                synapse.html = self.task_state[task_hash]["html"]
+                synapse.nonce = self.task_state[task_hash]["nonce"]        
+                del self.task_state[task_hash]
                 return synapse
             else:
-                bt.logging.warning(f"Task {synapse.task_id} is not ready to reveal yet.")
+                bt.logging.warning(f"Task {task_hash} is not ready to reveal yet.")
                 return synapse
 
     
