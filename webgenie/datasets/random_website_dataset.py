@@ -27,38 +27,26 @@ class RandomWebsiteDataset(Dataset):
         common_words = [word for word, _ in most_common]
         self.english_words = common_words
 
-    def _get_random_website_url(self, retries: int = 3) -> Optional[str]:
+    async def get_random_website_url(self, number_of_tries: int = 10) -> Optional[str]:
         try:
             ddg = DDGS()
-            for _ in range(retries):
-                random_words = " ".join(random.sample(self.english_words, 5))
-                random_words = random_words + " official website"
-                
-                bt.logging.info(f"Results: {random_words}")
+            random_words = " ".join(random.sample(self.english_words, 5))
+            random_words = random_words + " official website"
+            urls = []
+            for _ in range(number_of_tries):
                 results = list(ddg.text(random_words))
-                if results:
-                    website_url = random.choice(results)["href"]
-                    return website_url
-                    
+                if not results:
+                    continue
+                website_url = results[0]["href"]
+                urls.append(website_url)            
+                await asyncio.sleep(1)
+            if urls:
+                url_counts = Counter(urls)
+                most_common_url = url_counts.most_common(1)[0][0]
+                return most_common_url
         except Exception as ex:
             bt.logging.error(f"Failed to get search results from DuckDuckGo: {ex}")
         return None
-
-    async def get_random_website_url(self) -> Optional[str]:
-        number_of_tries = 10
-        urls = []
-        for _ in range(number_of_tries):
-            await asyncio.sleep(1)
-            url = self._get_random_website_url()
-            if url is not None:
-                urls.append(url)
-        # Return most frequent URL if there are duplicates, otherwise return first URL
-        if not urls:
-            return None
-        url_counts = Counter(urls)
-        max_freq = max(url_counts.values())
-        most_frequent = [url for url, count in url_counts.items() if count == max_freq]
-        return most_frequent[0]
 
     async def get_rendered_html(self, url):
         try:
