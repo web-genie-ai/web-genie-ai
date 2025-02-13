@@ -1,5 +1,6 @@
 import bittensor as bt
 import numpy as np
+import hashlib
 import random
 from typing import Tuple, List
 
@@ -76,7 +77,7 @@ class ImageTaskGenerator(TaskGenerator):
             ground_truth_html=ground_truth_html,
             generator=self,
             src=dataset_entry.src,
-            task_id=str(hash(dataset_entry.url)),
+            task_id=hashlib.sha256(dataset_entry.url.encode()).hexdigest(),
             timeout=IMAGE_TASK_TIMEOUT,
         )
         
