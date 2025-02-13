@@ -62,7 +62,14 @@ class ImageTaskGenerator(TaskGenerator):
         if is_empty_html(ground_truth_html):
             raise ValueError("Empty ground truth html")
         
-        base64_image = await html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)    
+        base64_image = await html_to_screenshot(ground_truth_html, page_load_time=GROUND_TRUTH_HTML_LOAD_TIME)   
+        # Check image dimensions ratio
+        image = base64_to_image(base64_image)
+        width, height = image.size
+        aspect_ratio = height / width
+        if aspect_ratio > 6:  # If height is more than 3x the width
+            raise ValueError(f"Image aspect ratio too extreme: {aspect_ratio:.2f}. Height should not exceed 3x width.")
+        
         bt.logging.debug(f"Screenshot generated for {dataset_entry.src}")
         image_task = ImageTask(
             base64_image=base64_image, 
