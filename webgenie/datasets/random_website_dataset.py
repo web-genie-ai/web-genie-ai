@@ -30,8 +30,8 @@ class RandomWebsiteDataset(Dataset):
     async def get_random_website_url(self, number_of_tries: int = 10) -> Optional[str]:
         try:
             ddg = DDGS()
-            random_words = " ".join(random.sample(self.english_words, 5))
-            random_words = random_words + " official website"
+            random_words = " ".join(random.sample(self.english_words, 7))
+            random_words = random_words + " official website with landing page"
             urls = []
             for _ in range(number_of_tries):
                 results = list(ddg.text(random_words))
