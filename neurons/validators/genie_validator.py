@@ -72,12 +72,12 @@ class GenieValidator:
 
                 task, synapse = self.synthetic_tasks.pop(0)
 
-            bt.logging.info("querying miners")
             miner_uids = get_all_available_uids(self.neuron)
             if len(miner_uids) == 0:
                 bt.logging.warning("No miners available")
                 return
-            
+            bt.logging.info(f"querying {len(miner_uids)} miners")
+
             available_challenges_classes = [
                 AccuracyChallenge, 
                 QualityChallenge, 
