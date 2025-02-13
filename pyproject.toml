@@ -1,13 +1,17 @@
 [project]
 name = "web-genie-ai"
+version = "1.1.7"
 description = "The first bittensor subnet for web generation"
 readme = "README.md"
 requires-python = ">=3.12.4"
 dependencies = [
     "ansible-vault==2.1.0",
+    "async-substrate-interface==1.0.0",
     "beautifulsoup4==4.12.3",
     "bert-score==0.3.13",
-    "bittensor==8.5.2",
+    "bt-decode==0.5.0a2",
+    "bittensor==9.0.0",
+    "bittensor-cli==9.0.0",
     "clip",
     "datasets==3.2.0",
     "ddt==1.6.0",
