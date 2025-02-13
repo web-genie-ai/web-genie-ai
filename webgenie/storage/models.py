@@ -75,4 +75,12 @@ class SolutionEvaluation(Base):
     score_type: Mapped["EvaluationType"] = relationship(back_populates="solution_scores")
     solution: Mapped["TaskSolution"] = relationship(back_populates="solution_scores")
 
+class GeneratedTask(Base):
+    __tablename__ = "generated_tasks"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    seed: Mapped[int]
+    task_html: Mapped[str]
+    evaluated: Mapped[bool] = mapped_column(default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 Base.metadata.create_all(engine)
