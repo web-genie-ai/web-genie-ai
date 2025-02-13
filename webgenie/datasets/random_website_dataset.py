@@ -158,7 +158,7 @@ class RandomWebsiteDataset(Dataset):
             bt.logging.info(f"Generated website URL: {website_url}")
             return DatasetEntry(
                 src="random_website",
-                topic="random_website",
+                url=f"random_website_{website_url}",
                 ground_truth_html=html,
                 prompt="",
                 base64_image="",
