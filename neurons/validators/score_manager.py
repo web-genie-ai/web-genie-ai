@@ -138,11 +138,28 @@ class ScoreManager:
         self.print_session_result(session, console)
 
     def get_scores(self, session_upto: int):
-        if session_upto in self.session_results:
-            scores = self.session_results[session_upto]["scores"]
-        else:
-            scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        return np.power(scores, 9)
+        scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        tiny_weight = 1 / 128
+        big_weight = 1.0
+        for session_number in self.session_results:
+            if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
+                session_number > session_upto):
+                continue
+                
+            winner = self.session_results[session_number]["winner"]
+            if winner == -1:
+                continue
+            if session_number == session_upto:
+                scores[winner] += big_weight
+            else:
+                scores[winner] += tiny_weight
+        return scores
+        
+        # if session_upto in self.session_results:
+        #     scores = self.session_results[session_upto]["scores"]
+        # else:
+        #     scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        # return np.power(scores, 9)
 
     def print_session_result(self, session_upto: int, console: Console):
         session_result = self.session_results[session_upto]
