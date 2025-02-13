@@ -67,8 +67,8 @@ class ImageTaskGenerator(TaskGenerator):
         image = base64_to_image(base64_image)
         width, height = image.size
         aspect_ratio = height / width
-        if aspect_ratio > 6:  # If height is more than 6x the width
-            raise ValueError(f"Image aspect ratio too extreme: {aspect_ratio:.2f}. Height should not exceed 6x width.")
+        if aspect_ratio > 7:  # If height is more than 7x the width
+            raise ValueError(f"Image aspect ratio too extreme: {aspect_ratio:.2f}. Height should not exceed 7x width.")
         
         bt.logging.debug(f"Screenshot generated for {dataset_entry.src}")
         image_task = ImageTask(
