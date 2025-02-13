@@ -94,7 +94,7 @@ class GenieValidator:
             synapse.competition_type = challenge.competition_type
             synapse.VERSION = __VERSION__
 
-            bt.logging.debug(f"Querying {len(miner_uids)} miners")
+            bt.logging.debug(f"Querying {len(miner_uids)} miners with task_id: {task.task_id}")
             
             query_time = time.time()
             async with bt.dendrite(wallet=self.neuron.wallet) as dendrite:
