@@ -108,3 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.8] - 2025-02-13
 ### Added
 - Added logging to the random website dataset.
+
+## [1.1.9] - 2025-02-13
+### Updated
+- Updated the version of bittensor to 9.0.0 for dynamic TAO.
