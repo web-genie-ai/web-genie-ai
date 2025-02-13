@@ -183,13 +183,16 @@ class ScoreManager:
             title_style="bold blue",
             border_style="blue"
         )
+
+        total_scores_table.add_column("Rank", justify="right", style="red", header_style="bold red")
         total_scores_table.add_column("UID", justify="right", style="cyan", header_style="bold cyan")
         total_scores_table.add_column("Total Score", justify="right", style="green")
         total_scores_table.add_column("Average Score", justify="right", style="yellow")
         scored_uids = [(uid, score) for uid, score in enumerate(scores) if score > 0]
         scored_uids.sort(key=lambda x: x[1], reverse=True)
-        for uid, score in scored_uids:
+        for rank, (uid, score) in enumerate(scored_uids):
             total_scores_table.add_row(
+                str(rank + 1),
                 str(uid),
                 f"{score:.4f}",
                 f"{score / number_of_tasks:.4f}",
