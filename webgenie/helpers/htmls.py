@@ -114,7 +114,7 @@ async def html_to_screenshot(html_content: str, page_load_time: int = 1000) -> s
             await page.close()
             await browser.close()
     except Exception as e: 
-        print(f"Failed to take screenshot due to: {e}. Generating a blank image.")
+        bt.logging.error(f"Failed to take screenshot due to: {e}. Generating a blank image.")
         # Generate a blank image 
         img = Image.new('RGB', (1280, 960), color = 'white')
         img.save(png_path)
