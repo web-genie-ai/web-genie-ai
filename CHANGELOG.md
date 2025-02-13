@@ -96,3 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.5] - 2025-02-12
 ### Changed
 - Switched to winner-take-all strategy.
+
+## [1.1.6] - 2025-02-13
+### Changed
+- Resolved an issue with duckduckgo search returning different results for the same query.
