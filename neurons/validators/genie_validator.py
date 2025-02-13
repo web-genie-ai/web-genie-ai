@@ -280,7 +280,7 @@ class GenieValidator:
                 subtensor.get_block_hash(session_start_block),
                 16
             )
-        return hash_cache[session] + task_index
+        return (hash_cache[session] + task_index) % np.iinfo(np.int64).max
 
     async def forward(self):
         try:
