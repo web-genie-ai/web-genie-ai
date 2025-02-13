@@ -272,14 +272,13 @@ class GenieValidator:
             bt.logging.error(f"Error in synthensize_task: {e}")
             
     
-    def get_seed(self, session: int, task_index: int, hash_cache: dict = {}):
+    def get_seed(self, session: int, task_index: int, hash_cache: dict = {}) -> int:
         if session not in hash_cache:
             session_start_block = session * SESSION_WINDOW_BLOCKS
             subtensor = self.neuron.subtensor
             block_hash = subtensor.get_block_hash(session_start_block)
-            # Take last 16 digits to avoid integer overflow
-            hash_cache[session] = int(block_hash[-16:], 16)
-        return (hash_cache[session] + task_index) % np.iinfo(np.int64).max
+            hash_cache[session] = int(block_hash[-15:], 16)
+        return int(hash_cache[session] + task_index)
 
     async def forward(self):
         try:
@@ -297,6 +296,7 @@ class GenieValidator:
             bt.logging.info(f"Forwarding task {task_index}")
             seed = self.get_seed(session, task_index)
             
+            bt.logging.info(f"Session: {session}, Task index: {task_index}, Seed: {seed}, type: {type(seed)}")
             bt.logging.info(f"Init random with seed: {seed}")
             random.seed(seed)
             
