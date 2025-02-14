@@ -38,8 +38,8 @@ class ImageTaskGenerator(TaskGenerator):
         
         self.datasets = [
             #(RandomWebsiteDataset(), 1),
-            (SyntheticDataset(), 0.5),
-            (HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"), 0.5),
+            #(SyntheticDataset(), 0.5),
+            (HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"), 1),
         ]
 
         self.metrics = {
