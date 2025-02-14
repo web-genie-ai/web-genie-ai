@@ -16,6 +16,15 @@ client = AsyncOpenAI(
     base_url=LLM_MODEL_URL,
 )
 
+
+SEED = 42
+
+
+def set_seed(seed):
+    global SEED
+    SEED = seed
+
+
 async def openai_call(messages, response_format, deterministic=True, retries=3):
     for _ in range(retries):
         try:
@@ -25,6 +34,7 @@ async def openai_call(messages, response_format, deterministic=True, retries=3):
                     messages= messages,
                     response_format=response_format,
                     temperature=0,
+                    seed=SEED,
                 )
             else:
                 completion = await client.beta.chat.completions.parse(

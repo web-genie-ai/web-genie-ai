@@ -28,6 +28,7 @@ from webgenie.challenges import (
 )
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
+from webgenie.helpers.llms import set_seed
 from webgenie.protocol import (
     WebgenieImageSynapse, 
     WebgenieTextSynapse,
@@ -297,6 +298,7 @@ class GenieValidator:
             
             bt.logging.info(f"Init random with seed: {seed}")
             random.seed(seed)
+            set_seed(seed)
             
             while True:
                 try:
