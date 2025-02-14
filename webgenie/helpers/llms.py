@@ -16,7 +16,7 @@ client = AsyncOpenAI(
     base_url=LLM_MODEL_URL,
 )
 
-async def openai_call(messages, response_format, deterministic=False, retries=3):
+async def openai_call(messages, response_format, deterministic=True, retries=3):
     for _ in range(retries):
         try:
             if deterministic:
