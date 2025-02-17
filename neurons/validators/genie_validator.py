@@ -289,7 +289,7 @@ class GenieValidator:
                 else:
                     task_index = self.neuron.score_manager.number_of_tasks
                     
-            MAX_NUMBER_OF_TASKS_PER_SESSION = 10
+            MAX_NUMBER_OF_TASKS_PER_SESSION = 20
             if task_index >= MAX_NUMBER_OF_TASKS_PER_SESSION:
                 return
             
