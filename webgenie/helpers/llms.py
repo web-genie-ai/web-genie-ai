@@ -1,6 +1,6 @@
 import bittensor as bt
 
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, OpenAIError
 
 from webgenie.constants import (
     LLM_MODEL_ID, 
@@ -44,6 +44,15 @@ async def openai_call(messages, response_format, deterministic=True, retries=3):
                     temperature=0.7,
                 )
             return completion.choices[0].message.parsed
+        except OpenAIError as e:
+            if "as the length limit was reached" in str(e):
+                bt.logging.error(f"Error calling OpenAI: {e}")
+                raise e
+            if "check your billing details" in str(e):
+                bt.logging.error(f"Error calling OpenAI: {e}")
+                raise e
+            bt.logging.warning(f"Error calling OpenAI: {e}")
+            continue
         except Exception as e:
             bt.logging.warning(f"Error calling OpenAI: {e}")
             continue
