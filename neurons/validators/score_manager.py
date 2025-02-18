@@ -132,12 +132,13 @@ class ScoreManager:
         self.number_of_tasks += 1
         self.total_scores[uids] += rewards
         self.solved_tasks[uids] += 1
-        
-        # Calculate average scores for each UID
+
         avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         for uid in range(self.neuron.metagraph.n):
-            if self.solved_tasks[uid] > 0:
+            if self.solved_tasks[uid] >= max(1, self.number_of_tasks / 2):
                 avg_scores[uid] = self.total_scores[uid] / self.solved_tasks[uid]
+            else:
+                avg_scores[uid] = 0
         winner = np.argmax(avg_scores) if max(avg_scores) > 0 else -1
         
         current_session_results = {
@@ -185,48 +186,51 @@ class ScoreManager:
         # return np.power(scores, 9)
 
     def print_session_result(self, session_upto: int, console: Console):
-        session_result = self.session_results[session_upto]
+        try:
+            session_result = self.session_results[session_upto]
 
-        number_of_tasks = session_result["number_of_tasks"]
-        session = session_result["session"]
-        competition_type = session_result["competition_type"]
-        winner = session_result["winner"]
-        scores = session_result["scores"]
-        solved_tasks = session_result["solved_tasks"]
-        
-        avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        for uid in range(self.neuron.metagraph.n):
-            if solved_tasks[uid] > 0:
-                avg_scores[uid] = scores[uid] / solved_tasks[uid]
-            else:
-                avg_scores[uid] = 0
-           
-        total_scores_table = Table(
-            title=(
-                f"📊 Total Scores Summary\n"
-                f"🔄 Session: #{session}\n"
-                f"📝 Number of Tasks: #{number_of_tasks}\n" 
-                f"🏆 Competition: {competition_type}\n"
-                f"👑 Winner: #{winner}\n"
-            ),
-            show_header=True,
-            header_style="bold magenta", 
-            title_style="bold blue",
-            border_style="blue"
-        )
-
-        total_scores_table.add_column("Rank", justify="right", style="red", header_style="bold red")
-        total_scores_table.add_column("UID", justify="right", style="cyan", header_style="bold cyan")
-        total_scores_table.add_column("Average Score", justify="right", style="yellow")
-        scored_uids = [(uid, avg_scores[uid]) for uid in range(self.neuron.metagraph.n) if avg_scores[uid] > 0]
-        scored_uids.sort(key=lambda x: x[1], reverse=True)
-        for rank, (uid, score) in enumerate(scored_uids):
-            total_scores_table.add_row(
-                str(rank + 1),
-                str(uid),
-                f"{score:.4f}",
+            number_of_tasks = session_result["number_of_tasks"]
+            session = session_result["session"]
+            competition_type = session_result["competition_type"]
+            winner = session_result["winner"]
+            scores = session_result["scores"]
+            solved_tasks = session_result["solved_tasks"]
+            
+            avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+            for uid in range(self.neuron.metagraph.n):
+                if solved_tasks[uid] >= max(1, number_of_tasks / 2):
+                    avg_scores[uid] = scores[uid] / solved_tasks[uid]
+                else:
+                    avg_scores[uid] = 0
+            
+            total_scores_table = Table(
+                title=(
+                    f"📊 Total Scores Summary\n"
+                    f"🔄 Session: #{session}\n"
+                    f"📝 Number of Tasks: #{number_of_tasks}\n" 
+                    f"🏆 Competition: {competition_type}\n"
+                    f"👑 Winner: #{winner}\n"
+                ),
+                show_header=True,
+                header_style="bold magenta", 
+                title_style="bold blue",
+                border_style="blue"
             )
-        console.print(total_scores_table)
+
+            total_scores_table.add_column("Rank", justify="right", style="red", header_style="bold red")
+            total_scores_table.add_column("UID", justify="right", style="cyan", header_style="bold cyan")
+            total_scores_table.add_column("Average Score", justify="right", style="yellow")
+            scored_uids = [(uid, avg_scores[uid]) for uid in range(self.neuron.metagraph.n) if avg_scores[uid] > 0]
+            scored_uids.sort(key=lambda x: x[1], reverse=True)
+            for rank, (uid, score) in enumerate(scored_uids):
+                total_scores_table.add_row(
+                    str(rank + 1),
+                    str(uid),
+                    f"{score:.4f}",
+                )
+            console.print(total_scores_table)
+        except Exception as e:
+            bt.logging.warning(f"Error printing session result: {e}")
 
     def save_session_result_to_file(self, session_upto: int):
         try:
@@ -240,3 +244,4 @@ class ScoreManager:
         except Exception as e:
             bt.logging.error(f"Error saving session result to file: {e}")
             raise e
+
