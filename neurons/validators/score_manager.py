@@ -226,7 +226,7 @@ class ScoreManager:
                 total_scores_table.add_row(
                     str(rank + 1),
                     str(uid),
-                    f"{avg_scores[uid]:.4f}",
+                    f"{score:.4f}",
                 )
             console.print(total_scores_table)
         except Exception as e:
