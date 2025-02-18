@@ -40,6 +40,7 @@ from webgenie.tasks.metric_types import (
     ACCURACY_METRIC_NAME, 
     QUALITY_METRIC_NAME,
     SEO_METRIC_NAME,
+    MAX_NUMBER_OF_TASKS_PER_SESSION,
 )
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
@@ -289,7 +290,6 @@ class GenieValidator:
                 else:
                     task_index = self.neuron.score_manager.number_of_tasks
                     
-            MAX_NUMBER_OF_TASKS_PER_SESSION = 18
             if task_index >= MAX_NUMBER_OF_TASKS_PER_SESSION:
                 return
             
