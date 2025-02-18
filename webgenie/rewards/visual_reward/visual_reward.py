@@ -80,6 +80,7 @@ class VisualReward(Reward):
         current_work_dir = f"{WORK_DIR}/task_{timestamp}_{task.task_id}"
         os.makedirs(current_work_dir, exist_ok=True)
 
+        bt.logging.info(f"The number of cpu cores: {os.cpu_count()}")
         # Use ProcessPoolExecutor for parallel processing
         with multiprocessing.Pool(processes=os.cpu_count()) as pool:
             # Convert solutions into chunks for parallel processing
