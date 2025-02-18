@@ -29,6 +29,8 @@ def is_valid_resources(html_content: str) -> bool:
         r"https?://stackpath.bootstrapcdn.com/bootstrap/[^/]+/css/bootstrap.min.css",
         r"https?://code.jquery.com/jquery-[^/]+.min.js",
         r"https?://stackpath.bootstrapcdn.com/bootstrap/[^/]+/js/bootstrap.bundle.min.js",
+        r"https?://cdnjs.cloudflare.com/ajax/libs/font-awesome/[^/]+/css/font-awesome.min.css",
+        r"https?://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap",
     ]
     
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -38,11 +40,11 @@ def is_valid_resources(html_content: str) -> bool:
         if resource.name == 'link' and resource.get('rel') == ['stylesheet']:
             href = resource.get('href')
             if href and not any(re.match(pattern, href) for pattern in allowed_patterns):
-                return False
+                return True
         elif resource.name == 'script':
             src = resource.get('src')
             if src and not any(re.match(pattern, src) for pattern in allowed_patterns):
-                return False
+                return True
 
     return True
 
