@@ -289,12 +289,12 @@ class Validator(BaseValidatorNeuron):
                 #     )
                 # )
                 FORWARD_TIMEOUT = 60 * 60 * 2 # 2 hours
-                self.query_miners_event_loop.run_until_complete(
-                    asyncio.wait_for(
-                        self.genie_validator.forward(),
-                        timeout=FORWARD_TIMEOUT
-                    )
-                )
+                # self.query_miners_event_loop.run_until_complete(
+                #     asyncio.wait_for(
+                #         self.genie_validator.forward(),
+                #         timeout=FORWARD_TIMEOUT
+                #     )
+                # )
             except Exception as e:
                 bt.logging.error(f"Error during query miners loop: {str(e)}")
             if self.should_exit:
