@@ -50,6 +50,11 @@ class ScoreManager:
                 -1
             )
 
+            self.solved_tasks = data.get(
+                f"solved_tasks", 
+                np.zeros(self.neuron.metagraph.n, dtype=np.float32),
+            )
+
             self.total_scores = data.get(
                 f"total_scores_{__STATE_VERSION__}", 
                 np.zeros(self.neuron.metagraph.n, dtype=np.float32),
@@ -62,6 +67,7 @@ class ScoreManager:
             bt.logging.error(f"Error loading state: {e}")
             self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
             self.current_session = -1
+            self.solved_tasks = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             self.last_set_weights_session = -1
             self.number_of_tasks = 0
@@ -76,6 +82,7 @@ class ScoreManager:
                 **{f"current_session": self.current_session},
                 last_set_weights_session=self.last_set_weights_session,
                 number_of_tasks=self.number_of_tasks,
+                solved_tasks=self.solved_tasks,
                 **{f"total_scores_{__STATE_VERSION__}": self.total_scores},
                 session_results= self.session_results,
                 allow_pickle=True,
@@ -91,6 +98,7 @@ class ScoreManager:
         for uid, hotkey in enumerate(self.hotkeys):
             if hotkey != new_hotkeys[uid]:
                 self.total_scores[uid] = 0
+                self.solved_tasks[uid] = 0
 
         # Check to see if the metagraph has changed size.
         # If so, we need to add new hotkeys and moving averages.
@@ -99,6 +107,11 @@ class ScoreManager:
             min_len = min(len(self.hotkeys), len(self.total_scores))
             new_total_scores[:min_len] = self.total_scores[:min_len]
             self.total_scores = new_total_scores
+
+            new_solved_tasks = np.zeros((len(new_hotkeys)))
+            min_len = min(len(self.hotkeys), len(self.solved_tasks))
+            new_solved_tasks[:min_len] = self.solved_tasks[:min_len]
+            self.solved_tasks = new_solved_tasks
 
         # Update the hotkeys.
         self.hotkeys = copy.deepcopy(new_hotkeys)
@@ -113,16 +126,27 @@ class ScoreManager:
             # This is a new session, reset the scores and winners.
             self.current_session = session
             self.number_of_tasks = 0
+            self.solved_tasks = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             self.total_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # Update accumulated scores and track best performer
         self.number_of_tasks += 1
         self.total_scores[uids] += rewards
+        self.solved_tasks[uids] += 1
 
+        avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        for uid in range(self.neuron.metagraph.n):
+            if self.solved_tasks[uid] >= max(1, self.number_of_tasks / 2):
+                avg_scores[uid] = self.total_scores[uid] / self.solved_tasks[uid]
+            else:
+                avg_scores[uid] = 0
+        winner = np.argmax(avg_scores) if max(avg_scores) > 0 else -1
+        
         current_session_results = {
             "session": session,
             "competition_type": competition_type,
             "number_of_tasks": self.number_of_tasks,
-            "winner": np.argmax(self.total_scores),
+            "winner": winner,
+            "solved_tasks": self.solved_tasks,
             "scores": self.total_scores,
         }
 
@@ -162,42 +186,51 @@ class ScoreManager:
         # return np.power(scores, 9)
 
     def print_session_result(self, session_upto: int, console: Console):
-        session_result = self.session_results[session_upto]
+        try:
+            session_result = self.session_results[session_upto]
 
-        number_of_tasks = session_result["number_of_tasks"]
-        session = session_result["session"]
-        competition_type = session_result["competition_type"]
-        winner = session_result["winner"]
-        scores = session_result["scores"]
-
-        total_scores_table = Table(
-            title=(
-                f"📊 Total Scores Summary\n"
-                f"🔄 Session: #{session}\n"
-                f"📝 Number of Tasks: #{number_of_tasks}\n" 
-                f"🏆 Competition: {competition_type}\n"
-                f"👑 Winner: #{winner}\n"
-            ),
-            show_header=True,
-            header_style="bold magenta", 
-            title_style="bold blue",
-            border_style="blue"
-        )
-
-        total_scores_table.add_column("Rank", justify="right", style="red", header_style="bold red")
-        total_scores_table.add_column("UID", justify="right", style="cyan", header_style="bold cyan")
-        total_scores_table.add_column("Total Score", justify="right", style="green")
-        total_scores_table.add_column("Average Score", justify="right", style="yellow")
-        scored_uids = [(uid, score) for uid, score in enumerate(scores) if score > 0]
-        scored_uids.sort(key=lambda x: x[1], reverse=True)
-        for rank, (uid, score) in enumerate(scored_uids):
-            total_scores_table.add_row(
-                str(rank + 1),
-                str(uid),
-                f"{score:.4f}",
-                f"{score / number_of_tasks:.4f}",
+            number_of_tasks = session_result["number_of_tasks"]
+            session = session_result["session"]
+            competition_type = session_result["competition_type"]
+            winner = session_result["winner"]
+            scores = session_result["scores"]
+            solved_tasks = session_result["solved_tasks"]
+            
+            avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+            for uid in range(self.neuron.metagraph.n):
+                if solved_tasks[uid] >= max(1, number_of_tasks / 2):
+                    avg_scores[uid] = scores[uid] / solved_tasks[uid]
+                else:
+                    avg_scores[uid] = 0
+            
+            total_scores_table = Table(
+                title=(
+                    f"📊 Total Scores Summary\n"
+                    f"🔄 Session: #{session}\n"
+                    f"📝 Number of Tasks: #{number_of_tasks}\n" 
+                    f"🏆 Competition: {competition_type}\n"
+                    f"👑 Winner: #{winner}\n"
+                ),
+                show_header=True,
+                header_style="bold magenta", 
+                title_style="bold blue",
+                border_style="blue"
             )
-        console.print(total_scores_table)
+
+            total_scores_table.add_column("Rank", justify="right", style="red", header_style="bold red")
+            total_scores_table.add_column("UID", justify="right", style="cyan", header_style="bold cyan")
+            total_scores_table.add_column("Average Score", justify="right", style="yellow")
+            scored_uids = [(uid, avg_scores[uid]) for uid in range(self.neuron.metagraph.n) if avg_scores[uid] > 0]
+            scored_uids.sort(key=lambda x: x[1], reverse=True)
+            for rank, (uid, score) in enumerate(scored_uids):
+                total_scores_table.add_row(
+                    str(rank + 1),
+                    str(uid),
+                    f"{score:.4f}",
+                )
+            console.print(total_scores_table)
+        except Exception as e:
+            bt.logging.warning(f"Error printing session result: {e}")
 
     def save_session_result_to_file(self, session_upto: int):
         try:
@@ -211,3 +244,4 @@ class ScoreManager:
         except Exception as e:
             bt.logging.error(f"Error saving session result to file: {e}")
             raise e
+

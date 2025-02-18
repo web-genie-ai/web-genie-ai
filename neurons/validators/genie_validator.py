@@ -19,6 +19,7 @@ from webgenie.constants import (
     SESSION_WINDOW_BLOCKS,
     BLOCK_IN_SECONDS,
     __VERSION__,
+    MAX_NUMBER_OF_TASKS_PER_SESSION,
 )
 from webgenie.challenges import (
     AccuracyChallenge,
@@ -289,7 +290,6 @@ class GenieValidator:
                 else:
                     task_index = self.neuron.score_manager.number_of_tasks
                     
-            MAX_NUMBER_OF_TASKS_PER_SESSION = 18
             if task_index >= MAX_NUMBER_OF_TASKS_PER_SESSION:
                 return
             
