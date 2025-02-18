@@ -19,6 +19,7 @@ from webgenie.constants import (
     SESSION_WINDOW_BLOCKS,
     BLOCK_IN_SECONDS,
     __VERSION__,
+    MAX_NUMBER_OF_TASKS_PER_SESSION,
 )
 from webgenie.challenges import (
     AccuracyChallenge,
@@ -40,7 +41,6 @@ from webgenie.tasks.metric_types import (
     ACCURACY_METRIC_NAME, 
     QUALITY_METRIC_NAME,
     SEO_METRIC_NAME,
-    MAX_NUMBER_OF_TASKS_PER_SESSION,
 )
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
