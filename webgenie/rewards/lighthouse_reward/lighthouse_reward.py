@@ -7,9 +7,9 @@ import multiprocessing
 import numpy as np
 from typing import List
 
+from webgenie.constants import NUMBER_OF_CONCURRENT_WORKERS
 from webgenie.rewards.reward import Reward
 from webgenie.tasks import Task, Solution
-
 from .get_lighthouse_score import get_lighthouse_score
 
 
@@ -40,9 +40,9 @@ class LighthouseReward(Reward):
         htmls = [solution.html for solution in solutions]
         
         # Use ProcessPoolExecutor for parallel processing
-        with multiprocessing.Pool(processes=os.cpu_count()) as pool:
+        with multiprocessing.Pool(processes=NUMBER_OF_CONCURRENT_WORKERS) as pool:
             # Convert solutions into chunks for parallel processing
-            chunk_size = max(1, len(htmls) // os.cpu_count()) 
+            chunk_size = max(1, len(htmls) // NUMBER_OF_CONCURRENT_WORKERS) 
 
             html_chunks = [htmls[i:i + chunk_size] for i in range(0, len(htmls), chunk_size)]
             
