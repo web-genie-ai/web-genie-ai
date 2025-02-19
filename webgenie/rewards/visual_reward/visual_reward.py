@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime
 from typing import List
 
-from webgenie.constants import WORK_DIR
+from webgenie.constants import WORK_DIR, NUMBER_OF_CONCURRENT_WORKERS
 from webgenie.rewards.reward import Reward
 from webgenie.rewards.visual_reward.common.browser import start_browser, stop_browser
 from webgenie.rewards.visual_reward.high_level_matching_score import high_level_matching_score
@@ -80,11 +80,11 @@ class VisualReward(Reward):
         current_work_dir = f"{WORK_DIR}/task_{timestamp}_{task.task_id}"
         os.makedirs(current_work_dir, exist_ok=True)
 
-        bt.logging.info(f"The number of cpu cores: {os.cpu_count()}")
+        bt.logging.info(f"The number of concurrent workers: {NUMBER_OF_CONCURRENT_WORKERS}")
         # Use ProcessPoolExecutor for parallel processing
-        with multiprocessing.Pool(processes=os.cpu_count()) as pool:
+        with multiprocessing.Pool(processes=NUMBER_OF_CONCURRENT_WORKERS) as pool:
             # Convert solutions into chunks for parallel processing
-            chunk_size = max(1, len(solutions) // os.cpu_count())
+            chunk_size = max(1, len(solutions) // NUMBER_OF_CONCURRENT_WORKERS)
             solution_chunks = [solutions[i:i + chunk_size] for i in range(0, len(solutions), chunk_size)]
             
             # Create partial tasks for each chunk
