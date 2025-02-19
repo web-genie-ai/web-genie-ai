@@ -167,12 +167,14 @@ class ScoreManager:
             if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
                 session_number > session_upto):
                 continue
-                
-            winner = self.session_results[session_number]["winner"]
-            competition_type = self.session_results[session_number]["competition_type"]
-            if winner == -1:
-                continue
-            scores[winner] += RESERVED_WEIGHTS[competition_type]
+            try:
+                winner = self.session_results[session_number]["winner"]
+                competition_type = self.session_results[session_number]["competition_type"]
+                if winner == -1:
+                    continue
+                scores[winner] += RESERVED_WEIGHTS[competition_type]
+            except Exception as e:
+                bt.logging.warning(f"Error getting scores: {e}")
         return scores
         # scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # tiny_weight = 1 / 128
