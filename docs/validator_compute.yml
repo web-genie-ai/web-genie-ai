@@ -9,14 +9,14 @@ version: '1.0'  # Update this version key as needed to match your release versio
 compute_spec:
 
   cpu:
-    min_cores: 24                # Minimum number of CPU cores
+    min_cores: 32                # Minimum number of CPU cores
     min_speed: 2.5               # Minimum speed per core (GHz)
-    recommended_cores: 24        # Recommended number of CPU cores
+    recommended_cores: 32        # Recommended number of CPU cores
     recommended_speed: 3.5       # Recommended speed per core (GHz)
     architecture: "x86_64"       # Architecture type (e.g., x86_64, arm64)
 
   memory:
-    min_ram: 32          # Minimum RAM (GB)
+    min_ram: 120          # Minimum RAM (GB)
     min_swap: 4          # Minimum swap space (GB)
     recommended_swap: 8  # Recommended swap space (GB)
     ram_type: "DDR4"     # RAM type (e.g., DDR4, DDR3, etc.)
