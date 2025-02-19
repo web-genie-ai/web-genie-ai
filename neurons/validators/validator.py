@@ -124,13 +124,16 @@ class Validator(BaseValidatorNeuron):
         console.print(weights_table)
 
     def set_weights(self):        
-        # with self.lock:
-        #     current_session = self.session
-        #     last_set_weights_session = self.score_manager.last_set_weights_session
-        #     if last_set_weights_session == current_session - 1:
-        #         return
-        current_session = self.session
+        with self.lock:
+            current_session = self.session
+            last_set_weights_session = self.score_manager.last_set_weights_session
+            if last_set_weights_session == current_session - 1:
+                return
+
         scores = self.score_manager.get_scores(current_session - 1)
+        if np.all(scores == 0):
+            bt.logging.info(f"All scores are 0, skipping set_weights")
+            return
         # Calculate the average reward for each uid across non-zero values.
         # Replace any NaN values with 0.
         # Compute the norm of the scores
@@ -289,12 +292,12 @@ class Validator(BaseValidatorNeuron):
                 #     )
                 # )
                 FORWARD_TIMEOUT = 60 * 60 * 2 # 2 hours
-                # self.query_miners_event_loop.run_until_complete(
-                #     asyncio.wait_for(
-                #         self.genie_validator.forward(),
-                #         timeout=FORWARD_TIMEOUT
-                #     )
-                # )
+                self.query_miners_event_loop.run_until_complete(
+                    asyncio.wait_for(
+                        self.genie_validator.forward(),
+                        timeout=FORWARD_TIMEOUT
+                    )
+                )
             except Exception as e:
                 bt.logging.error(f"Error during query miners loop: {str(e)}")
             if self.should_exit:
