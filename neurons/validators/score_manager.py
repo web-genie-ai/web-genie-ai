@@ -178,6 +178,10 @@ class ScoreManager:
 
     def get_scores(self, session_upto: int):
         scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        if session_upto % 4 == 1:
+            # quality competition
+            return scores
+        
         tiny_weight = 1 / 128
         big_weight = 1.0
         for session_number in self.session_results:
