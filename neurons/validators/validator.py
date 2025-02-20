@@ -81,7 +81,7 @@ class Validator(BaseValidatorNeuron):
 
         if not AXON_OFF:
             self.serve_axon()
-
+            
     def resync_metagraph(self):
         # Copies state of metagraph before syncing.
         previous_metagraph = copy.deepcopy(self.metagraph)

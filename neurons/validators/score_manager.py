@@ -160,6 +160,10 @@ class ScoreManager:
 
         console = Console()
         self.print_session_result(session, console)
+    
+    def is_blacklisted(self, uid: int):
+        blacklisted_coldkeys = ["5G9yTkkDd39chZiyvKwNsQvzqbbPgdiLtdb4sCR743f4MuRY"]
+        return self.neuron.metagraph.axons[uid].coldkey in blacklisted_coldkeys
 
     def get_scores(self, session_upto: int):
         scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
@@ -177,6 +181,11 @@ class ScoreManager:
                 scores[winner] += big_weight
             else:
                 scores[winner] += tiny_weight
+                
+        for uid in range(self.neuron.metagraph.n):
+            if self.is_blacklisted(uid):
+                scores[uid] = 0
+        
         return scores
         
         # if session_upto in self.session_results:
