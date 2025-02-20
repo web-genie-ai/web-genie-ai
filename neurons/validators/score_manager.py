@@ -133,13 +133,11 @@ class ScoreManager:
         self.total_scores[uids] += rewards
         self.solved_tasks[uids] += 1
 
-        avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        for uid in range(self.neuron.metagraph.n):
-            if self.solved_tasks[uid] >= max(1, self.number_of_tasks / 2):
-                avg_scores[uid] = self.total_scores[uid] / self.solved_tasks[uid]
-            else:
-                avg_scores[uid] = 0
-        winner = np.argmax(avg_scores) if max(avg_scores) > 0 else -1
+        winner = self.get_winner(
+            self.total_scores,
+            self.solved_tasks,
+            self.number_of_tasks,
+        )
         
         current_session_results = {
             "session": session,
@@ -165,6 +163,19 @@ class ScoreManager:
         blacklisted_coldkeys = ["5G9yTkkDd39chZiyvKwNsQvzqbbPgdiLtdb4sCR743f4MuRY"]
         return self.neuron.metagraph.axons[uid].coldkey in blacklisted_coldkeys
 
+    def get_winner(self, total_scores: np.ndarray, solved_tasks: np.ndarray, number_of_tasks: int):
+        avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        for uid in range(self.neuron.metagraph.n):
+            if self.is_blacklisted(uid):
+                continue
+            
+            if solved_tasks[uid] >= max(1, number_of_tasks / 2):
+                avg_scores[uid] = total_scores[uid] / solved_tasks[uid]
+            else:
+                avg_scores[uid] = 0
+        winner = np.argmax(avg_scores) if max(avg_scores) > 0 else -1
+        return winner
+
     def get_scores(self, session_upto: int):
         scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         tiny_weight = 1 / 128
@@ -174,7 +185,11 @@ class ScoreManager:
                 session_number > session_upto):
                 continue
                 
-            winner = self.session_results[session_number]["winner"]
+            winner = self.get_winner(
+                self.session_results[session_number]["scores"],
+                self.session_results[session_number]["solved_tasks"],
+                self.session_results[session_number]["number_of_tasks"],
+            )
             if winner == -1:
                 continue
             if session_number == session_upto:
