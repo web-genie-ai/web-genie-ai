@@ -3,7 +3,7 @@ import os
 import psutil
 # Change this value when updating your code base.
 # Define the version of the webgenie.
-__VERSION__ = "1.1.23" # version
+__VERSION__ = "1.1.24" # version
 
 SPEC_VERSION = (
     (1000 * int(__VERSION__.split(".")[0]))
@@ -81,7 +81,7 @@ WANDB_PROJECT_NAME = f"webgenie" # wandb project name
 
 WANDB_ENTITY_NAME = os.getenv("WANDB_ENTITY_NAME") # wandb entity name
 
-VPERMIT_TAO_LIMIT = 1000 # vpermit tao limit
+VPERMIT_TAO_LIMIT = 100000 # vpermit tao limit
 
 AXON_OFF = os.getenv("AXON_OFF", "False").lower() == "true" # axon off
 
