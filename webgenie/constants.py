@@ -81,7 +81,7 @@ WANDB_PROJECT_NAME = f"webgenie" # wandb project name
 
 WANDB_ENTITY_NAME = os.getenv("WANDB_ENTITY_NAME") # wandb entity name
 
-VPERMIT_TAO_LIMIT = 1000 # vpermit tao limit
+VPERMIT_TAO_LIMIT = 100000 # vpermit tao limit
 
 AXON_OFF = os.getenv("AXON_OFF", "False").lower() == "true" # axon off
 
