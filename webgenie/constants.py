@@ -89,6 +89,8 @@ NEURON_EPOCH_LENGTH = int(os.getenv("NEURON_EPOCH_LENGTH", 25)) # neuron epoch l
 
 MAX_NUMBER_OF_TASKS_PER_SESSION = 18 # max number of tasks per session
 
+MAX_UNANSWERED_TASKS = 10 # max unanswered tasks
+
 NUMBER_OF_CONCURRENT_WORKERS = max(
     1,
     min(
