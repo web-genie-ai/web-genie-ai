@@ -3,7 +3,7 @@ import os
 import psutil
 # Change this value when updating your code base.
 # Define the version of the webgenie.
-__VERSION__ = "1.1.27" # version
+__VERSION__ = "1.1.28" # version
 
 SPEC_VERSION = (
     (1000 * int(__VERSION__.split(".")[0]))
@@ -88,6 +88,8 @@ AXON_OFF = os.getenv("AXON_OFF", "False").lower() == "true" # axon off
 NEURON_EPOCH_LENGTH = int(os.getenv("NEURON_EPOCH_LENGTH", 25)) # neuron epoch length
 
 MAX_NUMBER_OF_TASKS_PER_SESSION = 18 # max number of tasks per session
+
+MAX_UNANSWERED_TASKS = 3 # max unanswered tasks
 
 NUMBER_OF_CONCURRENT_WORKERS = max(
     1,

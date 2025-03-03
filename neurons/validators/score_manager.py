@@ -9,7 +9,12 @@ from typing import List
 
 from webgenie.base.neuron import BaseNeuron
 from webgenie.challenges.challenge import Challenge
-from webgenie.constants import CONSIDERING_SESSION_COUNTS, __STATE_VERSION__, WORK_DIR
+from webgenie.constants import (
+    CONSIDERING_SESSION_COUNTS,
+    __STATE_VERSION__,
+    WORK_DIR,
+    MAX_UNANSWERED_TASKS,
+)
 from webgenie.helpers.weights import save_file_to_wandb
 
 class ScoreManager:
@@ -169,7 +174,7 @@ class ScoreManager:
             if self.is_blacklisted(uid):
                 continue
             
-            if solved_tasks[uid] >= max(1, number_of_tasks - 10):
+            if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
                 avg_scores[uid] = total_scores[uid] / solved_tasks[uid]
             else:
                 avg_scores[uid] = 0
@@ -222,7 +227,7 @@ class ScoreManager:
             
             avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             for uid in range(self.neuron.metagraph.n):
-                if solved_tasks[uid] >= max(1, number_of_tasks - 10):
+                if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
                     avg_scores[uid] = scores[uid] / solved_tasks[uid]
                 else:
                     avg_scores[uid] = 0
