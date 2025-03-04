@@ -182,6 +182,10 @@ class ScoreManager:
         return winner
 
     def get_scores(self, session_upto: int):
+        if session_upto % 4 == 3:
+            # skip the balanced competition
+            return np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        
         scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         tiny_weight = 1 / 128
         big_weight = 1.0
