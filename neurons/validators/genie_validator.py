@@ -84,7 +84,8 @@ class GenieValidator:
                 SeoChallenge,
                 #QualityChallenge, 
                 SeoChallenge,
-                BalancedChallenge,
+                SeoChallenge,
+                SeoChallenge,
             ]  
             
             with self.lock:

@@ -8,6 +8,7 @@ from rich.table import Table
 from typing import List
 
 from webgenie.base.neuron import BaseNeuron
+
 from webgenie.challenges.challenge import Challenge, RESERVED_WEIGHTS
 from webgenie.constants import CONSIDERING_SESSION_COUNTS, __STATE_VERSION__, WORK_DIR
 from webgenie.helpers.weights import save_file_to_wandb
@@ -133,13 +134,11 @@ class ScoreManager:
         self.total_scores[uids] += rewards
         self.solved_tasks[uids] += 1
 
-        avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        for uid in range(self.neuron.metagraph.n):
-            if self.solved_tasks[uid] >= max(1, self.number_of_tasks / 2):
-                avg_scores[uid] = self.total_scores[uid] / self.solved_tasks[uid]
-            else:
-                avg_scores[uid] = 0
-        winner = np.argmax(avg_scores) if max(avg_scores) > 0 else -1
+        winner = self.get_winner(
+            self.total_scores,
+            self.solved_tasks,
+            self.number_of_tasks,
+        )
         
         current_session_results = {
             "session": session,
@@ -160,6 +159,23 @@ class ScoreManager:
 
         console = Console()
         self.print_session_result(session, console)
+    
+    def is_blacklisted(self, uid: int):
+        blacklisted_coldkeys = ["5G9yTkkDd39chZiyvKwNsQvzqbbPgdiLtdb4sCR743f4MuRY"]
+        return self.neuron.metagraph.axons[uid].coldkey in blacklisted_coldkeys
+
+    def get_winner(self, total_scores: np.ndarray, solved_tasks: np.ndarray, number_of_tasks: int):
+        avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        for uid in range(self.neuron.metagraph.n):
+            if self.is_blacklisted(uid):
+                continue
+            
+            if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
+                avg_scores[uid] = total_scores[uid] / solved_tasks[uid]
+            else:
+                avg_scores[uid] = 0
+        winner = np.argmax(avg_scores) if max(avg_scores) > 0 else -1
+        return winner
 
     def get_scores(self, session_upto: int):
         scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
@@ -167,6 +183,7 @@ class ScoreManager:
             if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
                 session_number > session_upto):
                 continue
+
             try:
                 winner = self.session_results[session_number]["winner"]
                 competition_type = self.session_results[session_number]["competition_type"]
@@ -175,6 +192,7 @@ class ScoreManager:
                 scores[winner] += RESERVED_WEIGHTS[competition_type]
             except Exception as e:
                 bt.logging.warning(f"Error getting scores: {e}")
+
         return scores
         # scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         # tiny_weight = 1 / 128
@@ -212,7 +230,7 @@ class ScoreManager:
             
             avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             for uid in range(self.neuron.metagraph.n):
-                if solved_tasks[uid] >= max(1, number_of_tasks / 2):
+                if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
                     avg_scores[uid] = scores[uid] / solved_tasks[uid]
                 else:
                     avg_scores[uid] = 0

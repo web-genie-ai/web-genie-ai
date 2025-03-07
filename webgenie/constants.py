@@ -3,6 +3,7 @@ import os
 import psutil
 # Change this value when updating your code base.
 # Define the version of the webgenie.
+
 __VERSION__ = "1.1.20" # version
 
 SPEC_VERSION = (
@@ -81,13 +82,15 @@ WANDB_PROJECT_NAME = f"webgenie" # wandb project name
 
 WANDB_ENTITY_NAME = os.getenv("WANDB_ENTITY_NAME") # wandb entity name
 
-VPERMIT_TAO_LIMIT = 1000 # vpermit tao limit
+VPERMIT_TAO_LIMIT = 100000 # vpermit tao limit
 
 AXON_OFF = os.getenv("AXON_OFF", "False").lower() == "true" # axon off
 
 NEURON_EPOCH_LENGTH = int(os.getenv("NEURON_EPOCH_LENGTH", 25)) # neuron epoch length
 
 MAX_NUMBER_OF_TASKS_PER_SESSION = 18 # max number of tasks per session
+
+MAX_UNANSWERED_TASKS = 3 # max unanswered tasks
 
 NUMBER_OF_CONCURRENT_WORKERS = max(
     1,
