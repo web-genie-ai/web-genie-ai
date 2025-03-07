@@ -81,7 +81,8 @@ class GenieValidator:
 
             available_challenges_classes = [
                 AccuracyChallenge, 
-                QualityChallenge, 
+                SeoChallenge,
+                #QualityChallenge, 
                 SeoChallenge,
                 BalancedChallenge,
             ]  
