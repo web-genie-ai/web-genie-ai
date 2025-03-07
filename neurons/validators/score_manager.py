@@ -1,7 +1,7 @@
 import bittensor as bt
 import copy
 import numpy as np
-
+import threading
 from io import StringIO
 from rich.console import Console
 from rich.table import Table
@@ -10,14 +10,19 @@ from typing import List
 from webgenie.base.neuron import BaseNeuron
 
 from webgenie.challenges.challenge import Challenge, RESERVED_WEIGHTS
-from webgenie.constants import CONSIDERING_SESSION_COUNTS, __STATE_VERSION__, WORK_DIR
+from webgenie.constants import (
+    CONSIDERING_SESSION_COUNTS,
+    __STATE_VERSION__,
+    WORK_DIR,
+    MAX_UNANSWERED_TASKS
+)
 from webgenie.helpers.weights import save_file_to_wandb
 
 class ScoreManager:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
         self.state_path = self.neuron.config.neuron.full_path + "/state.npz"
-        self.lock = neuron.lock
+        self.lock = threading.Lock()
 
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
         self.current_session = -1
