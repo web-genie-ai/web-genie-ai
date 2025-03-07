@@ -8,13 +8,9 @@ from rich.table import Table
 from typing import List
 
 from webgenie.base.neuron import BaseNeuron
-from webgenie.challenges.challenge import Challenge
-from webgenie.constants import (
-    CONSIDERING_SESSION_COUNTS,
-    __STATE_VERSION__,
-    WORK_DIR,
-    MAX_UNANSWERED_TASKS,
-)
+
+from webgenie.challenges.challenge import Challenge, RESERVED_WEIGHTS
+from webgenie.constants import CONSIDERING_SESSION_COUNTS, __STATE_VERSION__, WORK_DIR
 from webgenie.helpers.weights import save_file_to_wandb
 
 class ScoreManager:
@@ -183,30 +179,37 @@ class ScoreManager:
 
     def get_scores(self, session_upto: int):
         scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
-        tiny_weight = 1 / 128
-        big_weight = 1.0
         for session_number in self.session_results:
             if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
                 session_number > session_upto):
                 continue
-                
-            winner = self.get_winner(
-                self.session_results[session_number]["scores"],
-                self.session_results[session_number]["solved_tasks"],
-                self.session_results[session_number]["number_of_tasks"],
-            )
-            if winner == -1:
-                continue
-            if session_number == session_upto:
-                scores[winner] += big_weight
-            else:
-                scores[winner] += tiny_weight
-                
-        for uid in range(self.neuron.metagraph.n):
-            if self.is_blacklisted(uid):
-                scores[uid] = 0
-        
+
+            try:
+                winner = self.session_results[session_number]["winner"]
+                competition_type = self.session_results[session_number]["competition_type"]
+                if winner == -1:
+                    continue
+                scores[winner] += RESERVED_WEIGHTS[competition_type]
+            except Exception as e:
+                bt.logging.warning(f"Error getting scores: {e}")
+
         return scores
+        # scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        # tiny_weight = 1 / 128
+        # big_weight = 1.0
+        # for session_number in self.session_results:
+        #     if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
+        #         session_number > session_upto):
+        #         continue
+                
+        #     winner = self.session_results[session_number]["winner"]
+        #     if winner == -1:
+        #         continue
+        #     if session_number == session_upto:
+        #         scores[winner] += big_weight
+        #     else:
+        #         scores[winner] += tiny_weight
+        # return scores
         
         # if session_upto in self.session_results:
         #     scores = self.session_results[session_upto]["scores"]
