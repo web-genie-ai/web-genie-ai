@@ -116,8 +116,7 @@ class ScoreManager:
 
         # Update the hotkeys.
         self.hotkeys = copy.deepcopy(new_hotkeys)
-        with self.lock:
-            self.save_scores()
+        self.save_scores()
 
     def update_scores(self, rewards: np.ndarray, uids: List[int], challenge: Challenge):
         bt.logging.info("Updating scores")
@@ -154,8 +153,7 @@ class ScoreManager:
             if session_number < session - CONSIDERING_SESSION_COUNTS * 2:
                 self.session_results.pop(session_number)
  
-        with self.lock:
-            self.save_scores()
+        self.save_scores()
 
         console = Console()
         self.print_session_result(session, console)
