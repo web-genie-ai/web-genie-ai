@@ -250,7 +250,7 @@ class GenieValidator:
         except Exception as e:
             bt.logging.error(f"Error storing results to database: {e}")
 
-    async def synthensize_task(self):
+    async def synthensize_task(self, session:int, task_number:int):
         try:
             with self.lock:
                 if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
@@ -264,7 +264,7 @@ class GenieValidator:
                 weights=[weight for _, weight in self.task_generators],
             )[0]
             
-            task, synapse = await task_generator.generate_task()
+            task, synapse = await task_generator.generate_task(session, task_number)
             with self.lock:
                 self.synthetic_tasks.append((task, synapse))
 
@@ -322,18 +322,16 @@ class GenieValidator:
             set_seed(seed)
             
             number_of_tries = 0
-            while True:
-                try:
-                    await self.synthensize_task()
-                    task, _ = self.synthetic_tasks[-1]
-                    number_of_tries += 1
-                    task.task_id = f"{task_id_seed}_{number_of_tries}"
-                    break
-                except Exception as e:
-                    bt.logging.error(
-                        f"Error in synthensize_task: {e}"
-                        f"Retrying..."
-                    )
+            try:
+                await self.synthensize_task(session, task_index)
+                task, _ = self.synthetic_tasks[-1]
+                number_of_tries += 1
+                task.task_id = f"{task_id_seed}_{number_of_tries}"
+            except Exception as e:
+                bt.logging.error(
+                    f"Error in synthensize_task: {e}"
+                )
+                return
             
             await self.query_miners()
             await self.score()
