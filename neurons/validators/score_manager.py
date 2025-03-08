@@ -173,10 +173,12 @@ class ScoreManager:
             if self.is_blacklisted(uid):
                 continue
             
-            if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
-                avg_scores[uid] = total_scores[uid] / solved_tasks[uid]
-            else:
-                avg_scores[uid] = 0
+            avg_scores[uid] = total_scores[uid] / number_of_tasks
+            
+            # if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
+            #     avg_scores[uid] = total_scores[uid] / solved_tasks[uid]
+            # else:
+            #     avg_scores[uid] = 0
         winner = np.argmax(avg_scores) if max(avg_scores) > 0 else -1
         return winner
 
