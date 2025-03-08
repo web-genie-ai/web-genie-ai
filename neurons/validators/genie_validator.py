@@ -278,8 +278,17 @@ class GenieValidator:
             method = "GET"
             url = "http://209.126.9.130:18000/api/v1/task/seed"
             response = requests.request(method, url, params={"session": session, "task_number": task_index})
-            if response.status_code == 200 and response.json()["seed"] is not None:
-                return response.json()["seed"]
+            if response.status_code == 200:
+                response_json = response.json()
+                success = response_json["success"]
+                if not success:
+                    raise Exception(f"Failed to get seed from API: {seed}")
+                
+                seed = response_json["seed"], response_json["task_id_seed"]
+                
+                if seed is None:
+                    raise Exception(f"Seed is None")
+                return seed
             else:
                 raise Exception(f"Failed to get seed from API: {response.status_code}")
             
@@ -306,15 +315,19 @@ class GenieValidator:
                 return
             
             bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
-            seed = self.get_seed(session, task_index)
+            seed, task_id_seed = self.get_seed(session, task_index)
             
-            bt.logging.info(f"Init random with seed: {seed}")
+            bt.logging.info(f"Random seed: {seed} | task_id_seed: {task_id_seed}")
             random.seed(seed)
             set_seed(seed)
             
+            number_of_tries = 0
             while True:
                 try:
                     await self.synthensize_task()
+                    task, _ = self.synthetic_tasks[-1]
+                    number_of_tries += 1
+                    task.task_id = f"{task_id_seed}_{number_of_tries}"
                     break
                 except Exception as e:
                     bt.logging.error(
