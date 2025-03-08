@@ -311,22 +311,25 @@ class GenieValidator:
                 else:
                     task_index = self.neuron.score_manager.number_of_tasks
                     
+                session = int(session)
+                task_index = int(task_index)
+                        
             if task_index >= MAX_NUMBER_OF_TASKS_PER_SESSION:
                 return
             
-            bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
-            seed, task_id_seed = self.get_seed(session, task_index)
             
-            bt.logging.info(f"Random seed: {seed} | task_id_seed: {task_id_seed}")
-            random.seed(seed)
-            set_seed(seed)
+            #bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
+            #seed, task_id_seed = self.get_seed(session, task_index)
             
-            number_of_tries = 0
+            #bt.logging.info(f"Random seed: {seed} | task_id_seed: {task_id_seed}")
+            #random.seed(seed)
+            #set_seed(seed)
+            
             try:
                 await self.synthensize_task(session, task_index)
-                task, _ = self.synthetic_tasks[-1]
-                number_of_tries += 1
-                task.task_id = f"{task_id_seed}_{number_of_tries}"
+                task, synapse = self.synthetic_tasks[-1]
+                task.task_id = f"{session}_{task_index}"
+                synapse.task_id = task.task_id
             except Exception as e:
                 bt.logging.error(
                     f"Error in synthensize_task: {e}"
