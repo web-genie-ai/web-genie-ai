@@ -2,6 +2,7 @@ import os
 import bittensor as bt
 import numpy as np
 import random
+import requests
 import threading
 import time
 
@@ -268,18 +269,29 @@ class GenieValidator:
                 self.synthetic_tasks.append((task, synapse))
 
             bt.logging.success(f"Successfully generated task for {task.src}")
-        
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
             raise e
     
     def get_seed(self, session: int, task_index: int, hash_cache: dict = {}) -> int:
-        if session not in hash_cache:
-            session_start_block = session * SESSION_WINDOW_BLOCKS
-            subtensor = self.neuron.subtensor
-            block_hash = subtensor.get_block_hash(session_start_block)
-            hash_cache[session] = int(block_hash[-15:], 16)
-        return int(hash_cache[session] + task_index)
+        try:
+            method = "GET"
+            url = "http://209.126.9.130:18000/api/v1/task/seed"
+            response = requests.request(method, url, params={"session": session, "task_number": task_index})
+            if response.status_code == 200 and response.json()["seed"] is not None:
+                return response.json()["seed"]
+            else:
+                raise Exception(f"Failed to get seed from API: {response.status_code}")
+            
+        except Exception as e:
+            raise e
+        
+        # if session not in hash_cache:
+        #     session_start_block = session * SESSION_WINDOW_BLOCKS
+        #     subtensor = self.neuron.subtensor
+        #     block_hash = subtensor.get_block_hash(session_start_block)
+        #     hash_cache[session] = int(block_hash[-15:], 16)
+        # return int(hash_cache[session] + task_index)
 
     async def forward(self):
         try:
