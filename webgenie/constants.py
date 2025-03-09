@@ -3,8 +3,7 @@ import os
 import psutil
 # Change this value when updating your code base.
 # Define the version of the webgenie.
-
-__VERSION__ = "1.1.30" # version
+__VERSION__ = "1.2.0" # version
 
 SPEC_VERSION = (
     (1000 * int(__VERSION__.split(".")[0]))

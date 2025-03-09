@@ -49,11 +49,11 @@ class ImageTaskGenerator(TaskGenerator):
             QUALITY_METRIC_NAME: QualityReward(),
         }
 
-    async def generate_task(self) -> Tuple[Task, bt.Synapse]:
+    async def generate_task(self, **kwargs) -> Tuple[Task, bt.Synapse]:
         bt.logging.info("Generating Image task")
         
         dataset, _ = random.choices(self.datasets, weights=[weight for _, weight in self.datasets])[0]
-        dataset_entry = await dataset.generate_context()
+        dataset_entry = await dataset.generate_context(**kwargs)
         bt.logging.debug(f"Generated dataset entry: {dataset_entry.url}")
 
         ground_truth_html = preprocess_html(dataset_entry.ground_truth_html)

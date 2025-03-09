@@ -18,9 +18,11 @@ class CentralDataset(Dataset):
     async def generate_context(self) -> DatasetEntry:
         pass
     
-    async def generate_context(self, session:int, task_number:int)->DatasetEntry:
+    async def generate_context(self, **kwargs)->DatasetEntry:
         try:
             bt.logging.info("Generating Central context")
+            session = kwargs.get("session")
+            task_number = kwargs.get("task_number")
             html = self.get_html(session, task_number)
             return DatasetEntry(
                 src="central",

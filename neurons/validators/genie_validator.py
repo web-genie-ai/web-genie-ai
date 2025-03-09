@@ -28,9 +28,7 @@ from webgenie.challenges import (
     SeoChallenge,
     BalancedChallenge,
 )
-from webgenie.datasets.central_dataset import (
-    CentralDataset,
-)
+from webgenie.datasets import CentralDataset
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.helpers.llms import set_seed
@@ -277,7 +275,7 @@ class GenieValidator:
                 weights=[weight for _, weight in self.task_generators],
             )[0]
             
-            task, synapse = await task_generator.generate_task(session, task_number)
+            task, synapse = await task_generator.generate_task(session=session, task_number=task_number)
             with self.lock:
                 self.synthetic_tasks.append((task, synapse))
 
@@ -286,69 +284,44 @@ class GenieValidator:
             bt.logging.error(f"Error in synthensize_task: {e}")
             raise e
     
-    def get_seed(self, session: int, task_index: int, hash_cache: dict = {}) -> int:
-        try:
-            method = "GET"
-            url = "http://209.126.9.130:18000/api/v1/task/seed"
-            response = requests.request(method, url, params={"session": session, "task_number": task_index})
-            if response.status_code == 200:
-                response_json = response.json()
-                success = response_json["success"]
-                if not success:
-                    raise Exception(f"Failed to get seed from API: {seed}")
-                
-                seed = response_json["seed"], response_json["task_id_seed"]
-                
-                if seed is None:
-                    raise Exception(f"Seed is None")
-                return seed
-            else:
-                raise Exception(f"Failed to get seed from API: {response.status_code}")
-            
-        except Exception as e:
-            raise e
-        
-        # if session not in hash_cache:
-        #     session_start_block = session * SESSION_WINDOW_BLOCKS
-        #     subtensor = self.neuron.subtensor
-        #     block_hash = subtensor.get_block_hash(session_start_block)
-        #     hash_cache[session] = int(block_hash[-15:], 16)
-        # return int(hash_cache[session] + task_index)
+    def get_seed(self, session: int, task_number: int, hash_cache: dict = {}) -> int:
+        if session not in hash_cache:
+            session_start_block = session * SESSION_WINDOW_BLOCKS
+            subtensor = self.neuron.subtensor
+            block_hash = subtensor.get_block_hash(session_start_block)
+            hash_cache[session] = int(block_hash[-15:], 16)
+        return int(hash_cache[session] + task_number)
 
     async def forward(self):
         try:
             with self.lock:
                 session = self.neuron.session
                 if self.neuron.score_manager.current_session != session:
-                    task_index = 0
+                    task_number = 0
                 else:
-                    task_index = self.neuron.score_manager.number_of_tasks
+                    task_number = self.neuron.score_manager.number_of_tasks
                     
-                session = int(session)
-                task_index = int(task_index)
-                        
-            if task_index >= MAX_NUMBER_OF_TASKS_PER_SESSION:
+            if task_number >= MAX_NUMBER_OF_TASKS_PER_SESSION:
                 return
             
+            bt.logging.info(f"Forwarding task #{task_number} in session #{session}")
+            # seed = self.get_seed(session, task_number)
             
-            bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
-            #seed, task_id_seed = self.get_seed(session, task_index)
-            
-            #bt.logging.info(f"Random seed: {seed} | task_id_seed: {task_id_seed}")
-            #random.seed(seed)
-            #set_seed(seed)
+            # bt.logging.info(f"Init random with seed: {seed}")
+            # random.seed(seed)
+            # set_seed(seed)
             
             try:
-                await self.synthensize_task(session, task_index)
+                await self.synthensize_task(session, task_number)
                 task, synapse = self.synthetic_tasks[-1]
-                task.task_id = f"{session}_{task_index}"
+                task.task_id = f"{session}_{task_number}"
                 synapse.task_id = task.task_id
             except Exception as e:
                 bt.logging.error(
                     f"Error in synthensize_task: {e}"
+                    f"Retrying..."
                 )
-                return
-            
+        
             await self.query_miners()
             await self.score()
         except Exception as e:

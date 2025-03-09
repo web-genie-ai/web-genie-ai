@@ -11,7 +11,7 @@ class TaskGenerator:
     def __init__(self):
         self.metrics: dict[str, Reward] = {}
 
-    async def generate_task(self) -> Tuple[Task, bt.Synapse]:
+    async def generate_task(self, **kwargs) -> Tuple[Task, bt.Synapse]:
         pass
     
     async def calculate_scores(self, task: Task, solutions: List[Solution]) -> dict[str, np.ndarray]:
