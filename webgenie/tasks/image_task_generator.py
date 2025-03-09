@@ -29,17 +29,18 @@ from webgenie.datasets import (
     RandomWebsiteDataset,
     SyntheticDataset,
     HuggingfaceDataset,
+    CentralDataset,
 )
-
 
 class ImageTaskGenerator(TaskGenerator):    
     def __init__(self):
         super().__init__()
         
         self.datasets = [
+            (CentralDataset(), 1),
             #(RandomWebsiteDataset(), 1),
             #(SyntheticDataset(), 0.5),
-            (HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"), 1),
+            #(HuggingfaceDataset(dataset_name="SALT-NLP/Design2Code-hf", split="train", html_column="text"), 1),
         ]
 
         self.metrics = {
@@ -48,11 +49,11 @@ class ImageTaskGenerator(TaskGenerator):
             QUALITY_METRIC_NAME: QualityReward(),
         }
 
-    async def generate_task(self) -> Tuple[Task, bt.Synapse]:
+    async def generate_task(self, **kwargs) -> Tuple[Task, bt.Synapse]:
         bt.logging.info("Generating Image task")
         
         dataset, _ = random.choices(self.datasets, weights=[weight for _, weight in self.datasets])[0]
-        dataset_entry = await dataset.generate_context()
+        dataset_entry = await dataset.generate_context(**kwargs)
         bt.logging.debug(f"Generated dataset entry: {dataset_entry.url}")
 
         ground_truth_html = preprocess_html(dataset_entry.ground_truth_html)

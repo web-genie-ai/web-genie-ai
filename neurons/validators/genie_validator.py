@@ -27,6 +27,7 @@ from webgenie.challenges import (
     SeoChallenge,
     BalancedChallenge,
 )
+from webgenie.datasets import CentralDataset
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.helpers.llms import set_seed
@@ -57,6 +58,17 @@ class GenieValidator:
         self.task_generators = [
             (ImageTaskGenerator(), 1.0), # currently only image task generator is supported
         ]
+        self.init_signature()
+        
+    def init_signature(self):
+        """Get signature for central database authentication using wallet"""
+        try:
+            message = b"I am the owner of the wallet"
+            CentralDataset.SIGNATURE =  self.neuron.wallet.hotkey.sign(message).hex()
+            CentralDataset.HOTKEY = self.neuron.wallet.hotkey.ss58_address
+        except Exception as e:
+            bt.logging.error(f"Error initializing signature: {e}")
+            raise e
 
     async def query_miners(self):
         try:
@@ -250,7 +262,7 @@ class GenieValidator:
         except Exception as e:
             bt.logging.error(f"Error storing results to database: {e}")
 
-    async def synthensize_task(self):
+    async def synthensize_task(self, session:int, task_index:int):
         try:
             with self.lock:
                 if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
@@ -264,7 +276,7 @@ class GenieValidator:
                 weights=[weight for _, weight in self.task_generators],
             )[0]
             
-            task, synapse = await task_generator.generate_task()
+            task, synapse = await task_generator.generate_task(session=session, task_index=task_index)
             with self.lock:
                 self.synthetic_tasks.append((task, synapse))
 
@@ -295,22 +307,22 @@ class GenieValidator:
                 return
             
             bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
-            seed = self.get_seed(session, task_index)
+            # seed = self.get_seed(session, task_index)
             
-            bt.logging.info(f"Init random with seed: {seed}")
-            random.seed(seed)
-            set_seed(seed)
+            # bt.logging.info(f"Init random with seed: {seed}")
+            # random.seed(seed)
+            # set_seed(seed)
             
-            while True:
-                try:
-                    await self.synthensize_task()
-                    break
-                except Exception as e:
-                    bt.logging.error(
-                        f"Error in synthensize_task: {e}"
-                        f"Retrying..."
-                    )
-            
+            try:
+                task, synapse = await self.synthensize_task(session, task_index)
+                task.task_id = f"{session}_{task_index}"
+                synapse.task_id = task.task_id
+            except Exception as e:
+                bt.logging.error(
+                    f"Error in synthensize_task: {e}"
+                    f"Retrying..."
+                )
+        
             await self.query_miners()
             await self.score()
         except Exception as e:
