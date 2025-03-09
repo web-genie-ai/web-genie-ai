@@ -2,6 +2,7 @@ import os
 import bittensor as bt
 import numpy as np
 import random
+import requests
 import threading
 import time
 
@@ -27,6 +28,9 @@ from webgenie.challenges import (
     SeoChallenge,
     BalancedChallenge,
 )
+from webgenie.datasets.central_dataset import (
+    CentralDataset,
+)
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.helpers.llms import set_seed
@@ -45,7 +49,6 @@ from webgenie.tasks.metric_types import (
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
 
-
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
@@ -57,6 +60,17 @@ class GenieValidator:
         self.task_generators = [
             (ImageTaskGenerator(), 1.0), # currently only image task generator is supported
         ]
+        self.init_signature()
+        
+    def init_signature(self):
+        """Get signature for central database authentication using wallet"""
+        try:
+            message = b"I am the owner of the wallet"
+            CentralDataset.SIGNATURE =  self.neuron.wallet.hotkey.sign(message).hex()
+            CentralDataset.HOTKEY = self.neuron.wallet.hotkey.ss58_address
+        except Exception as e:
+            bt.logging.error(f"Error initializing signature: {e}")
+            raise e
 
     async def query_miners(self):
         try:
@@ -82,8 +96,8 @@ class GenieValidator:
             available_challenges_classes = [
                 AccuracyChallenge, 
                 SeoChallenge,
+                AccuracyChallenge,
                 SeoChallenge,
-                BalancedChallenge,
             ]  
             
             with self.lock:
@@ -249,7 +263,7 @@ class GenieValidator:
         except Exception as e:
             bt.logging.error(f"Error storing results to database: {e}")
 
-    async def synthensize_task(self):
+    async def synthensize_task(self, session:int, task_number:int):
         try:
             with self.lock:
                 if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
@@ -263,23 +277,43 @@ class GenieValidator:
                 weights=[weight for _, weight in self.task_generators],
             )[0]
             
-            task, synapse = await task_generator.generate_task()
+            task, synapse = await task_generator.generate_task(session, task_number)
             with self.lock:
                 self.synthetic_tasks.append((task, synapse))
 
             bt.logging.success(f"Successfully generated task for {task.src}")
-        
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
             raise e
     
     def get_seed(self, session: int, task_index: int, hash_cache: dict = {}) -> int:
-        if session not in hash_cache:
-            session_start_block = session * SESSION_WINDOW_BLOCKS
-            subtensor = self.neuron.subtensor
-            block_hash = subtensor.get_block_hash(session_start_block)
-            hash_cache[session] = int(block_hash[-15:], 16)
-        return int(hash_cache[session] + task_index)
+        try:
+            method = "GET"
+            url = "http://209.126.9.130:18000/api/v1/task/seed"
+            response = requests.request(method, url, params={"session": session, "task_number": task_index})
+            if response.status_code == 200:
+                response_json = response.json()
+                success = response_json["success"]
+                if not success:
+                    raise Exception(f"Failed to get seed from API: {seed}")
+                
+                seed = response_json["seed"], response_json["task_id_seed"]
+                
+                if seed is None:
+                    raise Exception(f"Seed is None")
+                return seed
+            else:
+                raise Exception(f"Failed to get seed from API: {response.status_code}")
+            
+        except Exception as e:
+            raise e
+        
+        # if session not in hash_cache:
+        #     session_start_block = session * SESSION_WINDOW_BLOCKS
+        #     subtensor = self.neuron.subtensor
+        #     block_hash = subtensor.get_block_hash(session_start_block)
+        #     hash_cache[session] = int(block_hash[-15:], 16)
+        # return int(hash_cache[session] + task_index)
 
     async def forward(self):
         try:
@@ -290,25 +324,30 @@ class GenieValidator:
                 else:
                     task_index = self.neuron.score_manager.number_of_tasks
                     
+                session = int(session)
+                task_index = int(task_index)
+                        
             if task_index >= MAX_NUMBER_OF_TASKS_PER_SESSION:
                 return
             
+            
             bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
-            seed = self.get_seed(session, task_index)
+            #seed, task_id_seed = self.get_seed(session, task_index)
             
-            bt.logging.info(f"Init random with seed: {seed}")
-            random.seed(seed)
-            set_seed(seed)
+            #bt.logging.info(f"Random seed: {seed} | task_id_seed: {task_id_seed}")
+            #random.seed(seed)
+            #set_seed(seed)
             
-            while True:
-                try:
-                    await self.synthensize_task()
-                    break
-                except Exception as e:
-                    bt.logging.error(
-                        f"Error in synthensize_task: {e}"
-                        f"Retrying..."
-                    )
+            try:
+                await self.synthensize_task(session, task_index)
+                task, synapse = self.synthetic_tasks[-1]
+                task.task_id = f"{session}_{task_index}"
+                synapse.task_id = task.task_id
+            except Exception as e:
+                bt.logging.error(
+                    f"Error in synthensize_task: {e}"
+                )
+                return
             
             await self.query_miners()
             await self.score()
