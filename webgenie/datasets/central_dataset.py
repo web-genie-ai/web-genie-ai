@@ -34,13 +34,19 @@ class CentralDataset(Dataset):
             raise e
             
     def get_html(self, session:int, task_number:int)->str:
+        bt.logging.info(f"Getting HTML for session {session} and task {task_number}")
         method = "GET"
-        url = f"http://209.126.9.130:18000/api/v1/task/generate?session={session}&task_number={task_number}"
+        url = f"http://209.126.9.130:18000/api/v1/task/generate"
         headers = {
             "Signature": CentralDataset.SIGNATURE,
             "Hotkey": CentralDataset.HOTKEY
         }
-        response = requests.request(method, url, headers=headers)
+        params = {
+            "session": int(session),
+            "task_number": int(task_number)
+        }
+        response = requests.request(method, url, headers=headers, params=params)
+        
         if response.status_code != 200:
             raise Exception(f"Failed to get HTML: {response.status_code} {response.text}")
         bt.logging.info(f"HTML: {response.json()}")
