@@ -1,19 +1,20 @@
 import bittensor as bt
 import copy
 import numpy as np
-
+import threading
 from io import StringIO
 from rich.console import Console
 from rich.table import Table
 from typing import List
 
 from webgenie.base.neuron import BaseNeuron
-from webgenie.challenges.challenge import Challenge
+
+from webgenie.challenges.challenge import Challenge, RESERVED_WEIGHTS
 from webgenie.constants import (
     CONSIDERING_SESSION_COUNTS,
     __STATE_VERSION__,
     WORK_DIR,
-    MAX_UNANSWERED_TASKS,
+    MAX_UNANSWERED_TASKS
 )
 from webgenie.helpers.weights import save_file_to_wandb
 
@@ -21,7 +22,7 @@ class ScoreManager:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
         self.state_path = self.neuron.config.neuron.full_path + "/state.npz"
-        self.lock = neuron.lock
+        self.lock = threading.Lock()
 
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
         self.current_session = -1
@@ -120,8 +121,7 @@ class ScoreManager:
 
         # Update the hotkeys.
         self.hotkeys = copy.deepcopy(new_hotkeys)
-        with self.lock:
-            self.save_scores()
+        self.save_scores()
 
     def update_scores(self, rewards: np.ndarray, uids: List[int], challenge: Challenge):
         bt.logging.info("Updating scores")
@@ -158,8 +158,7 @@ class ScoreManager:
             if session_number < session - CONSIDERING_SESSION_COUNTS * 2:
                 self.session_results.pop(session_number)
  
-        with self.lock:
-            self.save_scores()
+        self.save_scores()
 
         console = Console()
         self.print_session_result(session, console)
@@ -174,14 +173,32 @@ class ScoreManager:
             if self.is_blacklisted(uid):
                 continue
             
-            if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
-                avg_scores[uid] = total_scores[uid] / solved_tasks[uid]
-            else:
-                avg_scores[uid] = 0
+            avg_scores[uid] = total_scores[uid] / number_of_tasks
+            
+            # if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
+            #     avg_scores[uid] = total_scores[uid] / solved_tasks[uid]
+            # else:
+            #     avg_scores[uid] = 0
         winner = np.argmax(avg_scores) if max(avg_scores) > 0 else -1
         return winner
 
     def get_scores(self, session_upto: int):
+        # scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+        # for session_number in self.session_results:
+        #     if (session_number <= session_upto - CONSIDERING_SESSION_COUNTS or 
+        #         session_number > session_upto):
+        #         continue
+
+        #     try:
+        #         winner = self.session_results[session_number]["winner"]
+        #         competition_type = self.session_results[session_number]["competition_type"]
+        #         if winner == -1:
+        #             continue
+        #         scores[winner] += RESERVED_WEIGHTS[competition_type]
+        #     except Exception as e:
+        #         bt.logging.warning(f"Error getting scores: {e}")
+
+        # return scores
         scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         tiny_weight = 1 / 128
         big_weight = 1.0
@@ -190,22 +207,13 @@ class ScoreManager:
                 session_number > session_upto):
                 continue
                 
-            winner = self.get_winner(
-                self.session_results[session_number]["scores"],
-                self.session_results[session_number]["solved_tasks"],
-                self.session_results[session_number]["number_of_tasks"],
-            )
+            winner = self.session_results[session_number]["winner"]
             if winner == -1:
                 continue
             if session_number == session_upto:
                 scores[winner] += big_weight
             else:
                 scores[winner] += tiny_weight
-                
-        for uid in range(self.neuron.metagraph.n):
-            if self.is_blacklisted(uid):
-                scores[uid] = 0
-        
         return scores
         
         # if session_upto in self.session_results:

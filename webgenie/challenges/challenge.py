@@ -57,6 +57,7 @@ class QualityChallenge(Challenge):
         aggregated_scores = np.where(accuracy_scores > 0.9, quality_scores, 0)
         return aggregated_scores, scores
 
+
 class BalancedChallenge(Challenge):
     competition_type: str = Field(default=BALANCED_COMPETITION_TYPE, description="The type of competition")
 
@@ -65,13 +66,13 @@ class BalancedChallenge(Challenge):
         accuracy_scores = scores[ACCURACY_METRIC_NAME]
         quality_scores = scores[QUALITY_METRIC_NAME]
         seo_scores = scores[SEO_METRIC_NAME]
-        aggregated_scores = accuracy_scores * 0.4 + quality_scores * 0.3 + seo_scores * 0.3
+        aggregated_scores = accuracy_scores * 0.6 + quality_scores * 0.2 + seo_scores * 0.2
         return aggregated_scores, scores
 
 
 RESERVED_WEIGHTS = {
-    ACCURACY_COMPETITION_TYPE: 50,
-    BALANCED_COMPETITION_TYPE: 30,
+    ACCURACY_COMPETITION_TYPE: 70,
+    BALANCED_COMPETITION_TYPE: 10,
     SEO_COMPETITION_TYPE: 10,
     QUALITY_COMPETITION_TYPE: 10,
 }

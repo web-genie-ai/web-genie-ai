@@ -2,6 +2,7 @@ import os
 import bittensor as bt
 import numpy as np
 import random
+import requests
 import threading
 import time
 
@@ -46,11 +47,10 @@ from webgenie.tasks.metric_types import (
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
 
-
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
-        self.lock = neuron.lock
+        self.lock = threading.Lock()
         self.config = neuron.config
         self.miner_results = []
         self.synthetic_tasks = []
@@ -93,10 +93,9 @@ class GenieValidator:
 
             available_challenges_classes = [
                 AccuracyChallenge, 
-                #QualityChallenge, 
+                SeoChallenge,
                 AccuracyChallenge,
                 SeoChallenge,
-                BalancedChallenge,
             ]  
             
             with self.lock:
@@ -281,7 +280,6 @@ class GenieValidator:
                 self.synthetic_tasks.append((task, synapse))
 
             bt.logging.success(f"Successfully generated task for {task.src}")
-        
         except Exception as e:
             bt.logging.error(f"Error in synthensize_task: {e}")
             raise e
