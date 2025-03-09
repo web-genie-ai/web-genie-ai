@@ -331,7 +331,7 @@ class GenieValidator:
                 return
             
             
-            #bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
+            bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
             #seed, task_id_seed = self.get_seed(session, task_index)
             
             #bt.logging.info(f"Random seed: {seed} | task_id_seed: {task_id_seed}")
