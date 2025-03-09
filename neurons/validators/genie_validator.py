@@ -314,7 +314,8 @@ class GenieValidator:
             # set_seed(seed)
             
             try:
-                task, synapse = await self.synthensize_task(session, task_number)
+                await self.synthensize_task(session, task_number)
+                task, synapse = self.synthetic_tasks[-1]
                 task.task_id = f"{session}_{task_number}"
                 synapse.task_id = task.task_id
             except Exception as e:
