@@ -28,6 +28,9 @@ from webgenie.challenges import (
     SeoChallenge,
     BalancedChallenge,
 )
+from webgenie.datasets.central_dataset import (
+    CentralDataset,
+)
 from webgenie.helpers.htmls import preprocess_html, is_valid_resources
 from webgenie.helpers.images import image_debug_str
 from webgenie.helpers.llms import set_seed
@@ -46,7 +49,6 @@ from webgenie.tasks.metric_types import (
 from webgenie.tasks.image_task_generator import ImageTaskGenerator
 from webgenie.utils.uids import get_all_available_uids
 
-
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
@@ -58,6 +60,17 @@ class GenieValidator:
         self.task_generators = [
             (ImageTaskGenerator(), 1.0), # currently only image task generator is supported
         ]
+        self.init_signature()
+        
+    def init_signature(self):
+        """Get signature for central database authentication using wallet"""
+        try:
+            message = b"I am the owner of the wallet"
+            CentralDataset.SIGNATURE =  self.neuron.wallet.hotkey.sign(message).hex()
+            CentralDataset.HOTKEY = self.neuron.wallet.hotkey.ss58_address
+        except Exception as e:
+            bt.logging.error(f"Error initializing signature: {e}")
+            raise e
 
     async def query_miners(self):
         try:

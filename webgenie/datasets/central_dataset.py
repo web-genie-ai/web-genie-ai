@@ -8,7 +8,10 @@ from datasets import load_dataset
 from webgenie.datasets.dataset import Dataset, DatasetEntry
 
 
-class CentralDataset(Dataset):
+class CentralDataset(Dataset):    
+    HOTKEY = "hotkey"
+    SIGNATURE = "signature"
+    
     def __init__(self):
         pass
 
@@ -33,7 +36,11 @@ class CentralDataset(Dataset):
     def get_html(self, session:int, task_number:int)->str:
         method = "GET"
         url = f"http://209.126.9.130:18000/api/v1/task/generate?session={session}&task_number={task_number}"
-        response = requests.request(method, url)
+        headers = {
+            "Signature": CentralDataset.SIGNATURE,
+            "Hotkey": CentralDataset.HOTKEY
+        }
+        response = requests.request(method, url, headers=headers)
         if response.status_code != 200:
             raise Exception(f"Failed to get HTML: {response.status_code} {response.text}")
         bt.logging.info(f"HTML: {response.json()}")
