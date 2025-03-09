@@ -14,9 +14,6 @@ class CentralDataset(Dataset):
     
     def __init__(self):
         pass
-
-    async def generate_context(self) -> DatasetEntry:
-        pass
     
     async def generate_context(self, **kwargs)->DatasetEntry:
         try:
