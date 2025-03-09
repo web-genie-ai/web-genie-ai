@@ -148,7 +148,6 @@ class Validator(BaseValidatorNeuron):
 
         self.print_weights(raw_weights)
 
-        return
         with self.lock:
             # Process the raw weights to final_weights via subtensor limitations.
             (
