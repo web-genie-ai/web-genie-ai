@@ -50,7 +50,7 @@ from webgenie.utils.uids import get_all_available_uids
 class GenieValidator:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
-        self.lock = threading.Lock()
+        self.lock = self.neuron.lock
         self.config = neuron.config
         self.miner_results = []
         self.synthetic_tasks = []

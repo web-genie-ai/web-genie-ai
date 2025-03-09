@@ -22,7 +22,7 @@ class ScoreManager:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
         self.state_path = self.neuron.config.neuron.full_path + "/state.npz"
-        self.lock = threading.Lock()
+        self.lock = self.neuron.lock
 
         self.hotkeys = copy.deepcopy(self.neuron.metagraph.hotkeys)
         self.current_session = -1
