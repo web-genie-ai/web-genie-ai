@@ -262,7 +262,7 @@ class GenieValidator:
         except Exception as e:
             bt.logging.error(f"Error storing results to database: {e}")
 
-    async def synthensize_task(self, session:int, task_index:int):
+    async def synthensize_task(self, session:int, task_number:int):
         try:
             with self.lock:
                 if len(self.synthetic_tasks) > MAX_SYNTHETIC_TASK_SIZE:
@@ -276,7 +276,7 @@ class GenieValidator:
                 weights=[weight for _, weight in self.task_generators],
             )[0]
             
-            task, synapse = await task_generator.generate_task(session=session, task_index=task_index)
+            task, synapse = await task_generator.generate_task(session=session, task_number=task_number)
             with self.lock:
                 self.synthetic_tasks.append((task, synapse))
 
@@ -286,36 +286,36 @@ class GenieValidator:
             bt.logging.error(f"Error in synthensize_task: {e}")
             raise e
     
-    def get_seed(self, session: int, task_index: int, hash_cache: dict = {}) -> int:
+    def get_seed(self, session: int, task_number: int, hash_cache: dict = {}) -> int:
         if session not in hash_cache:
             session_start_block = session * SESSION_WINDOW_BLOCKS
             subtensor = self.neuron.subtensor
             block_hash = subtensor.get_block_hash(session_start_block)
             hash_cache[session] = int(block_hash[-15:], 16)
-        return int(hash_cache[session] + task_index)
+        return int(hash_cache[session] + task_number)
 
     async def forward(self):
         try:
             with self.lock:
                 session = self.neuron.session
                 if self.neuron.score_manager.current_session != session:
-                    task_index = 0
+                    task_number = 0
                 else:
-                    task_index = self.neuron.score_manager.number_of_tasks
+                    task_number = self.neuron.score_manager.number_of_tasks
                     
-            if task_index >= MAX_NUMBER_OF_TASKS_PER_SESSION:
+            if task_number >= MAX_NUMBER_OF_TASKS_PER_SESSION:
                 return
             
-            bt.logging.info(f"Forwarding task #{task_index} in session #{session}")
-            # seed = self.get_seed(session, task_index)
+            bt.logging.info(f"Forwarding task #{task_number} in session #{session}")
+            # seed = self.get_seed(session, task_number)
             
             # bt.logging.info(f"Init random with seed: {seed}")
             # random.seed(seed)
             # set_seed(seed)
             
             try:
-                task, synapse = await self.synthensize_task(session, task_index)
-                task.task_id = f"{session}_{task_index}"
+                task, synapse = await self.synthensize_task(session, task_number)
+                task.task_id = f"{session}_{task_number}"
                 synapse.task_id = task.task_id
             except Exception as e:
                 bt.logging.error(
