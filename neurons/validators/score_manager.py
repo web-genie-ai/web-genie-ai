@@ -292,7 +292,7 @@ class ScoreManager:
             scores = session_result["scores"]
             solved_tasks = session_result["solved_tasks"]            
             competition = {
-                "session_number": session,
+                "session_number": int(session),
                 "competition_type": competition_type,
             }
             
@@ -307,7 +307,7 @@ class ScoreManager:
                     "neuron": {
                         "hotkey": self.neuron.metagraph.hotkeys[uid],
                     },
-                    "score": avg_scores[uid],
+                    "score": float(avg_scores[uid]),
                 })
 
             submit_results({
