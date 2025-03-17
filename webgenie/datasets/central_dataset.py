@@ -48,5 +48,5 @@ class CentralDataset(Dataset):
         
         if response.status_code != 200:
             raise Exception(f"Failed to get HTML: {response.status_code} {response.text}")
-        bt.logging.info(f"HTML: {response.json()}")
+        
         return response.json()["html"]
