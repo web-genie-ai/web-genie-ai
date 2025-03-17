@@ -21,6 +21,7 @@ import typing
 import bittensor as bt
 
 from abc import ABC, abstractmethod
+from bt_ddos_shield import ShieldMetagraph
 
 # Sync calls set weights and also resyncs the metagraph.
 from webgenie.constants import NEURON_EPOCH_LENGTH, SPEC_VERSION
@@ -90,7 +91,7 @@ class BaseNeuron(ABC):
         else:
             self.wallet = bt.wallet(config=self.config)
             self.subtensor = bt.subtensor(config=self.config)
-            self.metagraph = self.subtensor.metagraph(self.config.netuid)
+            self.metagraph = ShieldMetagraph(self.wallet, self.config.netuid, subtensor=self.subtensor)
 
         bt.logging.info(f"Wallet: {self.wallet}")
         bt.logging.info(f"Subtensor: {self.subtensor}")
