@@ -292,7 +292,7 @@ class ScoreManager:
             scores = session_result["scores"]
             solved_tasks = session_result["solved_tasks"]            
             competition = {
-                "session_number": session,
+                "session_number": session_upto,
                 "competition_type": competition_type,
             }
             
