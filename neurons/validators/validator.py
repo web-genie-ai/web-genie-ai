@@ -33,7 +33,10 @@ from webgenie.constants import (
 )
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.rewards.lighthouse_reward import start_lighthouse_server_thread, stop_lighthouse_server
-from webgenie.storage import send_challenge_to_stats_collector
+from webgenie.storage import (
+    send_challenge_to_stats_collector,
+    submit_results,
+)
 from webgenie.utils.uids import get_validator_index
 
 from neurons.validators.genie_validator import GenieValidator
@@ -183,11 +186,7 @@ class Validator(BaseValidatorNeuron):
             with self.lock:
                 self.score_manager.save_scores()
                 self.score_manager.save_session_result_to_file(current_session-1)
-            try:
-                bt.logging.info(f"Sending challenge to stats collector for session {current_session-1}")
-                send_challenge_to_stats_collector(self.wallet, current_session-1)
-            except Exception as e:
-                bt.logging.error(f"Error sending challenge to stats collector: {e}")
+                self.score_manager.submit_results_to_dashboard(current_session-1)
 
             bt.logging.success("set_weights on chain successfully!")
         else:

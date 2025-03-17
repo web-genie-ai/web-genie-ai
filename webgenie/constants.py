@@ -98,3 +98,7 @@ NUMBER_OF_CONCURRENT_WORKERS = max(
         (psutil.virtual_memory().total) // (1024 * 1024 * 1024 * 4)
     )
 )
+
+DASHBOARD_BACKEND_URL = os.getenv("DASHBOARD_BACKEND_URL", "http://209.126.9.130:19000") # dashboard backend url
+
+API_TOKEN = os.getenv("API_TOKEN", "api_token") # api token

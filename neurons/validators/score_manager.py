@@ -17,7 +17,7 @@ from webgenie.constants import (
     MAX_UNANSWERED_TASKS
 )
 from webgenie.helpers.weights import save_file_to_wandb
-
+from webgenie.storage import submit_results
 class ScoreManager:
     def __init__(self, neuron: BaseNeuron):
         self.neuron = neuron
@@ -282,3 +282,38 @@ class ScoreManager:
             bt.logging.error(f"Error saving session result to file: {e}")
             raise e
 
+    def submit_results_to_dashboard(self, session_upto: int):
+        try:
+            session_result = self.session_results[session_upto]
+
+            number_of_tasks = session_result["number_of_tasks"]
+            session = session_result["session"]
+            competition_type = session_result["competition_type"]
+            scores = session_result["scores"]
+            solved_tasks = session_result["solved_tasks"]            
+            competition = {
+                "session_number": int(session),
+                "competition_type": competition_type,
+            }
+            
+            submissions = []   
+            avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
+            for uid in range(self.neuron.metagraph.n):
+                if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
+                    avg_scores[uid] = scores[uid] / solved_tasks[uid]
+                else:
+                    avg_scores[uid] = 0
+                submissions.append({
+                    "neuron": {
+                        "hotkey": self.neuron.metagraph.hotkeys[uid],
+                    },
+                    "score": float(avg_scores[uid]),
+                })
+
+            submit_results({
+                "competition": competition,
+                "submissions": submissions,
+            })
+        except Exception as e:
+            bt.logging.error(f"Error submitting results to dashboard: {e}")
+            raise e
