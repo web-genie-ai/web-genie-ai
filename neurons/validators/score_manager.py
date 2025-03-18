@@ -297,17 +297,15 @@ class ScoreManager:
             }
             
             submissions = []   
-            avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
             for uid in range(self.neuron.metagraph.n):
-                if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
-                    avg_scores[uid] = scores[uid] / solved_tasks[uid]
-                else:
-                    avg_scores[uid] = 0
+                if solved_tasks[uid] < max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
+                    continue
+                avg_score = scores[uid] / solved_tasks[uid]
                 submissions.append({
                     "neuron": {
                         "hotkey": self.neuron.metagraph.hotkeys[uid],
                     },
-                    "score": float(avg_scores[uid]),
+                    "score": float(avg_score),
                 })
 
             submit_results({
