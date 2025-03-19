@@ -6,12 +6,12 @@ readme = "README.md"
 requires-python = ">=3.12.4"
 dependencies = [
     "ansible-vault==2.1.0",
-    "async-substrate-interface==1.0.3",
+    "async-substrate-interface==1.0.5",
     "beautifulsoup4==4.12.3",
     "bert-score==0.3.13",
-    "bt-decode==0.5.0a2",
-    "bittensor==9.0.3",
-    "bittensor-cli==9.0.3",
+    "bt-decode==0.5.0",
+    "bittensor==9.1.0",
+    "bittensor-cli==9.1.0",
     "clip",
     "datasets==3.2.0",
     "ddt==1.6.0",
@@ -40,7 +40,7 @@ dependencies = [
     "tensorflow>=2.18.0",
     "tf-keras",
     "uvicorn",
-    "bt-ddos-shield-client>=0.1.3",
+    "bt-ddos-shield-client==0.1.6",
 ]
 
 [project.urls]
