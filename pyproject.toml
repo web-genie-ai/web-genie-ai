@@ -11,7 +11,6 @@ dependencies = [
     "bert-score==0.3.13",
     "bt-decode==0.5.0",
     "bittensor==9.1.0",
-    "bittensor-cli==9.1.0",
     "clip",
     "datasets==3.2.0",
     "ddt==1.6.0",
