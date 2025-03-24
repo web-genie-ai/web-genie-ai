@@ -171,14 +171,11 @@ class ScoreManager:
         avg_scores = np.zeros(self.neuron.metagraph.n, dtype=np.float32)
         for uid in range(self.neuron.metagraph.n):
             if self.is_blacklisted(uid):
-                continue
-            
-            avg_scores[uid] = total_scores[uid] / number_of_tasks
-            
-            # if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
-            #     avg_scores[uid] = total_scores[uid] / solved_tasks[uid]
-            # else:
-            #     avg_scores[uid] = 0
+                continue          
+            if solved_tasks[uid] >= max(1, number_of_tasks - MAX_UNANSWERED_TASKS):
+                avg_scores[uid] = total_scores[uid] / solved_tasks[uid]
+            else:
+                avg_scores[uid] = 0
         winner = np.argmax(avg_scores) if max(avg_scores) > 0 else -1
         return winner
 
