@@ -57,9 +57,9 @@ MAX_COUNT_VALIDATORS = 1 # max count of validators
 
 BLOCK_IN_SECONDS = 12 # block in seconds
 
-TEMPO_BLOCKS = 360 # tempo blocks
+EPOCH_BLOCKS = 361 # epoch blocks
 
-SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 5 # session window blocks
+SESSION_WINDOW_BLOCKS = EPOCH_BLOCKS * 5 # session window blocks
 
 CONSIDERING_SESSION_COUNTS = 8
 
