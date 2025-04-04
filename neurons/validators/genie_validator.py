@@ -93,9 +93,9 @@ class GenieValidator:
 
             available_challenges_classes = [
                 AccuracyChallenge, 
+                BalancedChallenge,
                 AccuracyChallenge,
-                AccuracyChallenge,
-                SeoChallenge,
+                BalancedChallenge,
             ]  
             
             with self.lock:
