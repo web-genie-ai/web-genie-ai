@@ -66,7 +66,7 @@ class BalancedChallenge(Challenge):
         accuracy_scores = scores[ACCURACY_METRIC_NAME]
         quality_scores = scores[QUALITY_METRIC_NAME]
         seo_scores = scores[SEO_METRIC_NAME]
-        aggregated_scores = accuracy_scores * 0.6 + quality_scores * 0.2 + seo_scores * 0.2
+        aggregated_scores = accuracy_scores * 0.8 + quality_scores * 0.1 + seo_scores * 0.1
         return aggregated_scores, scores
 
 
