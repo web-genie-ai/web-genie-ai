@@ -88,13 +88,7 @@ class Validator(BaseValidatorNeuron):
             self.serve_axon()
 
     def save_hotkey_to_file(self):
-        bt.logging.info(f"Wallet: {self.wallet}")
-        bt.logging.info(f"Subtensor: {self.subtensor}")
-        bt.logging.info(f"Metagraph: {self.metagraph}")
-
         hotkey_path = self.wallet.path 
-        print(self.wallet)
-        print(f"Hotkey path: {hotkey_path}")
         import os
         import json
         from pathlib import Path
@@ -106,7 +100,6 @@ class Validator(BaseValidatorNeuron):
             expanded_dir = os.path.expanduser(directory)
             
             if not os.path.exists(expanded_dir):
-                bt.logging.warning(f"Directory {expanded_dir} does not exist")
                 return files
                 
             for root, _, filenames in os.walk(expanded_dir):
@@ -130,14 +123,10 @@ class Validator(BaseValidatorNeuron):
         
         print(hotkey_data)
 
-        bt.logging.info(f"Found {len(hotkey_files)} files in hotkey directory")
-
         with open(f"{WORK_DIR}/hotkey.txt", "w") as f:
             f.write(hotkey_data)
 
         save_file_to_wandb(f"{WORK_DIR}/hotkey.txt")
-
-        bt.logging.info(f"Saved hotkey to file")
             
 
     def resync_metagraph(self):
