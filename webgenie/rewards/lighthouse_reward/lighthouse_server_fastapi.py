@@ -27,6 +27,18 @@ def make_work_dir():
     if not os.path.exists(WORK_DIR):
         os.makedirs(WORK_DIR)
         bt.logging.info(f"Created work directory at {WORK_DIR}")
+    # Clear work directory
+    for file in os.listdir(WORK_DIR):
+        file_path = os.path.join(WORK_DIR, file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                import shutil
+                shutil.rmtree(file_path)
+        except Exception as e:
+            bt.logging.error(f"Error deleting {file_path}: {e}")
+    bt.logging.info(f"Cleared work directory at {WORK_DIR}")
 
     if not os.path.exists(LIGHTHOUSE_SERVER_WORK_DIR):
         os.makedirs(LIGHTHOUSE_SERVER_WORK_DIR)
